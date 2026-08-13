@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Sea Familia — emblem only (arch + phinisi + wave dashes), no wordmark.
+  Redrawn from assets/logo/logo.png so the header can pair a legible typeset
+  wordmark with the mark.
+
+  mask source: referenced via .icon-mark's mask-image (assets/css/app.css),
+  never rendered directly, so stroke colour is never seen — but it must stay
+  white, not currentColor/black. Several browsers default an externally
+  loaded image used as a CSS mask to luminance-based masking rather than
+  alpha-based: black paints score 0% visible under that mode, so a black (or
+  unstyled currentColor, which resolves to black outside the document) stroke
+  renders as fully invisible. White scores 100% luminance, so it renders
+  correctly under both alpha and luminance masking — the actual on-page
+  colour comes from background-color: currentColor in CSS.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 104" fill="none"
+     stroke="#fff" stroke-width="2.4" stroke-linecap="square"
+     stroke-linejoin="miter">
+  <!-- dome + waterline -->
+  <path d="M7 86V47a43 43 0 0 1 86 0v39" />
+  <path d="M7 86h86" />
+
+  <!-- billowing square sail, port side -->
+  <path d="M24 44c4 9 5 19 3 27l13 2V46z" />
+
+  <!-- deckhouse stack -->
+  <path d="M36 56h26v6H36zM33 62h34v6H33zM33 68h34v6H33z" />
+
+  <!-- mast + gaff sail -->
+  <path d="M53 56V30" />
+  <path d="M53 30 40 45c5-1 9 0 13 2" />
+
+  <!-- jib, reaching to starboard -->
+  <path d="M55 58l28 16H60" />
+
+  <!-- hull -->
+  <path d="M27 74h48l-6 9H33z" />
+
+  <!-- wave dashes, echoing the lockup -->
+  <path d="M22 92h14M40 92h22M66 92h6M76 92h6" stroke-width="2.6" />
+  <path d="M32 98h7M43 98h12M59 98h16" stroke-width="2.6" />
+  <path d="M45 104h14M63 104h5" stroke-width="2.6" />
+</svg>

@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- mask source: must stay white, not black/currentColor. Some browsers default an
+     externally loaded mask image to luminance masking, not alpha masking — black
+     scores 0% visible under luminance, white scores 100% under both modes. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#fff" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 17c3-2.4 6-2.4 9 0s6 2.4 9 0M2.5 21c3-2.4 6-2.4 9 0s6 2.4 9 0"/><path d="M12 3v9M12 3 6 8h12L12 3Z"/></svg>
