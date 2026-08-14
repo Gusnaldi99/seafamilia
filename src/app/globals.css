@@ -307,3 +307,55 @@
   .no-print { display: none !important; }
   body { background: #fff; }
 }
+
+/* ============================================================================
+   Icon system (.icon-*)
+   ============================================================================ */
+.icon {
+  display: inline-block;
+  background-color: currentColor;
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  -webkit-mask-size: contain;
+  mask-repeat: no-repeat;
+  mask-position: center;
+  mask-size: contain;
+}
+
+.icon-mark {
+  -webkit-mask-image: url(/media/mark.svg);
+  mask-image: url(/media/mark.svg);
+  aspect-ratio: 100 / 104;
+}
+
+.icon-chevron-right    { -webkit-mask-image: url(/media/icons/chevron-right.svg);    mask-image: url(/media/icons/chevron-right.svg); }
+.icon-cross            { -webkit-mask-image: url(/media/icons/cross.svg);            mask-image: url(/media/icons/cross.svg); }
+.icon-chevron-left     { -webkit-mask-image: url(/media/icons/chevron-left.svg);     mask-image: url(/media/icons/chevron-left.svg); }
+.icon-check            { -webkit-mask-image: url(/media/icons/check.svg);            mask-image: url(/media/icons/check.svg); }
+.icon-minus            { -webkit-mask-image: url(/media/icons/minus.svg);            mask-image: url(/media/icons/minus.svg); }
+.icon-plus             { -webkit-mask-image: url(/media/icons/plus.svg);             mask-image: url(/media/icons/plus.svg); }
+.icon-warning-triangle { -webkit-mask-image: url(/media/icons/warning-triangle.svg); mask-image: url(/media/icons/warning-triangle.svg); }
+.icon-shield           { -webkit-mask-image: url(/media/icons/shield.svg);           mask-image: url(/media/icons/shield.svg); }
+.icon-magnifier        { -webkit-mask-image: url(/media/icons/magnifier.svg);        mask-image: url(/media/icons/magnifier.svg); }
+.icon-refresh          { -webkit-mask-image: url(/media/icons/refresh.svg);          mask-image: url(/media/icons/refresh.svg); }
+.icon-print            { -webkit-mask-image: url(/media/icons/print.svg);            mask-image: url(/media/icons/print.svg); }
+.icon-chevron-down     { -webkit-mask-image: url(/media/icons/chevron-down.svg);     mask-image: url(/media/icons/chevron-down.svg); }
+.icon-big-check        { -webkit-mask-image: url(/media/icons/big-check.svg);        mask-image: url(/media/icons/big-check.svg); }
+.icon-whatsapp         { -webkit-mask-image: url(/media/icons/whatsapp.svg);         mask-image: url(/media/icons/whatsapp.svg); }
+.icon-signin           { -webkit-mask-image: url(/media/icons/signin.svg);           mask-image: url(/media/icons/signin.svg); }
+.icon-menu             { -webkit-mask-image: url(/media/icons/menu.svg);             mask-image: url(/media/icons/menu.svg); }
+.icon-globe            { -webkit-mask-image: url(/media/icons/globe.svg);            mask-image: url(/media/icons/globe.svg); }
+.icon-empty-state      { -webkit-mask-image: url(/media/icons/empty-state.svg);      mask-image: url(/media/icons/empty-state.svg); }
+.icon-path-waves-mast  { -webkit-mask-image: url(/media/icons/path-waves-mast.svg);  mask-image: url(/media/icons/path-waves-mast.svg); }
+.icon-compass          { -webkit-mask-image: url(/media/icons/compass.svg);          mask-image: url(/media/icons/compass.svg); }
+.icon-hull-mast        { -webkit-mask-image: url(/media/icons/hull-mast.svg);        mask-image: url(/media/icons/hull-mast.svg); }
+.icon-boat-mast        { -webkit-mask-image: url(/media/icons/boat-mast.svg);        mask-image: url(/media/icons/boat-mast.svg); }
+.icon-map-pin          { -webkit-mask-image: url(/media/icons/map-pin.svg);          mask-image: url(/media/icons/map-pin.svg); }
+.icon-link             { -webkit-mask-image: url(/media/icons/link.svg);             mask-image: url(/media/icons/link.svg); }
+
+.icon-exp-diving   { -webkit-mask-image: url(/media/icons/exp-diving.svg);   mask-image: url(/media/icons/exp-diving.svg); }
+.icon-exp-family   { -webkit-mask-image: url(/media/icons/exp-family.svg);   mask-image: url(/media/icons/exp-family.svg); }
+.icon-exp-remote   { -webkit-mask-image: url(/media/icons/exp-remote.svg);   mask-image: url(/media/icons/exp-remote.svg); }
+.icon-exp-culture  { -webkit-mask-image: url(/media/icons/exp-culture.svg);  mask-image: url(/media/icons/exp-culture.svg); }
+.icon-exp-wellness { -webkit-mask-image: url(/media/icons/exp-wellness.svg); mask-image: url(/media/icons/exp-wellness.svg); }
+.icon-exp-light    { -webkit-mask-image: url(/media/icons/exp-light.svg);    mask-image: url(/media/icons/exp-light.svg); }

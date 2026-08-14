@@ -1,13 +1,13 @@
 import type { Metadata } from "next";
-import CharterClient from "./CharterClient";
+import BookClient from "./BookClient";
 import { Suspense } from "react";
 
 export const metadata: Metadata = {
-  title: "Private Charter — Sea Familia",
-  description: "Take one of our four boats entirely to yourselves, on your dates, with a route we draw together. Four questions to start, and a real quote within one working day.",
+  title: "Reserve a cabin — Sea Familia",
+  description: "Find a departure, confirm the trip, choose a cabin, tell us who is coming, review and reserve. Nothing is charged until confirmed.",
 };
 
-export default function CharterPage() {
+export default function BookPage() {
   return (
     <Suspense fallback={
       <div className="min-h-screen bg-sand flex items-center justify-center">
@@ -18,7 +18,7 @@ export default function CharterPage() {
         </div>
       </div>
     }>
-      <CharterClient />
+      <BookClient />
     </Suspense>
   );
 }

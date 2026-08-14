@@ -10,6 +10,7 @@ import type {
   Boat,
   Trip,
   Departure,
+  CabinType,
   Article,
   TeamMember,
   FAQ,
@@ -17,6 +18,21 @@ import type {
   LengthBucket,
   PartyOption,
 } from "@/types";
+
+export type {
+  Experience,
+  Water,
+  Boat,
+  Trip,
+  Departure,
+  CabinType,
+  Article,
+  TeamMember,
+  FAQ,
+  Inclusions,
+  LengthBucket,
+  PartyOption,
+};
 
 // ---------- Experiences ----------
 
@@ -468,6 +484,19 @@ export function findBoat(slug: string) { return boats.find((b) => b.slug === slu
 export function findTrip(slug: string) { return trips.find((t) => t.slug === slug) ?? null; }
 export function findDeparture(id: string) { return departures.find((d) => d.id === id) ?? null; }
 export function findArticle(slug: string) { return articles.find((a) => a.slug === slug) ?? null; }
+export function findExperience(slug: string) { return experiences.find((e) => e.slug === slug) ?? null; }
+
+export function bodyFor(a?: Article | null) {
+  if (a && a.body && a.body.length) return a.body;
+  if (!a) return [];
+  return [
+    { t: "p", v: a.dek },
+    { t: "h2", v: "From the boat" },
+    { t: "p", v: "This piece is part of the Sea Familia journal, written by the people who are actually on the water — crew, cooks, captains and the biologists who join us as guest lecturers. We publish about twice a month, in between seasons and whenever somebody has something worth saying." },
+    { t: "quote", v: "Nobody on this boat is a content producer. That is rather the point." },
+    { t: "p", v: "If you would like the full piece as soon as it is edited, the familia letter goes out monthly and contains no marketing beyond the occasional note that a departure has opened up." },
+  ];
+}
 
 export function filterTrips(filters: {
   water?: string;
@@ -495,11 +524,22 @@ export function filterTrips(filters: {
   });
 }
 
-export function filterDepartures(filters: { available?: boolean; trip?: string; boat?: string }) {
-  return departures.filter((d) => {
-    if (filters.available && (d.status === "closed" || d.status === "waitlist")) return false;
-    if (filters.trip && d.trip !== filters.trip) return false;
-    if (filters.boat && d.boat !== filters.boat) return false;
-    return true;
-  });
+export function filterDepartures(query: { trip?: string, boat?: string, available?: boolean, water?: string, experience?: string } = {}) {
+  let result = departures;
+  if (query.trip) result = result.filter((d) => d.trip === query.trip);
+  if (query.boat) result = result.filter((d) => d.boat === query.boat);
+  if (query.available) result = result.filter((d) => d.status === "open" || d.status === "waitlist");
+  if (query.water) {
+    result = result.filter(d => {
+      const trip = findTrip(d.trip);
+      return trip && trip.water === query.water;
+    });
+  }
+  if (query.experience) {
+    result = result.filter(d => {
+      const trip = findTrip(d.trip);
+      return trip && trip.experiences.includes(query.experience as any);
+    });
+  }
+  return result;
 }

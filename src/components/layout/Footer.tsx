@@ -64,6 +64,7 @@ export function Footer() {
               <li><Link href="/destinations/banda" className="text-sm text-white/80 transition hover:text-white">Banda Sea</Link></li>
               <li><Link href="/destinations/alor" className="text-sm text-white/80 transition hover:text-white">Alor & Solor</Link></li>
               <li><Link href="/destinations/triton" className="text-sm text-white/80 transition hover:text-white">Triton Bay</Link></li>
+              <li><Link href="/destinations/wakatobi" className="text-sm text-white/80 transition hover:text-white">Wakatobi</Link></li>
               <li><Link href="/destinations" className="text-sm text-white/80 transition hover:text-white">All waters</Link></li>
             </ul>
           </div>
@@ -74,7 +75,10 @@ export function Footer() {
             </h3>
             <ul className="mt-4 space-y-2.5">
               <li><Link href="/our-story" className="text-sm text-white/80 transition hover:text-white">Our story</Link></li>
+              <li><Link href="/our-story#familia" className="text-sm text-white/80 transition hover:text-white">Meet the familia</Link></li>
+              <li><Link href="/our-story#sustainability" className="text-sm text-white/80 transition hover:text-white">Sustainability</Link></li>
               <li><Link href="/journal" className="text-sm text-white/80 transition hover:text-white">Journal</Link></li>
+              <li><Link href="/partners" className="text-sm text-white/80 transition hover:text-white">Travel agents</Link></li>
               <li><Link href="/contact" className="text-sm text-white/80 transition hover:text-white">Contact</Link></li>
             </ul>
           </div>
@@ -87,6 +91,9 @@ export function Footer() {
               <li><Link href="/charter" className="text-sm text-white/80 transition hover:text-white">How charter works</Link></li>
               <li><Link href="/charter/dates" className="text-sm text-white/80 transition hover:text-white">Request a charter</Link></li>
               <li><Link href="/boats" className="text-sm text-white/80 transition hover:text-white">The fleet</Link></li>
+              <li><Link href="/boats/familia-satu" className="text-sm text-white/80 transition hover:text-white">Familia Satu</Link></li>
+              <li><Link href="/boats/nusa-ombak" className="text-sm text-white/80 transition hover:text-white">Nusa Ombak</Link></li>
+              <li><Link href="/faq" className="text-sm text-white/80 transition hover:text-white">Frequent questions</Link></li>
             </ul>
           </div>
         </div>
@@ -102,6 +109,7 @@ export function Footer() {
             <Link href="/policies#privacy" className="font-mark text-[11px] uppercase tracking-[0.16em] text-white/60 transition hover:text-white">Privacy</Link>
             <Link href="/policies#terms" className="font-mark text-[11px] uppercase tracking-[0.16em] text-white/60 transition hover:text-white">Terms</Link>
             <Link href="/policies#cancellation" className="font-mark text-[11px] uppercase tracking-[0.16em] text-white/60 transition hover:text-white">Cancellation</Link>
+            <Link href="/policies#safety" className="font-mark text-[11px] uppercase tracking-[0.16em] text-white/60 transition hover:text-white">Safety</Link>
             <Link href="/contact" className="font-mark text-[11px] uppercase tracking-[0.16em] text-white/60 transition hover:text-white">Contact</Link>
           </nav>
         </div>

@@ -1,7 +1,8 @@
 import Link from "next/link";
-import { articles } from "@/lib/api/data";
+import { articles, team } from "@/lib/api/data";
 import { formatDate } from "@/lib/utils";
 import type { Metadata } from "next";
+import { JournalClient } from "./JournalClient";
 
 export const metadata: Metadata = {
   title: "Journal — Sea Familia",
@@ -61,36 +62,8 @@ export default function JournalPage() {
         </div>
       </section>
 
-      {/* ---------- Other Articles Grid ---------- */}
-      <section className="border-t border-sand-300 bg-sand py-16 sm:py-24">
-        <div className="mx-auto max-w-[88rem] px-5 sm:px-6 lg:px-8">
-          <h2 className="font-display text-3xl text-ink-700">From the archive</h2>
-          
-          <div className="mt-10 grid gap-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {others.map((a) => (
-              <Link key={a.slug} href={`/journal/${a.slug}`} className="group block">
-                <div className={`ph ph-${a.ph} relative aspect-[4/3] overflow-hidden rounded-2xl`}>
-                  <div className="scrim absolute inset-0" />
-                  <div className="absolute inset-x-4 bottom-4">
-                    <span className="font-mark text-[10px] uppercase tracking-[0.18em] text-white/70">
-                      {a.category}
-                    </span>
-                  </div>
-                </div>
-                <h3 className="mt-5 font-display text-xl text-ink-700 transition-colors group-hover:text-flame-600">
-                  {a.title}
-                </h3>
-                <p className="mt-2 text-sm leading-relaxed text-ink/70 line-clamp-2">
-                  {a.dek}
-                </p>
-                <p className="mt-3 font-mark text-[10px] uppercase tracking-[0.14em] text-mist-700">
-                  {a.author} · {formatDate(a.date)}
-                </p>
-              </Link>
-            ))}
-          </div>
-        </div>
-      </section>
+      {/* ---------- Journal Client (Search, Grid, Who Writes This) ---------- */}
+      <JournalClient articles={others} featured={featured} team={team} />
     </>
   );
 }

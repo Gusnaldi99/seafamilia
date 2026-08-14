@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { trips, waters, boats, departures, articles, findWater, findBoat } from "@/lib/api/data";
 import { formatMoney, formatNights, formatDateRange } from "@/lib/utils";
+import { ItineraryIndex } from "@/components/ItineraryIndex";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -60,7 +61,7 @@ export default function HomePage() {
                 </svg>
               </Link>
               <Link
-                href="/experiences"
+                href="/discover"
                 className="inline-flex h-14 items-center justify-center rounded-full border border-white/35 bg-white/5 px-7 font-mark text-[13px] uppercase tracking-[0.16em] text-white backdrop-blur transition hover:border-white hover:bg-white hover:text-ink-700"
               >
                 Answer 5 questions instead
@@ -103,6 +104,7 @@ export default function HomePage() {
             {/* Path 1 */}
             <Link href="/destinations" className="group flex flex-col rounded-3xl border border-sand-300 bg-white p-6 transition hover:border-mist-300 hover:shadow-card lg:p-8">
               <span className="font-mark text-[11px] uppercase tracking-[0.2em] text-mist-700">Path one</span>
+              <span className="icon icon-path-waves-mast mt-5 h-8 w-8 text-ink-700" aria-hidden="true" />
               <h3 className="mt-5 font-display text-2xl text-ink-700">Browse and be inspired</h3>
               <p className="mt-2.5 flex-1 text-sm leading-relaxed text-ink/70">
                 No form, no funnel. Eight waters, twelve itineraries, four boats — wander through in any
@@ -117,8 +119,9 @@ export default function HomePage() {
             </Link>
 
             {/* Path 2 — featured */}
-            <Link href="/experiences" className="group flex flex-col rounded-3xl border border-ink bg-ink p-6 text-white transition hover:bg-ink-600 lg:p-8">
+            <Link href="/discover" className="group flex flex-col rounded-3xl border border-ink bg-ink p-6 text-white transition hover:bg-ink-600 lg:p-8">
               <span className="font-mark text-[11px] uppercase tracking-[0.2em] text-mist-300">Path two · most popular</span>
+              <span className="icon icon-compass mt-5 h-8 w-8 text-white" aria-hidden="true" />
               <h3 className="mt-5 font-display text-2xl">Let us narrow it down</h3>
               <p className="mt-2.5 flex-1 text-sm leading-relaxed text-white/75">
                 Five questions — what you want to do, which water, how long, and who is coming.
@@ -135,6 +138,7 @@ export default function HomePage() {
             {/* Path 3 */}
             <Link href="/charter" className="group flex flex-col rounded-3xl border border-sand-300 bg-white p-6 transition hover:border-mist-300 hover:shadow-card lg:p-8">
               <span className="font-mark text-[11px] uppercase tracking-[0.2em] text-mist-700">Path three</span>
+              <span className="icon icon-hull-mast mt-5 h-8 w-8 text-ink-700" aria-hidden="true" />
               <h3 className="mt-5 font-display text-2xl text-ink-700">Take the whole boat</h3>
               <p className="mt-2.5 flex-1 text-sm leading-relaxed text-ink/70">
                 Your dates, your group, an itinerary we build together. Eight to twenty guests,
@@ -224,6 +228,8 @@ export default function HomePage() {
           })}
         </div>
       </section>
+
+      <ItineraryIndex />
 
       {/* ================================================================
            NEXT DEPARTURES
@@ -495,17 +501,30 @@ export default function HomePage() {
             </figure>
 
             <dl className="grid gap-x-8 gap-y-8 sm:grid-cols-2">
-              {[
-                { label: "Safety", text: "Oxygen and first-response kits on every deck, two liferafts, EPIRB and satellite phone. Crew drilled monthly, not annually." },
-                { label: "Diving cover", text: "DAN-affiliated evacuation cover on all four boats. We ask for your policy number with the joining form, and we do check it." },
-                { label: "Booking terms", text: "Deposit fully refundable to 90 days. One free move to another departure in the same season, whatever the notice." },
-                { label: "A person, not a bot", text: "The office is two people in Labuan Bajo. They answer on WhatsApp within a few hours, and it is genuinely them." },
-              ].map((item) => (
-                <div key={item.label}>
-                  <dt className="font-mark text-[11px] uppercase tracking-[0.18em] text-flame">{item.label}</dt>
-                  <dd className="mt-2 text-sm leading-relaxed text-ink/75">{item.text}</dd>
-                </div>
-              ))}
+              <div>
+                <dt className="font-mark text-[11px] uppercase tracking-[0.18em] text-flame">Safety</dt>
+                <dd className="mt-2 text-sm leading-relaxed text-ink/75">
+                  Oxygen and first-response kits on every deck, two liferafts, EPIRB and satellite phone. Crew drilled monthly, not annually.
+                </dd>
+              </div>
+              <div>
+                <dt className="font-mark text-[11px] uppercase tracking-[0.18em] text-flame">Diving cover</dt>
+                <dd className="mt-2 text-sm leading-relaxed text-ink/75">
+                  DAN-affiliated evacuation cover on all four boats. We ask for your policy number with the joining form, and we do check it.
+                </dd>
+              </div>
+              <div>
+                <dt className="font-mark text-[11px] uppercase tracking-[0.18em] text-flame">Booking terms</dt>
+                <dd className="mt-2 text-sm leading-relaxed text-ink/75">
+                  Deposit fully refundable to 90 days. One free move to another departure in the same season, whatever the notice. <Link href="/policies#cancellation" className="text-flame-600 underline underline-offset-4">Read the policy</Link>.
+                </dd>
+              </div>
+              <div>
+                <dt className="font-mark text-[11px] uppercase tracking-[0.18em] text-flame">A person, not a bot</dt>
+                <dd className="mt-2 text-sm leading-relaxed text-ink/75">
+                  The office is two people in Labuan Bajo. They answer on WhatsApp within a few hours, and it is genuinely them. <Link href="/contact" className="text-flame-600 underline underline-offset-4">Contact us</Link>.
+                </dd>
+              </div>
             </dl>
           </div>
         </div>

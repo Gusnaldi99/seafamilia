@@ -91,16 +91,12 @@ export function Header() {
           >
             {/* Logo */}
             <Link href="/" className="flex shrink-0 items-center gap-3 text-ink-700">
-              <Image
-                src="/media/mark.svg"
-                alt=""
-                width={36}
-                height={38}
+              <span 
                 className={cn(
-                  "transition-[height] duration-300 ease-[cubic-bezier(.22,1,.36,1)] w-auto",
+                  "sf-mark icon icon-mark w-auto transition-[height] duration-300 ease-[cubic-bezier(.22,1,.36,1)]",
                   compact ? "h-7 lg:h-9" : "h-9 lg:h-11"
-                )}
-                aria-hidden="true"
+                )} 
+                aria-hidden="true" 
               />
               <span className="flex flex-col leading-none">
                 <span className="font-mark text-[15px] font-medium uppercase tracking-[0.3em] lg:text-[17px]">
@@ -263,7 +259,7 @@ export function Header() {
             {/* Drawer header */}
             <div className="flex h-16 shrink-0 items-center justify-between px-5">
               <span className="flex items-center gap-2.5 text-white">
-                <Image src="/media/mark.svg" alt="" width={32} height={33} className="h-8 w-auto" />
+                <span className="icon icon-mark h-8 w-auto" aria-hidden="true" />
                 <span className="font-mark text-[13px] uppercase tracking-[0.28em]">Sea Familia</span>
               </span>
               <button
