@@ -1,0 +1,110 @@
+/* Sea Familia — "engraved ocean" placeholder plates standing in for
+   photography that hasn't been shot yet. Ported verbatim from
+   assets/css/app.css. See lib/photo.ts (later phase) for the real-photo
+   resolution that layers a next/image on top of these. */
+
+.ph {
+  isolation: isolate;
+  background-color: var(--color-ink);
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+.ph::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='54' viewBox='0 0 160 54'%3E%3Cg fill='none' stroke='%23FFFFFF' stroke-opacity='.55' stroke-width='1'%3E%3Cpath d='M-10 14c20-16 40-16 60 0s40 16 60 0 40-16 60 0'/%3E%3Cpath d='M-10 32c20-16 40-16 60 0s40 16 60 0 40-16 60 0'/%3E%3Cpath d='M-10 50c20-16 40-16 60 0s40 16 60 0 40-16 60 0'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: 220px 74px;
+  opacity: 0.22;
+  mix-blend-mode: soft-light;
+  z-index: 1;
+}
+.ph::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: repeating-linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0.09) 0 1px,
+    rgba(0, 0, 0, 0) 1px 7px
+  );
+  opacity: 0.7;
+  z-index: 1;
+}
+.ph > * {
+  position: relative;
+  z-index: 2;
+}
+
+.ph-reef {
+  background-image:
+    radial-gradient(120% 90% at 18% 12%, #a8c7d8 0%, rgba(168, 199, 216, 0) 55%),
+    radial-gradient(90% 70% at 82% 26%, rgba(255, 255, 255, 0.5) 0%, rgba(255, 255, 255, 0) 60%),
+    linear-gradient(170deg, #669bbc 0%, #15577d 48%, #001c2b 100%);
+}
+.ph-deep {
+  background-image:
+    radial-gradient(90% 60% at 50% -10%, #40708c 0%, rgba(64, 112, 140, 0) 70%),
+    linear-gradient(180deg, #00243a 0%, #001320 60%, #00131e 100%);
+}
+.ph-lagoon {
+  background-image:
+    radial-gradient(100% 80% at 30% 8%, #ffffff 0%, rgba(255, 255, 255, 0) 55%),
+    linear-gradient(165deg, #e1ebf2 0%, #87b1ca 42%, #15577d 100%);
+}
+.ph-volcano {
+  background-image:
+    radial-gradient(80% 60% at 72% 18%, #c1121f 0%, rgba(193, 18, 31, 0) 62%),
+    linear-gradient(170deg, #4a0000 0%, #780000 40%, #003049 100%);
+}
+.ph-sunset {
+  background-image:
+    radial-gradient(60% 44% at 50% 30%, #c1121f 0%, rgba(193, 18, 31, 0) 66%),
+    linear-gradient(180deg, #003049 0%, #941212 52%, #669bbc 100%);
+}
+.ph-village {
+  background-image:
+    radial-gradient(90% 70% at 20% 80%, #f7f5f2 0%, rgba(247, 245, 242, 0) 58%),
+    linear-gradient(160deg, #780000 0%, #c1121f 45%, #003049 100%);
+}
+.ph-jungle {
+  background-image:
+    radial-gradient(90% 70% at 78% 14%, #a8c7d8 0%, rgba(168, 199, 216, 0) 60%),
+    linear-gradient(190deg, #001c2b 0%, #15577d 55%, #40708c 100%);
+}
+.ph-boat {
+  background-image:
+    radial-gradient(80% 60% at 50% 92%, #003049 0%, rgba(0, 48, 73, 0) 62%),
+    linear-gradient(160deg, #f7f5f2 0%, #c6dbe7 40%, #669bbc 100%);
+}
+.ph-cabin {
+  background-image:
+    radial-gradient(70% 60% at 78% 22%, #ffffff 0%, rgba(255, 255, 255, 0) 58%),
+    linear-gradient(155deg, #f7f5f2 0%, #e3ddd4 38%, #87b1ca 100%);
+}
+.ph-market {
+  background-image:
+    radial-gradient(70% 60% at 24% 22%, #f7f5f2 0%, rgba(247, 245, 242, 0) 55%),
+    linear-gradient(150deg, #c1121f 0%, #780000 55%, #001c2b 100%);
+}
+.ph-night {
+  background-image:
+    radial-gradient(50% 40% at 68% 16%, #669bbc 0%, rgba(102, 155, 188, 0) 60%),
+    linear-gradient(185deg, #00131e 0%, #001c2b 45%, #4a0000 100%);
+}
+.ph-portrait {
+  background-image:
+    radial-gradient(80% 70% at 50% 8%, #ffffff 0%, rgba(255, 255, 255, 0) 60%),
+    linear-gradient(170deg, #e1ebf2 0%, #a8c7d8 55%, #40708c 100%);
+}
+
+/* A real next/image sits above the texture via PhotoSlot (components/media,
+   later phase); this class positions it to fill the placeholder exactly. */
+.img-slot {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 3;
+}

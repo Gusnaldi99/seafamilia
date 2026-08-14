@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Sea Familia">
+  <rect width="64" height="64" rx="14" fill="#003049" />
+  <g fill="none" stroke="#F7F5F2" stroke-width="2.6" stroke-linecap="square">
+    <path d="M12 46V30a20 20 0 0 1 40 0v16" />
+    <path d="M12 46h40" />
+    <path d="M32 30V16l-8 9c3 0 6 1 8 3" />
+    <path d="M22 40h20l-3 5H25z" />
+    <path d="M24 34h16v6H24z" />
+  </g>
+  <g fill="none" stroke="#C1121F" stroke-width="2.6" stroke-linecap="square">
+    <path d="M18 53h10M32 53h14" />
+    <path d="M26 58h8M38 58h6" />
+  </g>
+</svg>

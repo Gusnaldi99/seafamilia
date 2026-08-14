@@ -1,0 +1,137 @@
+<!-- ============================================================================
+     Sea Familia — global footer (canonical source)
+     ----------------------------------------------------------------------------
+     Edit THIS file, then run:  node tools/sync-partials.js
+
+     Behaviour lives in assets/js/layout.js → window.seaNewsletter().
+
+     The Passages and Waters columns are literal copies of data in
+     assets/js/data.js. If those change, change them here too:
+       · Passages ← SEA.lengths (3 buckets)
+       · Waters   ← SEA.waters, first 6
+     ========================================================================= -->
+
+<footer class="bg-ink text-white">
+
+  <!-- ---------- brand + the familia letter ---------- -->
+  <div class="border-b border-white/10">
+    <div class="mx-auto grid max-w-8xl gap-10 px-5 py-14 sm:px-6 lg:grid-cols-[1.1fr_1fr] lg:gap-16 lg:px-8 lg:py-20">
+      <div>
+        <img src="assets/logo/logo-light.png" alt="Sea Familia" width="120" height="118"
+             class="h-24 w-auto opacity-95" loading="lazy">
+        <p class="mt-6 max-w-md font-display text-2xl leading-snug text-white/90 sm:text-3xl">
+          Four boats, one family, and the eastern half of Indonesia.
+        </p>
+        <p class="mt-4 max-w-md text-sm leading-relaxed text-white/60">
+          We started with one phinisi built in Bira and a loan nobody sensible would have given us.
+          The boats have multiplied. The crew list has barely changed.
+        </p>
+      </div>
+
+      <div x-data="seaNewsletter()">
+        <h2 class="font-mark text-[11px] uppercase tracking-[0.2em] text-white/50">The familia letter</h2>
+        <p class="mt-3 text-sm leading-relaxed text-white/75">
+          Once a month: where the boats are, what the reef is doing, and the occasional cabin that
+          has opened up. No countdown timers.
+        </p>
+        <form @submit.prevent="submit()" novalidate class="mt-5">
+          <div x-show="!sent" class="flex flex-col gap-3 sm:flex-row">
+            <label class="flex-1">
+              <span class="sr-only">Email address</span>
+              <input x-model="email" type="email" required placeholder="you@example.com"
+                     :aria-invalid="error ? 'true' : 'false'"
+                     class="h-12 w-full rounded-full border-white/20 bg-white/5 px-5 text-white placeholder:text-white/40 focus:border-mist focus:ring-2 focus:ring-mist/40">
+            </label>
+            <button type="submit" :disabled="busy"
+                    class="h-12 shrink-0 rounded-full bg-white px-6 font-mark text-[12px] uppercase tracking-[0.16em] text-ink-700 transition hover:bg-sand disabled:opacity-60">
+              <span x-show="!busy">Subscribe</span>
+              <span x-show="busy" x-cloak>Sending…</span>
+            </button>
+          </div>
+          <p x-show="error" x-cloak x-text="error" role="alert" class="mt-2 text-sm text-flame-300"></p>
+          <div x-show="sent" x-cloak class="flex items-start gap-3 rounded-2xl bg-white/5 p-4">
+            <span class="mt-0.5 text-mist-300">
+              <span class="icon icon-check h-5 w-5" aria-hidden="true"></span>
+            </span>
+            <p class="text-sm leading-relaxed text-white/85">
+              You are on the list. The next letter goes out at the start of the month — until then, nothing.
+            </p>
+          </div>
+          <p x-show="!sent" class="mt-3 text-xs leading-relaxed text-white/45">
+            We keep your address on our own server and never pass it on. Unsubscribe is one click, in every letter.
+          </p>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- ---------- link columns ---------- -->
+  <div class="mx-auto max-w-8xl px-5 py-12 sm:px-6 lg:px-8">
+    <div class="grid grid-cols-2 gap-8 sm:grid-cols-4">
+
+      <div>
+        <h3 class="font-mark text-[11px] uppercase tracking-[0.2em] text-white/50">Passages</h3>
+        <ul class="mt-4 space-y-2.5">
+          <li><a href="destinations.html?length=short" class="text-sm text-white/80 transition hover:text-white">3 – 5 nights</a></li>
+          <li><a href="destinations.html?length=classic" class="text-sm text-white/80 transition hover:text-white">6 – 8 nights</a></li>
+          <li><a href="destinations.html?length=long" class="text-sm text-white/80 transition hover:text-white">9 – 14 nights</a></li>
+          <li><a href="destinations.html" class="text-sm text-white/80 transition hover:text-white">All itineraries</a></li>
+          <li><a href="departures.html" class="text-sm text-white/80 transition hover:text-white">Departure calendar</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h3 class="font-mark text-[11px] uppercase tracking-[0.2em] text-white/50">Waters</h3>
+        <ul class="mt-4 space-y-2.5">
+          <li><a href="destination.html?slug=komodo" class="text-sm text-white/80 transition hover:text-white">Komodo</a></li>
+          <li><a href="destination.html?slug=raja-ampat" class="text-sm text-white/80 transition hover:text-white">Raja Ampat</a></li>
+          <li><a href="destination.html?slug=banda" class="text-sm text-white/80 transition hover:text-white">Banda Sea</a></li>
+          <li><a href="destination.html?slug=alor" class="text-sm text-white/80 transition hover:text-white">Alor &amp; Solor</a></li>
+          <li><a href="destination.html?slug=triton" class="text-sm text-white/80 transition hover:text-white">Triton Bay</a></li>
+          <li><a href="destination.html?slug=wakatobi" class="text-sm text-white/80 transition hover:text-white">Wakatobi</a></li>
+          <li><a href="destinations.html" class="text-sm text-white/80 transition hover:text-white">All waters</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h3 class="font-mark text-[11px] uppercase tracking-[0.2em] text-white/50">The familia</h3>
+        <ul class="mt-4 space-y-2.5">
+          <li><a href="our-story.html" class="text-sm text-white/80 transition hover:text-white">Our story</a></li>
+          <li><a href="our-story.html#familia" class="text-sm text-white/80 transition hover:text-white">Meet the familia</a></li>
+          <li><a href="our-story.html#sustainability" class="text-sm text-white/80 transition hover:text-white">Sustainability</a></li>
+          <li><a href="journal.html" class="text-sm text-white/80 transition hover:text-white">Journal</a></li>
+          <li><a href="partners.html" class="text-sm text-white/80 transition hover:text-white">Travel agents</a></li>
+          <li><a href="contact.html" class="text-sm text-white/80 transition hover:text-white">Contact</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h3 class="font-mark text-[11px] uppercase tracking-[0.2em] text-white/50">Private charter</h3>
+        <ul class="mt-4 space-y-2.5">
+          <li><a href="charter.html" class="text-sm text-white/80 transition hover:text-white">How charter works</a></li>
+          <li><a href="charter.html?step=2" class="text-sm text-white/80 transition hover:text-white">Request a charter</a></li>
+          <li><a href="boats.html" class="text-sm text-white/80 transition hover:text-white">The fleet</a></li>
+          <li><a href="boat.html?slug=familia-satu" class="text-sm text-white/80 transition hover:text-white">Familia Satu</a></li>
+          <li><a href="boat.html?slug=nusa-ombak" class="text-sm text-white/80 transition hover:text-white">Nusa Ombak</a></li>
+          <li><a href="faq.html" class="text-sm text-white/80 transition hover:text-white">Frequent questions</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ---------- legal bar ---------- -->
+  <div class="border-t border-white/10">
+    <div class="mx-auto flex max-w-8xl flex-col gap-4 px-5 py-6 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:px-8">
+      <p class="font-mark text-[11px] uppercase tracking-[0.16em] text-white/45">
+        © 2026 Sea Familia · PT Keluarga Laut Nusantara · Labuan Bajo &amp; Bira
+      </p>
+      <nav aria-label="Legal" class="flex flex-wrap items-center gap-x-5 gap-y-2">
+        <a href="policies.html#privacy" class="font-mark text-[11px] uppercase tracking-[0.16em] text-white/60 transition hover:text-white">Privacy</a>
+        <a href="policies.html#terms" class="font-mark text-[11px] uppercase tracking-[0.16em] text-white/60 transition hover:text-white">Terms</a>
+        <a href="policies.html#cancellation" class="font-mark text-[11px] uppercase tracking-[0.16em] text-white/60 transition hover:text-white">Cancellation</a>
+        <a href="policies.html#safety" class="font-mark text-[11px] uppercase tracking-[0.16em] text-white/60 transition hover:text-white">Safety</a>
+        <a href="contact.html" class="font-mark text-[11px] uppercase tracking-[0.16em] text-white/60 transition hover:text-white">Contact</a>
+      </nav>
+    </div>
+  </div>
+</footer>

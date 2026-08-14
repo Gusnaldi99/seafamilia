@@ -1,0 +1,61 @@
+/* Sea Familia — brand motifs derived from the logo. Ported verbatim from
+   assets/css/app.css. */
+
+.arch {
+  border-top-left-radius: 999px;
+  border-top-right-radius: 999px;
+  border-bottom-left-radius: 0.75rem;
+  border-bottom-right-radius: 0.75rem;
+  overflow: hidden;
+}
+.arch-soft {
+  border-top-left-radius: 14rem;
+  border-top-right-radius: 14rem;
+  border-bottom-left-radius: 1rem;
+  border-bottom-right-radius: 1rem;
+  overflow: hidden;
+}
+
+.wave-rule {
+  height: 22px;
+  width: 108px;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='108' height='22' viewBox='0 0 108 22'%3E%3Cg fill='none' stroke='%23669BBC' stroke-width='2' stroke-linecap='square'%3E%3Cpath d='M18 4h20M44 4h30M79 4h8M89 4h11'/%3E%3Cpath d='M28 11h9M43 11h16M64 11h24'/%3E%3Cpath d='M46 18h20M71 18h7'/%3E%3C/g%3E%3C/svg%3E");
+}
+.wave-rule-flame {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='108' height='22' viewBox='0 0 108 22'%3E%3Cg fill='none' stroke='%23C1121F' stroke-width='2' stroke-linecap='square'%3E%3Cpath d='M18 4h20M44 4h30M79 4h8M89 4h11'/%3E%3Cpath d='M28 11h9M43 11h16M64 11h24'/%3E%3Cpath d='M46 18h20M71 18h7'/%3E%3C/g%3E%3C/svg%3E");
+}
+.wave-rule-light {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='108' height='22' viewBox='0 0 108 22'%3E%3Cg fill='none' stroke='%23F7F5F2' stroke-opacity='.75' stroke-width='2' stroke-linecap='square'%3E%3Cpath d='M18 4h20M44 4h30M79 4h8M89 4h11'/%3E%3Cpath d='M28 11h9M43 11h16M64 11h24'/%3E%3Cpath d='M46 18h20M71 18h7'/%3E%3C/g%3E%3C/svg%3E");
+}
+
+/* Text over media: keeps AA contrast without a heavy black scrim */
+.scrim {
+  background-image: linear-gradient(
+    to top,
+    rgba(0, 19, 30, 0.88) 0%,
+    rgba(0, 19, 30, 0.55) 38%,
+    rgba(0, 19, 30, 0.08) 72%,
+    rgba(0, 19, 30, 0) 100%
+  );
+}
+.scrim-soft {
+  background-image: linear-gradient(to top, rgba(0, 19, 30, 0.72) 0%, rgba(0, 19, 30, 0) 62%);
+}
+
+/* Horizontal rails: snap on mobile, grid on desktop */
+@media (max-width: 1023.98px) {
+  .rail {
+    display: flex;
+    gap: 1rem;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-padding-left: 1.25rem;
+    -webkit-overflow-scrolling: touch;
+  }
+  .rail > * {
+    scroll-snap-align: start;
+    flex: 0 0 auto;
+  }
+}

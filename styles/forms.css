@@ -1,0 +1,52 @@
+/* Sea Familia — form primitives beyond what Tailwind/shadcn express.
+   Ported from assets/css/app.css. */
+
+/* Card legends (.sf-legend)
+   A <legend> is not laid out like any other box: the browser lifts it onto
+   the fieldset's block-start edge and starts painting the fieldset's
+   background at the legend's vertical middle. On a borderless white card
+   that puts the label outside the card, floating on the sand.
+   Floating a legend removes it from being the "rendered legend" per the
+   HTML spec, so it lays out as an ordinary block inside the fieldset's
+   padding — where a card header belongs. The float needs an explicit width
+   (it would otherwise shrink-wrap and collapse the trailing hairline); the
+   block after it has to clear it. Spacing below the header stays in the
+   markup — the legend's own pb-3 is only a floor, since clearance takes
+   whichever is larger, that or the next block's mt-*. */
+.sf-legend {
+  float: left;
+  width: 100%;
+}
+.sf-legend + * {
+  clear: both;
+}
+
+/* Number inputs in the guest counter: no spinners, real buttons ship
+   instead. */
+.counter-input::-webkit-outer-spin-button,
+.counter-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.counter-input {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+/* Native select popups: the OS dropdown inherits colour from the control.
+   Selects on ink backgrounds (utility bar, mobile drawer) would render
+   white text on the popup's white background otherwise — invisible until
+   hovered. Every select in the product wants ink-on-white options, so this
+   is set once, globally. */
+select option {
+  color: var(--color-ink);
+  background-color: #ffffff;
+}
+/* Windows high-contrast and dark-mode popups: let the OS decide rather than
+   forcing a white background it will not honour anyway. */
+@media (forced-colors: active) {
+  select option {
+    color: CanvasText;
+    background-color: Canvas;
+  }
+}

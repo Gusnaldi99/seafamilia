@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Hero video poster / fallback.
+  Drop assets/media/hero.mp4 (and hero.webm) next to this file and the <video>
+  element on the homepage plays over it. Until then this poster is what ships,
+  so the hero never renders empty. Palette-only.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" width="1600" height="900"
+     preserveAspectRatio="xMidYMid slice" role="img"
+     aria-label="Sunset over the Flores Sea with a phinisi under sail">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#00131E" />
+      <stop offset=".30" stop-color="#003049" />
+      <stop offset=".58" stop-color="#780000" />
+      <stop offset=".78" stop-color="#C1121F" />
+      <stop offset="1" stop-color="#D53C46" />
+    </linearGradient>
+    <linearGradient id="sea" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#C1121F" />
+      <stop offset=".14" stop-color="#669BBC" />
+      <stop offset=".55" stop-color="#15577D" />
+      <stop offset="1" stop-color="#00131E" />
+    </linearGradient>
+    <radialGradient id="glow" cx=".5" cy=".5" r=".5">
+      <stop offset="0" stop-color="#E4737A" stop-opacity=".95" />
+      <stop offset=".45" stop-color="#C1121F" stop-opacity=".55" />
+      <stop offset="1" stop-color="#C1121F" stop-opacity="0" />
+    </radialGradient>
+    <linearGradient id="reflect" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#E4737A" stop-opacity=".75" />
+      <stop offset="1" stop-color="#E4737A" stop-opacity="0" />
+    </linearGradient>
+    <linearGradient id="vignette" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#00131E" stop-opacity=".55" />
+      <stop offset=".45" stop-color="#00131E" stop-opacity="0" />
+      <stop offset="1" stop-color="#00131E" stop-opacity=".75" />
+    </linearGradient>
+  </defs>
+
+  <!-- sky -->
+  <rect width="1600" height="560" fill="url(#sky)" />
+  <!-- sun glow + disc -->
+  <circle cx="640" cy="500" r="360" fill="url(#glow)" />
+  <circle cx="640" cy="502" r="76" fill="#F7F5F2" opacity=".92" />
+
+  <!-- horizon cloud bands, monoline -->
+  <g stroke="#F7F5F2" stroke-opacity=".22" stroke-width="3" fill="none" stroke-linecap="round">
+    <path d="M120 300c90-34 190-34 280 0s200 34 300 0" />
+    <path d="M760 214c70-26 150-26 220 0s160 26 240 0" />
+    <path d="M980 372c60-22 130-22 190 0s140 22 210 0" />
+  </g>
+
+  <!-- distant islands -->
+  <path d="M0 520c120-14 170-96 250-96s130 68 236 78 0 18 0 18z" fill="#4A0000" opacity=".85" />
+  <path d="M1600 522c-160-8-230-104-330-104s-160 78-282 88 0 16 0 16z" fill="#4A0000" opacity=".7" />
+
+  <!-- sea -->
+  <rect y="520" width="1600" height="380" fill="url(#sea)" />
+  <!-- sun column on the water -->
+  <path d="M560 520h160l120 380H440z" fill="url(#reflect)" />
+
+  <!-- engraved swell lines -->
+  <g stroke="#F7F5F2" stroke-opacity=".26" stroke-width="2.5" fill="none">
+    <path d="M-40 566c110-22 220-22 330 0s220 22 330 0 220-22 330 0 220 22 330 0 110-22 220 0" />
+    <path d="M-40 622c130-26 260-26 390 0s260 26 390 0 260-26 390 0 130 26 260 0" />
+    <path d="M-40 692c150-30 300-30 450 0s300 30 450 0 300-30 450 0" />
+    <path d="M-40 782c170-34 340-34 510 0s340 34 510 0 340-34 510 0" />
+    <path d="M-40 872c190-38 380-38 570 0s380 38 570 0 380-38 570 0" />
+  </g>
+
+  <!-- phinisi, in the logo's language: monoline over a solid silhouette -->
+  <g transform="translate(1010 268) scale(3.05)">
+    <g fill="#00131E" fill-opacity=".92">
+      <path d="M27 74h48l-6 9H33z" />
+      <path d="M33 62h34v12H33z" />
+      <path d="M53 30 40 45c5-1 9 0 13 2z" />
+      <path d="M55 58l28 16H60z" />
+      <path d="M24 44c4 9 5 19 3 27l13 2V46z" />
+    </g>
+    <g fill="none" stroke="#F7F5F2" stroke-opacity=".55" stroke-width="1.1" stroke-linecap="square">
+      <path d="M53 58V29" />
+      <path d="M36 56h26v6H36z" />
+      <path d="M33 68h34" />
+      <path d="M27 74h48" />
+    </g>
+  </g>
+
+  <rect width="1600" height="900" fill="url(#vignette)" />
+</svg>

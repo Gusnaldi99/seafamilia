@@ -1,0 +1,1785 @@
+<!doctype html>
+<html lang="en" class="scroll-smooth">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reserve a cabin — Sea Familia</title>
+<meta name="description" content="Seven steps: find a departure, confirm the trip, choose a cabin, tell us who is coming, review and reserve. Nothing is charged until a person confirms.">
+<meta name="robots" content="noindex">
+<link rel="icon" href="assets/media/favicon.svg" type="image/svg+xml">
+<!-- sea:assets · static — edit partials/assets.html, then: node tools/sync-partials.js -->
+<link rel="preload" href="assets/fonts/fraunces-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/fonts/jost-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="assets/css/fonts.css">
+<link rel="stylesheet" href="assets/css/tailwind.css">
+<link rel="stylesheet" href="assets/css/app.css">
+<script src="assets/js/data.js"></script>
+<script defer src="assets/js/vendor/alpine-3.14.9.min.js"></script>
+<!-- /sea:assets -->
+</head>
+<body class="bg-sand font-sans text-ink antialiased" data-page="departures" data-sticky-bar>
+<!-- sea:header · static — edit partials/header.html, then: node tools/sync-partials.js -->
+<a href="#main" class="skip-link rounded-full bg-ink px-4 py-2 font-mark text-xs uppercase tracking-[0.16em] text-white">Skip to content</a>
+
+<!-- class="contents": this wrapper exists only to give the chrome one Alpine scope.
+     Without display:contents it generates a ~116px box, and a position:sticky child is
+     constrained to its containing block — so the header would unstick almost immediately.
+     display:contents removes the box, making <body> the header's containing block. -->
+<div class="contents" x-data="seaChrome()" @keydown.escape.window="closeAll()">
+
+  <!-- ---------- utility bar: currency, language, WhatsApp ---------- -->
+  <div class="hidden bg-ink text-white/80 lg:block">
+    <div class="mx-auto flex h-9 max-w-8xl items-center justify-between px-6 lg:px-8">
+      <p class="font-mark text-[11px] uppercase tracking-[0.18em]">
+        Open trips &amp; private charter · Komodo to Raja Ampat
+      </p>
+      <div class="flex items-center gap-1">
+        <label class="sr-only" for="sf-currency" data-i18n="lbl.currency">Currency</label>
+        <select id="sf-currency" x-model="currency" @change="setCurrency($event.target.value)"
+                class="cursor-pointer border-0 bg-transparent py-0 pl-2 pr-6 font-mark text-[11px] uppercase tracking-[0.16em] text-white/80 hover:text-white focus:ring-0 focus:ring-offset-0">
+          <option value="USD">USD</option>
+          <option value="IDR">IDR</option>
+          <option value="EUR">EUR</option>
+          <option value="AUD">AUD</option>
+          <option value="SGD">SGD</option>
+        </select>
+        <span class="h-3 w-px bg-white/20"></span>
+        <label class="sr-only" for="sf-lang" data-i18n="lbl.language">Language</label>
+        <select id="sf-lang" x-model="lang" @change="setLang($event.target.value)"
+                class="cursor-pointer border-0 bg-transparent py-0 pl-2 pr-6 font-mark text-[11px] uppercase tracking-[0.16em] text-white/80 hover:text-white focus:ring-0 focus:ring-offset-0">
+          <option value="en">EN</option>
+          <option value="id">ID</option>
+        </select>
+        <span class="h-3 w-px bg-white/20"></span>
+        <a href="https://wa.me/6281100000000" target="_blank" rel="noopener"
+           class="flex items-center gap-1.5 px-2 font-mark text-[11px] uppercase tracking-[0.16em] hover:text-white">
+          <span class="icon icon-whatsapp h-3.5 w-3.5" aria-hidden="true"></span>
+          <span>WhatsApp</span>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ---------- main header ----------
+       bg-white/[0.92] is deliberately an arbitrary value, not bg-white/92: Tailwind's
+       opacity scale stops at 90 then 95, so /92 produced no rule at all — the header
+       had no background until the compact state took over past 72px of scroll. The
+       Play CDN failed the same way, silently; compiling is what surfaced it. -->
+  <header class="sticky top-0 z-40 border-b border-ink/10 bg-white/[0.92] backdrop-blur-md">
+    <div class="mx-auto max-w-8xl px-5 sm:px-6 lg:px-8">
+      <!-- sf-headbar / sf-mark are hooks for the compact-on-scroll state. layout.js sets
+           data-compact on the header element; the heights live in app.css so the base
+           sizes stay plain Tailwind and still apply without JavaScript. -->
+      <div class="sf-headbar flex h-16 items-center justify-between gap-3 lg:h-20">
+
+        <!-- logo: emblem redrawn from assets/logo/logo.png, wordmark typeset beside it -->
+        <a href="index.html" class="flex shrink-0 items-center gap-3 text-ink-700">
+          <span class="sf-mark icon icon-mark h-9 w-auto lg:h-11" aria-hidden="true"></span>
+          <span class="flex flex-col leading-none">
+            <span class="font-mark text-[15px] font-medium uppercase tracking-[0.3em] lg:text-[17px]">Sea</span>
+            <span class="font-mark text-[15px] font-medium uppercase tracking-[0.3em] text-flame lg:text-[17px]">Familia</span>
+          </span>
+          <span class="sr-only">Sea Familia — home</span>
+        </a>
+
+        <!-- primary nav. The active item is marked with aria-current="page" by
+             tools/sync-partials.js; the colour and underline come from app.css. -->
+        <nav class="hidden items-center gap-0.5 lg:flex" aria-label="Primary">
+          <a href="experiences.html" data-nav="experiences" class="relative rounded-full px-3 py-2 font-mark text-[13px] uppercase tracking-[0.14em] text-ink-700 transition hover:text-flame-600"><span data-i18n="nav.experiences">Experiences</span></a>
+          <a href="destinations.html" data-nav="destinations" class="relative rounded-full px-3 py-2 font-mark text-[13px] uppercase tracking-[0.14em] text-ink-700 transition hover:text-flame-600"><span data-i18n="nav.destinations">Destinations</span></a>
+          <a href="boats.html" data-nav="boats" class="relative rounded-full px-3 py-2 font-mark text-[13px] uppercase tracking-[0.14em] text-ink-700 transition hover:text-flame-600"><span data-i18n="nav.boats">Boats</span></a>
+          <a href="departures.html" data-nav="departures" aria-current="page" class="relative rounded-full px-3 py-2 font-mark text-[13px] uppercase tracking-[0.14em] text-ink-700 transition hover:text-flame-600"><span data-i18n="nav.departures">Departures</span></a>
+          <a href="our-story.html" data-nav="story" class="relative rounded-full px-3 py-2 font-mark text-[13px] uppercase tracking-[0.14em] text-ink-700 transition hover:text-flame-600"><span data-i18n="nav.story">Our Story</span></a>
+          <a href="journal.html" data-nav="journal" class="relative rounded-full px-3 py-2 font-mark text-[13px] uppercase tracking-[0.14em] text-ink-700 transition hover:text-flame-600"><span data-i18n="nav.journal">Journal</span></a>
+        </nav>
+
+        <div class="flex items-center gap-1">
+          <button type="button" @click="toggle('search')" :aria-expanded="open === 'search'"
+                  aria-controls="sf-search-panel" aria-label="Search" data-i18n-aria="nav.search"
+                  class="grid h-10 w-10 place-items-center rounded-full text-ink-700 transition hover:bg-sand">
+            <span class="icon icon-magnifier h-5 w-5" aria-hidden="true"></span>
+          </button>
+
+          <button type="button" @click="toggle('signin')"
+                  class="hidden h-10 items-center gap-2 rounded-full px-3 font-mark text-[12px] uppercase tracking-[0.14em] text-ink-700 transition hover:bg-sand lg:flex">
+            <span class="icon icon-signin h-4 w-4" aria-hidden="true"></span>
+            <span data-i18n="nav.signin">Sign in</span>
+          </button>
+
+          <a href="discover.html"
+             class="hidden h-10 items-center gap-2 rounded-full bg-flame px-4 font-mark text-[12px] uppercase tracking-[0.14em] text-white transition hover:bg-flame-600 lg:flex">
+            Plan your trip
+            <span class="icon icon-chevron-right h-3.5 w-3.5" aria-hidden="true"></span>
+          </a>
+
+          <button type="button" @click="toggle('menu')" :aria-expanded="open === 'menu'"
+                  aria-controls="sf-mobile-panel" aria-label="Menu" data-i18n-aria="nav.menu"
+                  class="grid h-10 w-10 place-items-center rounded-full text-ink-700 transition hover:bg-sand lg:hidden">
+            <span class="icon icon-menu h-5 w-5" aria-hidden="true"></span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ---------- search panel ---------- -->
+    <div id="sf-search-panel" x-show="open === 'search'" x-cloak x-transition.opacity.duration.150ms
+         class="absolute inset-x-0 top-full border-b border-ink/10 bg-white shadow-lift">
+      <div class="mx-auto max-w-3xl px-5 py-6 sm:px-6">
+        <div class="relative">
+          <span class="absolute left-4 top-1/2 -translate-y-1/2 text-mist-700">
+            <span class="icon icon-magnifier h-5 w-5" aria-hidden="true"></span>
+          </span>
+          <input x-ref="searchInput" x-model="term" @input.debounce.180ms="runSearch()" type="search"
+                 placeholder="Reefs, boats, an island, a month…"
+                 aria-label="Search" data-i18n-aria="nav.search"
+                 class="h-14 w-full rounded-full border-sand-300 bg-sand pl-12 pr-4 font-sans text-base text-ink-700 placeholder:text-ink/40 focus:border-mist focus:ring-2 focus:ring-mist/40">
+        </div>
+
+        <!-- idle: suggestions -->
+        <div x-show="term.trim().length < 2" class="mt-5">
+          <p class="font-mark text-[11px] uppercase tracking-[0.18em] text-mist-700">Try</p>
+          <div class="mt-3 flex flex-wrap gap-2">
+            <button type="button" @click="term = 'Komodo'; runSearch()" class="rounded-full border border-sand-300 px-3 py-1.5 font-mark text-[11px] uppercase tracking-[0.14em] text-ink-700 transition hover:border-mist hover:bg-sand">Komodo</button>
+            <button type="button" @click="term = 'Raja Ampat'; runSearch()" class="rounded-full border border-sand-300 px-3 py-1.5 font-mark text-[11px] uppercase tracking-[0.14em] text-ink-700 transition hover:border-mist hover:bg-sand">Raja Ampat</button>
+            <button type="button" @click="term = 'Banda Sea'; runSearch()" class="rounded-full border border-sand-300 px-3 py-1.5 font-mark text-[11px] uppercase tracking-[0.14em] text-ink-700 transition hover:border-mist hover:bg-sand">Banda Sea</button>
+            <button type="button" @click="term = 'family'; runSearch()" class="rounded-full border border-sand-300 px-3 py-1.5 font-mark text-[11px] uppercase tracking-[0.14em] text-ink-700 transition hover:border-mist hover:bg-sand">family</button>
+            <button type="button" @click="term = 'whale shark'; runSearch()" class="rounded-full border border-sand-300 px-3 py-1.5 font-mark text-[11px] uppercase tracking-[0.14em] text-ink-700 transition hover:border-mist hover:bg-sand">whale shark</button>
+            <button type="button" @click="term = 'private charter'; runSearch()" class="rounded-full border border-sand-300 px-3 py-1.5 font-mark text-[11px] uppercase tracking-[0.14em] text-ink-700 transition hover:border-mist hover:bg-sand">private charter</button>
+          </div>
+        </div>
+
+        <!-- results, or the empty search state -->
+        <div x-show="term.trim().length >= 2" class="mt-5 max-h-[60vh] overflow-y-auto">
+          <div x-show="results.total > 0" x-html="resultsHTML()"></div>
+          <div x-show="results.total === 0" class="py-10 text-center">
+            <p class="font-display text-xl text-ink-700">Nothing matched “<span x-text="term"></span>”</p>
+            <p class="mx-auto mt-2 max-w-sm text-sm leading-relaxed text-ink/70">
+              Try an island, a boat name or a month. Or tell us what you are after —
+              half of what we run never makes it onto a search page.
+            </p>
+            <a href="contact.html" data-i18n="cta.help"
+               class="mt-5 inline-flex h-11 items-center rounded-full bg-ink px-5 font-mark text-sm uppercase tracking-[0.12em] text-white transition hover:bg-ink-600">Talk to the familia</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ---------- mobile drawer ---------- -->
+  <div x-show="open === 'menu'" x-cloak class="fixed inset-0 z-50 lg:hidden" role="dialog" aria-modal="true" aria-label="Menu">
+    <div x-show="open === 'menu'" x-transition.opacity class="absolute inset-0 bg-ink-950/60" @click="closeAll()"></div>
+    <div id="sf-mobile-panel" x-show="open === 'menu'"
+         x-transition:enter="transition ease-swell duration-300"
+         x-transition:enter-start="translate-x-full" x-transition:enter-end="translate-x-0"
+         x-transition:leave="transition ease-in duration-200"
+         x-transition:leave-start="translate-x-0" x-transition:leave-end="translate-x-full"
+         class="absolute inset-y-0 right-0 flex w-full max-w-sm flex-col bg-ink text-white">
+      <div class="flex h-16 shrink-0 items-center justify-between px-5">
+        <span class="flex items-center gap-2.5 text-white">
+          <span class="icon icon-mark h-8 w-auto" aria-hidden="true"></span>
+          <span class="font-mark text-[13px] uppercase tracking-[0.28em]">Sea Familia</span>
+        </span>
+        <button type="button" @click="closeAll()" aria-label="Close" data-i18n-aria="nav.close"
+                class="grid h-10 w-10 place-items-center rounded-full text-white/80 transition hover:bg-white/10">
+          <span class="icon icon-cross h-5 w-5" aria-hidden="true"></span>
+        </button>
+      </div>
+
+      <div class="flex-1 overflow-y-auto px-5 pb-6">
+        <nav aria-label="Primary mobile">
+          <a href="experiences.html" data-nav="experiences" class="flex items-baseline justify-between border-b border-white/10 py-4 text-white"><span class="font-display text-3xl" data-i18n="nav.experiences">Experiences</span><span class="font-mark text-[11px] tracking-[0.2em] text-white/40">01</span></a>
+          <a href="destinations.html" data-nav="destinations" class="flex items-baseline justify-between border-b border-white/10 py-4 text-white"><span class="font-display text-3xl" data-i18n="nav.destinations">Destinations</span><span class="font-mark text-[11px] tracking-[0.2em] text-white/40">02</span></a>
+          <a href="boats.html" data-nav="boats" class="flex items-baseline justify-between border-b border-white/10 py-4 text-white"><span class="font-display text-3xl" data-i18n="nav.boats">Boats</span><span class="font-mark text-[11px] tracking-[0.2em] text-white/40">03</span></a>
+          <a href="departures.html" data-nav="departures" aria-current="page" class="flex items-baseline justify-between border-b border-white/10 py-4 text-white"><span class="font-display text-3xl" data-i18n="nav.departures">Departures</span><span class="font-mark text-[11px] tracking-[0.2em] text-white/40">04</span></a>
+          <a href="our-story.html" data-nav="story" class="flex items-baseline justify-between border-b border-white/10 py-4 text-white"><span class="font-display text-3xl" data-i18n="nav.story">Our Story</span><span class="font-mark text-[11px] tracking-[0.2em] text-white/40">05</span></a>
+          <a href="journal.html" data-nav="journal" class="flex items-baseline justify-between border-b border-white/10 py-4 text-white"><span class="font-display text-3xl" data-i18n="nav.journal">Journal</span><span class="font-mark text-[11px] tracking-[0.2em] text-white/40">06</span></a>
+        </nav>
+
+        <div class="mt-6 grid gap-2">
+          <a href="discover.html" class="flex h-12 items-center justify-center gap-2 rounded-full bg-flame font-mark text-[12px] uppercase tracking-[0.16em] text-white">
+            Plan your trip
+            <span class="icon icon-chevron-right h-3.5 w-3.5" aria-hidden="true"></span>
+          </a>
+          <a href="charter.html" data-i18n="cta.charter"
+             class="flex h-12 items-center justify-center rounded-full border border-white/25 font-mark text-[12px] uppercase tracking-[0.16em] text-white">Request a charter</a>
+          <button type="button" @click="toggle('signin')"
+                  class="flex h-12 items-center justify-center gap-2 rounded-full border border-white/25 font-mark text-[12px] uppercase tracking-[0.16em] text-white">
+            <span class="icon icon-signin h-4 w-4" aria-hidden="true"></span>
+            <span data-i18n="nav.signin">Sign in</span>
+          </button>
+        </div>
+
+        <div class="mt-6 grid grid-cols-2 gap-3 border-t border-white/10 pt-6">
+          <label class="block">
+            <span class="font-mark text-[10px] uppercase tracking-[0.18em] text-white/50" data-i18n="lbl.currency">Currency</span>
+            <select x-model="currency" @change="setCurrency($event.target.value)"
+                    class="mt-1.5 h-11 w-full rounded-xl border-white/20 bg-white/5 font-mark text-sm text-white focus:border-mist focus:ring-mist/40">
+              <option value="USD">USD</option>
+              <option value="IDR">IDR</option>
+              <option value="EUR">EUR</option>
+              <option value="AUD">AUD</option>
+              <option value="SGD">SGD</option>
+            </select>
+          </label>
+          <label class="block">
+            <span class="font-mark text-[10px] uppercase tracking-[0.18em] text-white/50" data-i18n="lbl.language">Language</span>
+            <select x-model="lang" @change="setLang($event.target.value)"
+                    class="mt-1.5 h-11 w-full rounded-xl border-white/20 bg-white/5 font-mark text-sm text-white focus:border-mist focus:ring-mist/40">
+              <option value="en">English</option>
+              <option value="id">Bahasa Indonesia</option>
+            </select>
+          </label>
+        </div>
+
+        <a href="https://wa.me/6281100000000" target="_blank" rel="noopener"
+           class="mt-4 flex items-center gap-2 font-mark text-[11px] uppercase tracking-[0.16em] text-white/70">
+          <span class="icon icon-whatsapp h-4 w-4" aria-hidden="true"></span>
+          WhatsApp the office
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ---------- sign-in modal ---------- -->
+  <div x-show="open === 'signin'" x-cloak class="fixed inset-0 z-50 grid place-items-end sm:place-items-center"
+       role="dialog" aria-modal="true" aria-labelledby="sf-signin-title">
+    <div x-show="open === 'signin'" x-transition.opacity class="absolute inset-0 bg-ink-950/60" @click="closeAll()"></div>
+    <div x-show="open === 'signin'"
+         x-transition:enter="transition ease-swell duration-300"
+         x-transition:enter-start="opacity-0 translate-y-6 sm:scale-95"
+         x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
+         class="relative w-full max-w-md rounded-t-3xl bg-white p-6 shadow-lift sm:rounded-3xl sm:p-8">
+      <button type="button" @click="closeAll()" aria-label="Close" data-i18n-aria="nav.close"
+              class="absolute right-4 top-4 grid h-9 w-9 place-items-center rounded-full text-ink/50 transition hover:bg-sand">
+        <span class="icon icon-cross h-4 w-4" aria-hidden="true"></span>
+      </button>
+
+      <!-- success state -->
+      <div x-show="signin.sent" class="py-6 text-center">
+        <span class="mx-auto grid h-14 w-14 place-items-center rounded-full bg-mist-100 text-ink-700">
+          <span class="icon icon-check h-7 w-7" aria-hidden="true"></span>
+        </span>
+        <h2 class="mt-5 font-display text-2xl text-ink-700">Check your inbox</h2>
+        <p class="mt-2 text-sm leading-relaxed text-ink/70">
+          We sent a sign-in link to <strong class="text-ink-700" x-text="signin.email"></strong>. It is valid for one hour.
+        </p>
+        <button type="button" @click="signin.sent = false"
+                class="mt-6 font-mark text-[11px] uppercase tracking-[0.16em] text-flame-600 underline underline-offset-4">Use a different address</button>
+      </div>
+
+      <!-- form state -->
+      <form x-show="!signin.sent" @submit.prevent="submitSignin()" novalidate>
+        <span class="wave-rule wave-rule-flame mb-4 block"></span>
+        <h2 id="sf-signin-title" class="font-display text-2xl text-ink-700">Welcome back</h2>
+        <p class="mt-1.5 text-sm text-ink/65">Your bookings, joining forms and past voyages.</p>
+        <label class="mt-6 block">
+          <span class="font-mark text-[11px] uppercase tracking-[0.16em] text-ink-700">Email</span>
+          <input x-model="signin.email" x-ref="signinEmail" type="email" autocomplete="email" required
+                 :aria-invalid="signin.error ? 'true' : 'false'" placeholder="you@example.com"
+                 class="mt-1.5 h-12 w-full rounded-xl border-sand-300 bg-sand text-ink-700 focus:border-mist focus:ring-2 focus:ring-mist/40">
+        </label>
+        <p x-show="signin.error" x-cloak x-text="signin.error" role="alert"
+           class="mt-2 flex items-start gap-1.5 text-sm text-flame-600"></p>
+        <button type="submit" :disabled="signin.busy"
+                class="mt-5 flex h-12 w-full items-center justify-center rounded-full bg-flame font-mark text-[12px] uppercase tracking-[0.16em] text-white transition hover:bg-flame-600 disabled:opacity-60">
+          <span x-show="!signin.busy">Email me a sign-in link</span>
+          <span x-show="signin.busy" x-cloak>Sending…</span>
+        </button>
+        <p class="mt-4 text-center text-xs leading-relaxed text-ink/50">
+          No password to remember. New here? A guest account is created with your first reservation.
+        </p>
+      </form>
+    </div>
+  </div>
+</div>
+<!-- /sea:header -->
+
+<main id="main" class="pb-32 lg:pb-28"
+      x-data="reserveFlow()" x-init="init()"
+      @sf-goto="goto($event.detail)" @sf-reset="clearSearch()" @sf-retry="runSearch()">
+
+  <!-- ======================================================================
+       FUNNEL HEADER — seven steps, always visible, completed ones navigable
+       ==================================================================== -->
+  <div class="border-b border-sand-300 bg-white" x-show="step < 7">
+    <div class="mx-auto max-w-7xl px-5 py-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between gap-4">
+        <div>
+          <p class="font-mark text-[11px] uppercase tracking-[0.18em] text-flame">Reserve a cabin</p>
+          <p class="mt-1 font-mark text-[11px] uppercase tracking-[0.14em] text-mist-700">
+            Step <span x-text="step"></span> of 6 · <span x-text="steps[step - 1].label"></span>
+          </p>
+        </div>
+        <a href="departures.html" class="group inline-flex items-center gap-2 font-mark text-[11px] uppercase tracking-[0.16em] text-ink/60 hover:text-flame-600">
+          <span class="icon icon-cross h-4 w-4" aria-hidden="true"></span>
+          <span class="hidden sm:inline">Leave — nothing is saved to your account</span>
+          <span class="sm:hidden">Leave</span>
+        </a>
+      </div>
+
+      <ol class="mt-4 flex gap-1.5" aria-label="Progress">
+        <template x-for="(s, i) in steps.slice(0, 6)" :key="s.key">
+          <li class="flex-1">
+            <button type="button" @click="goto(i + 1)" :disabled="i + 1 > furthest"
+                    :aria-current="step === i + 1 ? 'step' : null"
+                    class="block w-full text-left disabled:cursor-not-allowed">
+              <span class="block h-1 rounded-full transition"
+                    :class="i + 1 < step ? 'bg-flame' : i + 1 === step ? 'bg-ink' : 'bg-sand-300'"></span>
+              <span class="mt-1.5 hidden font-mark text-[9px] uppercase tracking-[0.12em] lg:block"
+                    :class="i + 1 <= step ? 'text-ink-700' : 'text-mist-400'" x-text="s.label"></span>
+            </button>
+          </li>
+        </template>
+      </ol>
+    </div>
+  </div>
+
+  <div class="mx-auto max-w-7xl px-5 py-8 sm:px-6 lg:px-8 lg:py-12">
+    <!-- the summary rail retires on the confirmation screen, so the grid collapses -->
+    <div class="grid gap-8 lg:gap-12"
+         :class="step === 7 ? 'lg:grid-cols-1' : 'lg:grid-cols-[1fr_22rem]'">
+
+      <!-- ==================================================================
+           THE STEPS
+           ================================================================ -->
+      <div class="min-w-0">
+
+        <!-- ---------------- 1 · SEARCH ---------------- -->
+        <section x-show="step === 1" x-transition.opacity.duration.200ms>
+          <h1 class="font-display text-3xl font-light leading-tight tracking-tight text-ink-700 sm:text-4xl">
+            Which date suits you?
+          </h1>
+          <p class="mt-3 text-base leading-relaxed text-ink/70">
+            Pick a water and a month, or leave both open and read the list. Everything shown has at
+            least one cabin free.
+          </p>
+
+          <form @submit.prevent="runSearch()" class="mt-7 grid gap-3 rounded-2xl bg-white p-5 sm:grid-cols-3 lg:p-6">
+            <label class="block">
+              <span class="font-mark text-[10px] uppercase tracking-[0.16em] text-mist-700">Water</span>
+              <select x-model="search.water" @change="runSearch()"
+                      class="mt-1.5 h-12 w-full rounded-xl border-sand-300 bg-sand text-ink-700 focus:border-mist focus:ring-2 focus:ring-mist/40">
+                <option value="">Anywhere</option>
+                <template x-for="w in SEA.waters" :key="w.slug">
+                  <option :value="w.slug" x-text="w.short"></option>
+                </template>
+              </select>
+            </label>
+            <label class="block">
+              <span class="font-mark text-[10px] uppercase tracking-[0.16em] text-mist-700">Month</span>
+              <select x-model="search.month" @change="runSearch()"
+                      class="mt-1.5 h-12 w-full rounded-xl border-sand-300 bg-sand text-ink-700 focus:border-mist focus:ring-2 focus:ring-mist/40">
+                <option value="">Any month</option>
+                <template x-for="m in months" :key="m.value">
+                  <option :value="m.value" x-text="m.label"></option>
+                </template>
+              </select>
+            </label>
+            <label class="block">
+              <span class="font-mark text-[10px] uppercase tracking-[0.16em] text-mist-700">Length</span>
+              <select x-model="search.length" @change="runSearch()"
+                      class="mt-1.5 h-12 w-full rounded-xl border-sand-300 bg-sand text-ink-700 focus:border-mist focus:ring-2 focus:ring-mist/40">
+                <option value="">Any</option>
+                <template x-for="l in SEA.lengths" :key="l.slug">
+                  <option :value="l.slug" x-text="l.label"></option>
+                </template>
+              </select>
+            </label>
+          </form>
+
+          <div class="mt-6">
+            <div x-show="searchState === 'loading'" class="space-y-3" x-html="SEA.states.skeleton('departure', 4)"></div>
+            <div x-show="searchState === 'error'" x-html="SEA.states.error({ onRetry: true })"></div>
+            <div x-show="searchState === 'ready' && results.length === 0"
+                 x-html="SEA.states.empty({
+                   title: 'Nothing free on those terms',
+                   body: 'Regions run in their own seasons, so a month and a water can cancel each other out. Clear the month first — that usually does it.',
+                   onReset: true, resetLabel: 'Clear the search', altHref: 'charter.html', altLabel: 'Charter your own dates' })"></div>
+
+            <ul x-show="searchState === 'ready' && results.length > 0" class="space-y-3">
+              <template x-for="d in results" :key="d.id">
+                <li>
+                  <button type="button" @click="chooseDeparture(d.id)"
+                          class="group flex w-full items-center gap-4 rounded-2xl border-2 bg-white p-4 text-left transition"
+                          :class="dep && dep.id === d.id ? 'border-flame shadow-card' : 'border-sand-300 hover:border-mist'">
+                    <span class="relative h-20 w-24 shrink-0 overflow-hidden rounded-xl bg-ink">
+                      <span class="ph absolute inset-0 block" :class="'ph-' + SEA.trip(d.trip).ph">
+                        <img class="img-slot" :src="SEA.photoPath.trip(d.trip)" alt="" loading="lazy" onerror="this.style.display='none'">
+                      </span>
+                    </span>
+                    <span class="min-w-0 flex-1">
+                      <span class="block font-mark text-[10px] uppercase tracking-[0.16em] text-flame"
+                            x-text="SEA.fmt.dateRange(d.start, d.nights)"></span>
+                      <span class="mt-1 block font-display text-lg leading-tight text-ink-700"
+                            x-text="SEA.trip(d.trip).title"></span>
+                      <span class="mt-1 block text-xs text-mist-700">
+                        <span x-text="SEA.fmt.nights(d.nights)"></span> ·
+                        <span x-text="SEA.boat(d.boat).name"></span> ·
+                        <span x-text="d.cabinsLeft"></span> cabins left
+                      </span>
+                    </span>
+                    <span class="shrink-0 text-right">
+                      <span class="tnum block font-display text-lg text-deep-700" :data-usd="d.price"
+                            x-text="SEA.fmt.money(d.price)"></span>
+                      <span class="block text-[11px] text-ink/50" data-i18n="lbl.pp">per person</span>
+                    </span>
+                  </button>
+                </li>
+              </template>
+            </ul>
+          </div>
+        </section>
+
+        <!-- ---------------- 2 · TRIP SUMMARY ---------------- -->
+        <section x-show="step === 2" x-cloak x-transition.opacity.duration.200ms>
+          <template x-if="dep">
+            <div>
+              <h1 class="font-display text-3xl font-light leading-tight tracking-tight text-ink-700 sm:text-4xl">
+                Is this the week?
+              </h1>
+              <p class="mt-3 text-base leading-relaxed text-ink/70">
+                Everything below is fixed for this departure. Check the dates against your flights
+                before going on — the day you board is not the day you fly.
+              </p>
+
+              <div class="mt-7 overflow-hidden rounded-2xl bg-white">
+                <div class="relative aspect-[16/7]">
+                  <div class="ph absolute inset-0" :class="'ph-' + trip.ph">
+                    <img class="img-slot" :src="SEA.photoPath.trip(trip.slug)" :alt="trip.title" loading="lazy" onerror="this.style.display='none'">
+                  </div>
+                  <div class="scrim-soft absolute inset-0"></div>
+                  <div class="absolute inset-x-5 bottom-4">
+                    <p class="font-mark text-[10px] uppercase tracking-[0.18em] text-white/80" x-text="water.short"></p>
+                    <p class="mt-1 font-display text-2xl text-white sm:text-3xl" x-text="trip.title"></p>
+                  </div>
+                </div>
+
+                <dl class="grid grid-cols-2 gap-x-6 gap-y-5 p-5 sm:grid-cols-3 lg:p-6">
+                  <div>
+                    <dt class="font-mark text-[10px] uppercase tracking-[0.16em] text-mist-700">Dates</dt>
+                    <dd class="mt-1 font-display text-lg text-ink-700" x-text="SEA.fmt.dateRange(dep.start, dep.nights)"></dd>
+                  </div>
+                  <div>
+                    <dt class="font-mark text-[10px] uppercase tracking-[0.16em] text-mist-700">Length</dt>
+                    <dd class="mt-1 font-display text-lg text-ink-700" x-text="SEA.fmt.nights(dep.nights)"></dd>
+                  </div>
+                  <div>
+                    <dt class="font-mark text-[10px] uppercase tracking-[0.16em] text-mist-700">Boat</dt>
+                    <dd class="mt-1 font-display text-lg text-ink-700" x-text="boat.name"></dd>
+                  </div>
+                  <div>
+                    <dt class="font-mark text-[10px] uppercase tracking-[0.16em] text-mist-700">Boards &amp; ends</dt>
+                    <dd class="mt-1 font-display text-lg text-ink-700" x-text="trip.gateway"></dd>
+                  </div>
+                  <div>
+                    <dt class="font-mark text-[10px] uppercase tracking-[0.16em] text-mist-700">Guests on board</dt>
+                    <dd class="mt-1 font-display text-lg text-ink-700">Up to <span x-text="boat.guests"></span></dd>
+                  </div>
+                  <div>
+                    <dt class="font-mark text-[10px] uppercase tracking-[0.16em] text-mist-700">Cabins left</dt>
+                    <dd class="mt-1 font-display text-lg" :class="dep.cabinsLeft <= 1 ? 'text-flame-600' : 'text-ink-700'"
+                        x-text="dep.cabinsLeft"></dd>
+                  </div>
+                </dl>
+              </div>
+
+              <div class="mt-4 grid gap-4 sm:grid-cols-2">
+                <div class="rounded-2xl bg-white p-5">
+                  <h2 class="font-mark text-[11px] uppercase tracking-[0.16em] text-flame">Key inclusions</h2>
+                  <ul class="mt-3 space-y-2">
+                    <template x-for="i in SEA.inclusions.included.slice(0, 6)" :key="i">
+                      <li class="flex gap-2.5 text-sm leading-relaxed text-ink/80">
+                        <span class="icon icon-check mt-0.5 h-4 w-4 shrink-0 text-mist" aria-hidden="true"></span>
+                        <span x-text="i"></span>
+                      </li>
+                    </template>
+                  </ul>
+                </div>
+                <div class="rounded-2xl bg-white p-5">
+                  <h2 class="font-mark text-[11px] uppercase tracking-[0.16em] text-flame">First and last day</h2>
+                  <ul class="mt-3 space-y-3 text-sm leading-relaxed text-ink/80">
+                    <li><strong class="text-ink-700" x-text="SEA.fmt.date(dep.start)"></strong> — aboard by 2pm,
+                      transfer from the airport included.</li>
+                    <li><strong class="text-ink-700" x-text="SEA.fmt.date(endDate)"></strong> — alongside by 9am,
+                      transfer to the airport included.</li>
+                    <li class="text-ink/60">Book flights out after 1pm on the last day. Inland flights
+                      get cancelled, and we would rather you had a buffer.</li>
+                  </ul>
+                </div>
+              </div>
+
+              <a :href="SEA.href('trip.html', { slug: trip.slug })" target="_blank" rel="noopener"
+                 class="mt-5 inline-flex items-center gap-2 font-mark text-[11px] uppercase tracking-[0.16em] text-flame-600 underline underline-offset-4">
+                Read the full day-by-day in a new tab
+              </a>
+            </div>
+          </template>
+        </section>
+
+        <!-- ---------------- 3 · CHOOSE CABIN ---------------- -->
+        <section x-show="step === 3" x-cloak x-transition.opacity.duration.200ms>
+          <h1 class="font-display text-3xl font-light leading-tight tracking-tight text-ink-700 sm:text-4xl">
+            Choose your cabin
+          </h1>
+          <p class="mt-3 text-base leading-relaxed text-ink/70">
+            Prices are per person for this departure, everything on board included.
+            Choosing holds the cabin for 72 hours — no card details yet.
+          </p>
+
+          <div class="mt-7 space-y-3">
+            <template x-for="c in cabins" :key="c.code">
+              <div>
+                <button type="button" @click="chooseCabin(c.code)" :disabled="c.left <= 0"
+                        :aria-pressed="cabin && cabin.code === c.code"
+                        class="flex w-full gap-4 rounded-2xl border-2 bg-white p-4 text-left transition disabled:cursor-not-allowed disabled:opacity-60"
+                        :class="cabin && cabin.code === c.code ? 'border-flame shadow-card' : 'border-sand-300 hover:border-mist'">
+                  <span class="relative h-24 w-24 shrink-0 overflow-hidden rounded-xl bg-ink sm:h-28 sm:w-36">
+                    <span class="ph absolute inset-0 block" :class="'ph-' + c.ph">
+                    <img class="img-slot" :src="SEA.photoPath.cabin(boat.slug, c.code)" :alt="c.name" loading="lazy" onerror="this.style.display='none'">
+                  </span>
+                  </span>
+                  <span class="min-w-0 flex-1">
+                    <span class="flex flex-wrap items-start justify-between gap-x-4 gap-y-1">
+                      <span>
+                        <span class="block font-display text-lg text-ink-700" x-text="c.name"></span>
+                        <span class="mt-0.5 block text-xs text-mist-700">
+                          <span x-text="c.deck"></span> · <span x-text="c.beds"></span> ·
+                          sleeps <span x-text="c.maxOccupancy"></span>
+                        </span>
+                      </span>
+                      <span class="shrink-0 text-right">
+                        <span class="tnum block font-display text-lg text-deep-700" :data-usd="c.price"
+                              x-text="SEA.fmt.money(c.price)"></span>
+                        <span class="block text-[11px] text-ink/50" data-i18n="lbl.pp">per person</span>
+                      </span>
+                    </span>
+                    <span class="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-xs text-ink/65">
+                      <template x-for="f in c.features" :key="f"><span x-text="f"></span></template>
+                    </span>
+                    <span class="mt-2 block font-mark text-[10px] uppercase tracking-[0.14em]"
+                          :class="c.left <= 0 ? 'text-ink/40' : c.left === 1 ? 'text-flame-600' : 'text-mist-700'"
+                          x-text="c.left <= 0 ? 'Fully booked on this date' : c.left === 1 ? 'Last one' : c.left + ' left'"></span>
+                  </span>
+                  <span class="mt-1 grid h-7 w-7 shrink-0 place-items-center self-start rounded-full border transition"
+                        :class="cabin && cabin.code === c.code ? 'border-flame bg-flame text-white' : 'border-sand-300 text-transparent'">
+                    <span class="icon icon-check h-4 w-4" aria-hidden="true"></span>
+                  </span>
+                </button>
+              </div>
+            </template>
+          </div>
+
+          <p class="mt-5 rounded-2xl bg-white p-4 text-xs leading-relaxed text-ink/60">
+            Travelling alone? The single berths carry no supplement and we will not pair you with a
+            stranger unless you ask. Need two cabins side by side, or an interconnecting pair?
+            <a href="contact.html" class="text-flame-600 underline underline-offset-4">Tell the office</a>
+            and they will arrange it by hand.
+          </p>
+        </section>
+
+        <!-- ---------------- 4 · GUESTS ---------------- -->
+        <section x-show="step === 4" x-cloak x-transition.opacity.duration.200ms>
+          <h1 class="font-display text-3xl font-light leading-tight tracking-tight text-ink-700 sm:text-4xl">
+            Who is sailing?
+          </h1>
+          <p class="mt-3 text-base leading-relaxed text-ink/70">
+            Numbers first, names next. We ask ages because the kitchen, the dive plan and the cabin
+            beds all depend on them — not the price bands alone.
+          </p>
+
+          <div class="mt-7 rounded-2xl bg-white p-5 lg:p-6">
+            <div class="space-y-4">
+              <template x-for="c in guestBands" :key="c.key">
+                <div class="flex items-center justify-between gap-4 border-b border-sand-200 pb-4 last:border-0 last:pb-0">
+                  <div>
+                    <p class="text-sm text-ink-700" x-text="c.label"></p>
+                    <p class="text-xs text-ink/55" x-text="c.note"></p>
+                    <p class="mt-0.5 font-mark text-[10px] uppercase tracking-[0.14em] text-mist-700"
+                       x-show="c.rate < 1">
+                      <span x-text="Math.round(c.rate * 100)"></span>% of the cabin fare
+                    </p>
+                  </div>
+                  <span class="inline-flex shrink-0 items-center rounded-full border border-sand-300">
+                    <button type="button" @click="bump(c.key, -1)" :disabled="guests[c.key] <= c.min"
+                            class="grid h-11 w-11 place-items-center rounded-l-full text-ink-700 transition hover:bg-sand disabled:opacity-30"
+                            :aria-label="'One fewer: ' + c.label">
+                      <span class="icon icon-minus h-4 w-4" aria-hidden="true"></span>
+                    </button>
+                    <span class="w-12 text-center font-display text-lg text-ink-700" x-text="guests[c.key]"></span>
+                    <button type="button" @click="bump(c.key, 1)" :disabled="totalGuests >= maxOccupancy"
+                            class="grid h-11 w-11 place-items-center rounded-r-full text-ink-700 transition hover:bg-sand disabled:opacity-30"
+                            :aria-label="'One more: ' + c.label">
+                      <span class="icon icon-plus h-4 w-4" aria-hidden="true"></span>
+                    </button>
+                  </span>
+                </div>
+              </template>
+            </div>
+
+            <!-- occupancy validation, stated positively -->
+            <div class="mt-5 rounded-xl p-4" aria-live="polite"
+                 :class="occupancyOk ? 'bg-sand' : 'bg-flame/5 ring-1 ring-inset ring-flame/25'">
+              <p class="text-sm leading-relaxed" :class="occupancyOk ? 'text-ink/75' : 'text-flame-700'">
+                <template x-if="occupancyOk">
+                  <span>
+                    <strong class="text-ink-700" x-text="totalGuests"></strong> in the
+                    <span x-text="cabin ? cabin.name : 'cabin'"></span>, which sleeps
+                    <span x-text="maxOccupancy"></span>.
+                    <span x-show="totalGuests < maxOccupancy" class="text-ink/60">
+                      Room for <span x-text="maxOccupancy - totalGuests"></span> more if someone else joins.
+                    </span>
+                  </span>
+                </template>
+                <template x-if="!occupancyOk">
+                  <span>
+                    <strong x-text="totalGuests"></strong> will not fit — the
+                    <span x-text="cabin ? cabin.name : 'cabin'"></span> sleeps
+                    <span x-text="maxOccupancy"></span>. Choose a larger grade, or ask us for a
+                    second cabin nearby.
+                  </span>
+                </template>
+              </p>
+              <div x-show="!occupancyOk" class="mt-3 flex flex-wrap gap-2">
+                <button type="button" @click="goto(3)"
+                        class="inline-flex h-10 items-center rounded-full bg-flame px-4 font-mark text-[11px] uppercase tracking-[0.12em] text-white transition hover:bg-flame-600">
+                  Choose another cabin
+                </button>
+                <a href="contact.html" class="inline-flex h-10 items-center rounded-full border border-ink/20 px-4 font-mark text-[11px] uppercase tracking-[0.12em] text-ink-700 transition hover:border-ink">
+                  Ask for two cabins
+                </a>
+              </div>
+            </div>
+
+            <p x-show="guests.children > 0" x-cloak class="mt-4 text-xs leading-relaxed text-ink/60">
+              Children are welcome from four upwards. Under four, please talk to us first — it depends
+              on the route rather than the child.
+            </p>
+          </div>
+
+          <!-- optional extras -->
+          <div class="mt-4 rounded-2xl bg-white p-5 lg:p-6">
+            <h2 class="font-mark text-[11px] uppercase tracking-[0.16em] text-ink-700">Anything to add?</h2>
+            <p class="mt-1 text-xs text-ink/55">All optional, all addable later. Nothing here is a trap.</p>
+            <div class="mt-4 space-y-3">
+              <template x-for="x in extras" :key="x.key">
+                <label class="flex items-start gap-3 border-b border-sand-200 pb-3 last:border-0 last:pb-0">
+                  <input type="checkbox" :value="x.key" x-model="chosenExtras"
+                         class="mt-0.5 h-5 w-5 rounded border-sand-300 text-flame focus:ring-mist/40">
+                  <span class="min-w-0 flex-1">
+                    <span class="flex flex-wrap items-baseline justify-between gap-x-4">
+                      <span class="text-sm text-ink-700" x-text="x.label"></span>
+                      <span class="tnum shrink-0 text-sm text-deep-700" :data-usd="x.price"
+                            x-text="SEA.fmt.money(x.price)"></span>
+                    </span>
+                    <span class="mt-0.5 block text-xs text-ink/60">
+                      <span x-text="x.note"></span> ·
+                      <span x-text="x.perPerson ? 'per person' : 'per group'"></span>
+                    </span>
+                  </span>
+                </label>
+              </template>
+            </div>
+          </div>
+        </section>
+
+        <!-- ---------------- 5 · GUEST DETAILS ---------------- -->
+        <section x-show="step === 5" x-cloak x-transition.opacity.duration.200ms>
+          <h1 class="font-display text-3xl font-light leading-tight tracking-tight text-ink-700 sm:text-4xl">
+            Guest details
+          </h1>
+          <p class="mt-3 text-base leading-relaxed text-ink/70">
+            Only the lead guest is needed now — the rest can follow on the joining form.
+            Anything you tell us here reaches the crew before you board.
+          </p>
+
+          <div class="mt-7 space-y-4">
+            <template x-for="(g, i) in guestList" :key="i">
+              <fieldset class="rounded-2xl bg-white p-5 lg:p-6">
+                <legend class="sf-legend flex items-center gap-3 pb-3 font-mark text-[11px] font-medium uppercase tracking-[0.18em] text-ink-700">
+                  <span class="h-3.5 w-[3px] shrink-0 rounded-full bg-flame"></span>
+                  <span x-text="i === 0 ? 'Lead guest' : 'Guest ' + (i + 1)"></span>
+                  <span class="shrink-0 rounded-full bg-sand px-2.5 py-1 font-mark text-[10px] uppercase tracking-[0.12em] text-mist-700"
+                        x-text="g.band"></span>
+                  <span class="h-px flex-1 bg-sand-300"></span>
+                </legend>
+
+                <div class="mt-4 grid gap-4 sm:grid-cols-2">
+                  <label class="block sm:col-span-2">
+                    <span class="text-sm text-ink/70">
+                      Full name, as in the passport
+                      <span x-show="i === 0" class="text-flame">*</span>
+                    </span>
+                    <input type="text" x-model="g.name" :autocomplete="i === 0 ? 'name' : 'off'"
+                           :aria-invalid="errors['name' + i] ? 'true' : 'false'"
+                           class="mt-1.5 h-12 w-full rounded-xl border-sand-300 bg-sand text-ink-700 focus:border-mist focus:ring-2 focus:ring-mist/40">
+                    <span x-show="errors['name' + i]" x-cloak x-text="errors['name' + i]" role="alert"
+                          class="mt-1.5 block text-sm text-flame-600"></span>
+                  </label>
+
+                  <template x-if="i === 0">
+                    <label class="block">
+                      <span class="text-sm text-ink/70">Email <span class="text-flame">*</span></span>
+                      <input type="email" x-model="lead.email" autocomplete="email" inputmode="email"
+                             :aria-invalid="errors.email ? 'true' : 'false'"
+                             class="mt-1.5 h-12 w-full rounded-xl border-sand-300 bg-sand text-ink-700 focus:border-mist focus:ring-2 focus:ring-mist/40">
+                      <span x-show="errors.email" x-cloak x-text="errors.email" role="alert"
+                            class="mt-1.5 block text-sm text-flame-600"></span>
+                    </label>
+                  </template>
+                  <template x-if="i === 0">
+                    <label class="block">
+                      <span class="text-sm text-ink/70">Phone or WhatsApp <span class="text-flame">*</span></span>
+                      <input type="tel" x-model="lead.phone" autocomplete="tel" inputmode="tel"
+                             placeholder="+61 400 000 000"
+                             :aria-invalid="errors.phone ? 'true' : 'false'"
+                             class="mt-1.5 h-12 w-full rounded-xl border-sand-300 bg-sand text-ink-700 placeholder:text-ink/35 focus:border-mist focus:ring-2 focus:ring-mist/40">
+                      <span x-show="errors.phone" x-cloak x-text="errors.phone" role="alert"
+                            class="mt-1.5 block text-sm text-flame-600"></span>
+                    </label>
+                  </template>
+
+                  <label class="block">
+                    <span class="text-sm text-ink/70">Nationality</span>
+                    <input type="text" x-model="g.nationality" autocomplete="country-name"
+                           class="mt-1.5 h-12 w-full rounded-xl border-sand-300 bg-sand text-ink-700 focus:border-mist focus:ring-2 focus:ring-mist/40">
+                  </label>
+                  <label class="block">
+                    <span class="text-sm text-ink/70">Diving</span>
+                    <select x-model="g.diving"
+                            class="mt-1.5 h-12 w-full rounded-xl border-sand-300 bg-sand text-ink-700 focus:border-mist focus:ring-2 focus:ring-mist/40">
+                      <option value="none">Not diving — snorkelling only</option>
+                      <option value="learning">Would like to learn on board</option>
+                      <option value="open-water">Open Water</option>
+                      <option value="advanced">Advanced</option>
+                      <option value="rescue">Rescue or above</option>
+                      <option value="pro">Instructor / divemaster</option>
+                    </select>
+                  </label>
+                  <label class="block" x-show="g.diving !== 'none' && g.diving !== 'learning'" x-cloak>
+                    <span class="text-sm text-ink/70">Certification number</span>
+                    <input type="text" x-model="g.certNumber" placeholder="Optional — can follow later"
+                           class="mt-1.5 h-12 w-full rounded-xl border-sand-300 bg-sand text-ink-700 placeholder:text-ink/35 focus:border-mist focus:ring-2 focus:ring-mist/40">
+                  </label>
+                  <label class="block" x-show="g.diving !== 'none' && g.diving !== 'learning'" x-cloak>
+                    <span class="text-sm text-ink/70">Logged dives, roughly</span>
+                    <input type="number" min="0" max="9999" x-model.number="g.dives"
+                           class="counter-input mt-1.5 h-12 w-full rounded-xl border-sand-300 bg-sand text-ink-700 focus:border-mist focus:ring-2 focus:ring-mist/40">
+                  </label>
+                  <label class="block sm:col-span-2">
+                    <span class="text-sm text-ink/70">Dietary needs, allergies, anything medical</span>
+                    <textarea x-model="g.dietary" rows="2" maxlength="300"
+                              placeholder="Coeliac, vegan, nut allergy, halal, a knee that objects to ladders — all useful, and all easy if we know early."
+                              class="mt-1.5 w-full rounded-xl border-sand-300 bg-sand text-ink-700 placeholder:text-ink/35 focus:border-mist focus:ring-2 focus:ring-mist/40"></textarea>
+                  </label>
+                </div>
+              </fieldset>
+            </template>
+
+            <fieldset class="rounded-2xl bg-white p-5 lg:p-6">
+              <legend class="sf-legend flex items-center gap-3 pb-3 font-mark text-[11px] font-medium uppercase tracking-[0.18em] text-ink-700">
+                <span class="h-3.5 w-[3px] shrink-0 rounded-full bg-flame"></span>
+                <span>Anything else</span>
+                <span class="h-px flex-1 bg-sand-300"></span>
+              </legend>
+              <label class="mt-3 block">
+                <span class="sr-only">Notes for the office</span>
+                <textarea x-model="lead.notes" rows="3" maxlength="500"
+                          placeholder="Celebrating something? Arriving a day early? Want us to hold this without a payment link for 72 hours? Say so here."
+                          class="w-full rounded-xl border-sand-300 bg-sand text-ink-700 placeholder:text-ink/35 focus:border-mist focus:ring-2 focus:ring-mist/40"></textarea>
+              </label>
+            </fieldset>
+          </div>
+        </section>
+
+        <!-- ---------------- 6 · REVIEW & RESERVE ---------------- -->
+        <section x-show="step === 6" x-cloak x-transition.opacity.duration.200ms>
+          <h1 class="font-display text-3xl font-light leading-tight tracking-tight text-ink-700 sm:text-4xl">
+            Review and reserve
+          </h1>
+          <p class="mt-3 text-base leading-relaxed text-ink/70">
+            Nothing is charged on this screen. Reserving holds your cabin for 72 hours while the
+            office confirms it by hand and sends a payment link.
+          </p>
+
+          <!-- voyage -->
+          <div class="mt-7 rounded-2xl bg-white p-5 lg:p-6">
+            <div class="flex items-start justify-between gap-4">
+              <h2 class="font-mark text-[11px] uppercase tracking-[0.16em] text-ink-700">Your voyage</h2>
+              <button type="button" @click="goto(2)" class="font-mark text-[11px] uppercase tracking-[0.14em] text-flame-600 underline underline-offset-4">Change</button>
+            </div>
+            <dl class="mt-4 space-y-2.5 text-sm">
+              <div class="flex flex-wrap justify-between gap-x-4 border-b border-sand-200 pb-2.5">
+                <dt class="text-ink/60">Itinerary</dt><dd class="text-right text-ink-700" x-text="trip.title"></dd>
+              </div>
+              <div class="flex flex-wrap justify-between gap-x-4 border-b border-sand-200 pb-2.5">
+                <dt class="text-ink/60">Dates</dt><dd class="text-right text-ink-700" x-text="SEA.fmt.dateRange(dep.start, dep.nights)"></dd>
+              </div>
+              <div class="flex flex-wrap justify-between gap-x-4 border-b border-sand-200 pb-2.5">
+                <dt class="text-ink/60">Boat</dt><dd class="text-right text-ink-700" x-text="boat.name"></dd>
+              </div>
+              <div class="flex flex-wrap justify-between gap-x-4 border-b border-sand-200 pb-2.5">
+                <dt class="text-ink/60">Boards &amp; ends</dt><dd class="text-right text-ink-700" x-text="trip.gateway"></dd>
+              </div>
+              <div class="flex flex-wrap justify-between gap-x-4">
+                <dt class="text-ink/60">Reference</dt><dd class="text-right text-ink-700" x-text="dep.id"></dd>
+              </div>
+            </dl>
+          </div>
+
+          <!-- guests -->
+          <div class="mt-4 rounded-2xl bg-white p-5 lg:p-6">
+            <div class="flex items-start justify-between gap-4">
+              <h2 class="font-mark text-[11px] uppercase tracking-[0.16em] text-ink-700">Guests</h2>
+              <button type="button" @click="goto(5)" class="font-mark text-[11px] uppercase tracking-[0.14em] text-flame-600 underline underline-offset-4">Change</button>
+            </div>
+            <ul class="mt-4 space-y-2.5">
+              <template x-for="(g, i) in guestList" :key="i">
+                <li class="flex flex-wrap items-baseline justify-between gap-x-4 border-b border-sand-200 pb-2.5 text-sm last:border-0 last:pb-0">
+                  <span class="text-ink-700" x-text="g.name || (i === 0 ? 'Lead guest — name missing' : 'Guest ' + (i + 1) + ' — name to follow')"></span>
+                  <span class="text-xs text-mist-700">
+                    <span x-text="g.band"></span>
+                    <span x-show="g.diving !== 'none'"> · <span x-text="divingLabel(g.diving)"></span></span>
+                  </span>
+                </li>
+              </template>
+            </ul>
+            <p class="mt-3 text-xs text-ink/55">
+              <span x-text="lead.email"></span><span x-show="lead.phone"> · <span x-text="lead.phone"></span></span>
+            </p>
+          </div>
+
+          <!-- breakdown -->
+          <div class="mt-4 rounded-2xl bg-white p-5 lg:p-6">
+            <div class="flex items-start justify-between gap-4">
+              <h2 class="font-mark text-[11px] uppercase tracking-[0.16em] text-ink-700">Full breakdown</h2>
+              <button type="button" @click="goto(3)" class="font-mark text-[11px] uppercase tracking-[0.14em] text-flame-600 underline underline-offset-4">Change cabin</button>
+            </div>
+
+            <table class="mt-4 w-full text-sm">
+              <caption class="sr-only">Price breakdown for this reservation</caption>
+              <tbody>
+                <template x-for="line in priceLines" :key="line.label">
+                  <tr class="border-b border-sand-200">
+                    <th scope="row" class="py-2.5 text-left font-normal text-ink/70">
+                      <span x-text="line.label"></span>
+                      <span x-show="line.detail" class="block text-xs text-ink/50" x-text="line.detail"></span>
+                    </th>
+                    <td class="tnum py-2.5 text-right text-ink-700" :data-usd="line.amount"
+                        x-text="SEA.fmt.money(line.amount)"></td>
+                  </tr>
+                </template>
+                <tr x-show="discount > 0" x-cloak class="border-b border-sand-200">
+                  <th scope="row" class="py-2.5 text-left font-normal text-flame-600">
+                    Voucher <span x-text="voucher.applied"></span>
+                  </th>
+                  <td class="tnum py-2.5 text-right text-flame-600" :data-usd="-discount"
+                      x-text="SEA.fmt.money(-discount)"></td>
+                </tr>
+                <tr class="border-b-2 border-ink/15">
+                  <th scope="row" class="py-3 text-left font-mark text-[11px] uppercase tracking-[0.14em] text-ink-700">
+                    Total, all guests
+                  </th>
+                  <td class="tnum py-3 text-right font-display text-xl text-ink-700" :data-usd="total"
+                      x-text="SEA.fmt.money(total)"></td>
+                </tr>
+                <tr>
+                  <th scope="row" class="py-2.5 text-left font-normal text-ink-700">
+                    Deposit to reserve
+                    <span class="block text-xs text-ink/50">
+                      <span x-text="Math.round(dep.deposit * 100)"></span>% — payment link follows, not charged now
+                    </span>
+                  </th>
+                  <td class="tnum py-2.5 text-right font-display text-lg text-deep-700" :data-usd="deposit"
+                      x-text="SEA.fmt.money(deposit)"></td>
+                </tr>
+                <tr>
+                  <th scope="row" class="py-2.5 text-left font-normal text-ink/70">
+                    Balance, due 60 days before you sail
+                  </th>
+                  <td class="tnum py-2.5 text-right text-ink-700" :data-usd="total - deposit"
+                      x-text="SEA.fmt.money(total - deposit)"></td>
+                </tr>
+              </tbody>
+            </table>
+
+            <!-- voucher -->
+            <div class="mt-5 border-t border-sand-200 pt-5">
+              <div x-show="!voucher.applied">
+                <label class="block">
+                  <span class="font-mark text-[10px] uppercase tracking-[0.16em] text-mist-700">Voucher or agent code</span>
+                  <span class="mt-1.5 flex gap-2">
+                    <input type="text" x-model="voucher.code" @keydown.enter.prevent="applyVoucher()"
+                           placeholder="If you have one"
+                           :aria-invalid="voucher.error ? 'true' : 'false'"
+                           class="h-12 flex-1 rounded-xl border-sand-300 bg-sand uppercase tracking-wider text-ink-700 placeholder:normal-case placeholder:tracking-normal placeholder:text-ink/35 focus:border-mist focus:ring-2 focus:ring-mist/40">
+                    <button type="button" @click="applyVoucher()"
+                            class="h-12 shrink-0 rounded-xl border border-ink/20 px-5 font-mark text-[11px] uppercase tracking-[0.12em] text-ink-700 transition hover:border-ink hover:bg-ink hover:text-white">
+                      Apply
+                    </button>
+                  </span>
+                </label>
+                <p x-show="voucher.error" x-cloak x-text="voucher.error" role="alert" class="mt-2 text-sm text-flame-600"></p>
+              </div>
+              <div x-show="voucher.applied" x-cloak class="flex items-center justify-between gap-4 rounded-xl bg-mist-50 p-3.5">
+                <p class="text-sm text-ink/80">
+                  <strong class="text-ink-700" x-text="voucher.applied"></strong> applied —
+                  <span x-text="Math.round(voucher.rate * 100)"></span>% off the cabin fare.
+                </p>
+                <button type="button" @click="removeVoucher()" class="font-mark text-[11px] uppercase tracking-[0.14em] text-flame-600 underline underline-offset-4">Remove</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- consent -->
+          <div class="mt-4 rounded-2xl bg-white p-5 lg:p-6">
+            <h2 class="font-mark text-[11px] uppercase tracking-[0.16em] text-ink-700">Before you reserve</h2>
+            <div class="mt-4 space-y-4">
+              <label class="flex items-start gap-3">
+                <input type="checkbox" x-model="consent.terms" :aria-invalid="errors.terms ? 'true' : 'false'"
+                       class="mt-0.5 h-5 w-5 rounded border-sand-300 text-flame focus:ring-mist/40">
+                <span class="text-sm leading-relaxed text-ink/80">
+                  I have read the <a href="policies.html#terms" class="text-flame-600 underline underline-offset-4">booking terms</a>
+                  and the <a href="policies.html#cancellation" class="text-flame-600 underline underline-offset-4">cancellation policy</a>.
+                  <span class="text-flame">*</span>
+                </span>
+              </label>
+              <p x-show="errors.terms" x-cloak x-text="errors.terms" role="alert" class="text-sm text-flame-600"></p>
+
+              <label class="flex items-start gap-3">
+                <input type="checkbox" x-model="consent.insurance" :aria-invalid="errors.insurance ? 'true' : 'false'"
+                       class="mt-0.5 h-5 w-5 rounded border-sand-300 text-flame focus:ring-mist/40">
+                <span class="text-sm leading-relaxed text-ink/80">
+                  Everyone in my party will hold travel insurance covering emergency evacuation, and
+                  diving to the depth they intend to dive. <span class="text-flame">*</span>
+                  <span class="mt-0.5 block text-xs text-ink/55">
+                    We are DAN-affiliated and will ask for the policy number with the joining form.
+                  </span>
+                </span>
+              </label>
+              <p x-show="errors.insurance" x-cloak x-text="errors.insurance" role="alert" class="text-sm text-flame-600"></p>
+
+              <label class="flex items-start gap-3">
+                <input type="checkbox" x-model="consent.newsletter"
+                       class="mt-0.5 h-5 w-5 rounded border-sand-300 text-flame focus:ring-mist/40">
+                <span class="text-sm leading-relaxed text-ink/80">Send me the familia letter, once a month.</span>
+              </label>
+            </div>
+          </div>
+
+          <div x-show="submitError" x-cloak class="mt-4 rounded-2xl border border-flame/25 bg-flame/5 p-5" role="alert">
+            <h2 class="font-display text-lg text-ink-700">The reservation did not go through</h2>
+            <p class="mt-1.5 text-sm leading-relaxed text-ink/75">
+              Nothing was charged and nothing is lost — every answer is still on this screen. Your
+              cabin is not held yet, so if the date is nearly full, message the office and quote
+              <strong class="text-ink-700" x-text="dep.id"></strong>.
+            </p>
+            <div class="mt-4 flex flex-wrap gap-3">
+              <button type="button" @click="submit()"
+                      class="inline-flex h-11 items-center gap-2 rounded-full bg-flame px-5 font-mark text-[11px] uppercase tracking-[0.12em] text-white transition hover:bg-flame-600">
+                <span data-i18n="cta.retry">Try again</span>
+              </button>
+              <a href="https://wa.me/6281100000000" target="_blank" rel="noopener"
+                 class="inline-flex h-11 items-center rounded-full border border-ink/20 px-5 font-mark text-[11px] uppercase tracking-[0.12em] text-ink-700 transition hover:border-ink">
+                Message the office
+              </a>
+            </div>
+          </div>
+        </section>
+
+        <!-- ---------------- 7 · CONFIRMATION ---------------- -->
+        <section x-show="step === 7" x-cloak class="lg:col-span-2">
+          <div class="mx-auto max-w-2xl">
+            <div class="rounded-4xl bg-white p-7 shadow-card lg:p-12">
+              <span class="grid h-16 w-16 place-items-center rounded-full bg-mist-100 text-ink-700">
+                <span class="icon icon-big-check h-8 w-8" aria-hidden="true"></span>
+              </span>
+              <p class="mt-6 font-mark text-eyebrow uppercase text-flame">Cabin reserved</p>
+              <h1 class="mt-4 font-display text-3xl font-light leading-tight tracking-tight text-ink-700 sm:text-4xl">
+                Held for you — welcome to the familia
+              </h1>
+              <p class="mt-4 text-base leading-relaxed text-ink/70">
+                Your cabin is held for 72 hours. Nothing has been charged: the office confirms
+                availability by hand first, then sends the deposit link.
+              </p>
+
+              <dl class="mt-8 grid gap-5 rounded-2xl bg-sand p-5 sm:grid-cols-2 lg:p-6">
+                <div>
+                  <dt class="font-mark text-[10px] uppercase tracking-[0.16em] text-mist-700">Booking reference</dt>
+                  <dd class="mt-1 font-display text-2xl tracking-wide text-ink-700" x-text="reference"></dd>
+                </div>
+                <div>
+                  <dt class="font-mark text-[10px] uppercase tracking-[0.16em] text-mist-700">Payment status</dt>
+                  <dd class="mt-1 flex items-center gap-2">
+                    <span class="h-2 w-2 rounded-full bg-flame"></span>
+                    <span class="font-display text-xl text-ink-700">Awaiting deposit</span>
+                  </dd>
+                </div>
+                <div>
+                  <dt class="font-mark text-[10px] uppercase tracking-[0.16em] text-mist-700">Voyage</dt>
+                  <dd class="mt-1 text-sm text-ink-700">
+                    <span x-text="trip.title"></span><br>
+                    <span x-text="SEA.fmt.dateRange(dep.start, dep.nights)"></span> ·
+                    <span x-text="boat.name"></span>
+                  </dd>
+                </div>
+                <div>
+                  <dt class="font-mark text-[10px] uppercase tracking-[0.16em] text-mist-700">Held until</dt>
+                  <dd class="mt-1 text-sm text-ink-700">
+                    72 hours from now<br>
+                    <span class="text-ink/55">Then the cabin returns to the pool</span>
+                  </dd>
+                </div>
+                <div class="sm:col-span-2">
+                  <dt class="font-mark text-[10px] uppercase tracking-[0.16em] text-mist-700">Deposit due</dt>
+                  <dd class="mt-1">
+                    <span class="tnum font-display text-2xl text-deep-700" :data-usd="deposit" x-text="SEA.fmt.money(deposit)"></span>
+                    <span class="text-sm text-ink/60"> of
+                      <span class="tnum" :data-usd="total" x-text="SEA.fmt.money(total)"></span> total</span>
+                  </dd>
+                </div>
+              </dl>
+
+              <div class="mt-8">
+                <h2 class="font-mark text-[11px] uppercase tracking-[0.18em] text-flame">What happens next</h2>
+                <ol class="mt-4 space-y-3.5">
+                  <li class="flex gap-3 text-sm leading-relaxed text-ink/80">
+                    <span class="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-mist"></span>
+                    A confirmation is on its way to <strong class="text-ink-700" x-text="lead.email"></strong>
+                    with everything on this screen.
+                  </li>
+                  <li class="flex gap-3 text-sm leading-relaxed text-ink/80">
+                    <span class="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-mist"></span>
+                    Within one working day: the deposit link, joining instructions and a short form
+                    for dietary and diving details.
+                  </li>
+                  <li class="flex gap-3 text-sm leading-relaxed text-ink/80">
+                    <span class="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-mist"></span>
+                    Sixty days before you sail: the balance, and the crew list for your week.
+                  </li>
+                  <li class="flex gap-3 text-sm leading-relaxed text-ink/80">
+                    <span class="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-mist"></span>
+                    Any time before that: one free move to another departure in the same season.
+                  </li>
+                </ol>
+              </div>
+
+              <div class="mt-9 flex flex-col gap-3 sm:flex-row">
+                <button type="button" @click="window.print()"
+                        class="inline-flex flex-1 items-center justify-center gap-2 rounded-full bg-ink px-6 py-4 font-mark text-[12px] uppercase tracking-[0.14em] text-white transition hover:bg-ink-600">
+                  <span class="icon icon-print h-4 w-4" aria-hidden="true"></span>
+                  Print this page
+                </button>
+                <a :href="SEA.href('trip.html', { slug: trip.slug })"
+                   class="inline-flex flex-1 items-center justify-center rounded-full border border-ink/20 px-6 py-4 font-mark text-[12px] uppercase tracking-[0.14em] text-ink-700 transition hover:border-ink">
+                  Read the itinerary again
+                </a>
+              </div>
+
+              <div class="mt-8 border-t border-sand-300 pt-6">
+                <h2 class="font-mark text-[11px] uppercase tracking-[0.18em] text-flame">If anything looks wrong</h2>
+                <p class="mt-2 text-sm leading-relaxed text-ink/75">
+                  Message the office on
+                  <a href="https://wa.me/6281100000000" target="_blank" rel="noopener" class="text-flame-600 underline underline-offset-4">WhatsApp</a>
+                  or email <a href="mailto:hello@seafamilia.com" class="text-flame-600 underline underline-offset-4">hello@seafamilia.com</a>,
+                  quoting <strong class="text-ink-700" x-text="reference"></strong>. Two people, both
+                  in Labuan Bajo, usually within a few hours.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- ==================================================================
+           STICKY SUMMARY PANEL — desktop rail. Same markup feeds the mobile
+           sheet below, rendered from summaryHTML().
+           ================================================================ -->
+      <aside class="hidden lg:block" x-show="step > 1 && step < 7">
+        <div class="lg:sticky lg:top-28">
+          <div class="overflow-hidden rounded-3xl bg-white shadow-card" x-html="summaryHTML()"></div>
+          <p class="mt-4 px-1 text-xs leading-relaxed text-ink/55">
+            Prices shown in <strong class="text-ink-700" x-text="SEA.store.currency"></strong>,
+            converted at our weekly rate. The invoice is issued in the currency you choose at
+            checkout, and that is the rate you pay.
+          </p>
+        </div>
+      </aside>
+    </div>
+  </div>
+
+  <!-- ======================================================================
+       MOBILE SUMMARY SHEET — the same panel, pulled up from the funnel footer
+       ==================================================================== -->
+  <div x-show="sheet" x-cloak class="fixed inset-0 z-40 lg:hidden" role="dialog" aria-modal="true"
+       aria-label="Your voyage summary">
+    <div x-show="sheet" x-transition.opacity class="absolute inset-0 bg-ink-950/60" @click="sheet = false"></div>
+    <div x-show="sheet" x-transition:enter="transition ease-swell duration-300"
+         x-transition:enter-start="translate-y-full" x-transition:enter-end="translate-y-0"
+         class="absolute inset-x-0 bottom-0 max-h-[85vh] overflow-y-auto rounded-t-3xl bg-white pb-24">
+      <div class="sticky top-0 flex items-center justify-between border-b border-sand-200 bg-white px-5 py-4">
+        <h2 class="font-mark text-[11px] uppercase tracking-[0.16em] text-ink-700" data-i18n="lbl.summary">Your voyage</h2>
+        <button type="button" @click="sheet = false" aria-label="Close summary"
+                class="grid h-9 w-9 place-items-center rounded-full text-ink/50 transition hover:bg-sand">
+          <span class="icon icon-cross h-4 w-4" aria-hidden="true"></span>
+        </button>
+      </div>
+      <div x-html="summaryHTML({ bare: true })"></div>
+    </div>
+  </div>
+
+  <!-- ======================================================================
+       STICKY FUNNEL FOOTER
+       ==================================================================== -->
+  <div x-show="step < 7" class="fixed inset-x-0 bottom-0 z-30 border-t border-sand-300 bg-white/95 shadow-rail backdrop-blur">
+    <div class="mx-auto flex max-w-7xl items-center gap-3 px-5 py-3 sm:px-6 lg:px-8">
+      <button type="button" @click="back()" :disabled="step === 1"
+              class="inline-flex h-12 items-center gap-2 rounded-full border border-sand-300 px-4 font-mark text-[12px] uppercase tracking-[0.14em] text-ink-700 transition hover:border-ink disabled:opacity-40 sm:px-5">
+        <span class="icon icon-chevron-left h-4 w-4" aria-hidden="true"></span>
+        <span class="hidden sm:inline" data-i18n="cta.back">Back</span>
+      </button>
+
+      <!-- mobile: tap the running total to open the summary sheet -->
+      <button type="button" @click="sheet = true" x-show="step > 1"
+              class="min-w-0 flex-1 text-left lg:pointer-events-none">
+        <span class="flex items-center gap-1.5">
+          <span class="truncate font-mark text-[10px] uppercase tracking-[0.14em] text-mist-700"
+                x-text="footerHint"></span>
+          <span class="icon icon-chevron-down h-3.5 w-3.5 shrink-0 text-mist-700 lg:hidden" aria-hidden="true"></span>
+        </span>
+        <span class="block text-sm text-ink-700">
+          <span x-show="cabin">
+            <span class="tnum font-display text-base" :data-usd="total" x-text="SEA.fmt.money(total)"></span>
+            <span class="text-xs text-ink/55">total · <span x-text="SEA.fmt.guests(totalGuests)"></span></span>
+          </span>
+          <span x-show="!cabin" class="text-xs text-ink/55">No cabin chosen yet</span>
+        </span>
+      </button>
+      <div x-show="step === 1" class="min-w-0 flex-1">
+        <p class="truncate font-mark text-[10px] uppercase tracking-[0.14em] text-mist-700" x-text="footerHint"></p>
+      </div>
+
+      <button type="button" x-show="step < 6" @click="next()" :disabled="!canContinue"
+              class="inline-flex h-12 shrink-0 items-center gap-2 rounded-full bg-flame px-5 font-mark text-[12px] uppercase tracking-[0.14em] text-white transition hover:bg-flame-600 disabled:opacity-40 sm:px-6">
+        <span x-text="step === 5 ? 'Review' : 'Continue'"></span>
+        <span class="icon icon-chevron-right h-4 w-4" aria-hidden="true"></span>
+      </button>
+
+      <button type="button" x-show="step === 6" @click="submit()" :disabled="busy"
+              class="inline-flex h-12 shrink-0 items-center gap-2 rounded-full bg-flame px-5 font-mark text-[12px] uppercase tracking-[0.14em] text-white transition hover:bg-flame-600 disabled:opacity-60 sm:px-6">
+        <span x-show="!busy">Reserve my cabin</span>
+        <span x-show="busy" x-cloak>Reserving…</span>
+      </button>
+    </div>
+    <div x-show="busy" x-cloak class="bar-indeterminate h-0.5 w-full bg-sand-300"></div>
+  </div>
+
+</main>
+
+<!-- sea:footer · static — edit partials/footer.html, then: node tools/sync-partials.js -->
+<footer class="bg-ink text-white">
+
+  <!-- ---------- brand + the familia letter ---------- -->
+  <div class="border-b border-white/10">
+    <div class="mx-auto grid max-w-8xl gap-10 px-5 py-14 sm:px-6 lg:grid-cols-[1.1fr_1fr] lg:gap-16 lg:px-8 lg:py-20">
+      <div>
+        <img src="assets/logo/logo-light.png" alt="Sea Familia" width="120" height="118"
+             class="h-24 w-auto opacity-95" loading="lazy">
+        <p class="mt-6 max-w-md font-display text-2xl leading-snug text-white/90 sm:text-3xl">
+          Four boats, one family, and the eastern half of Indonesia.
+        </p>
+        <p class="mt-4 max-w-md text-sm leading-relaxed text-white/60">
+          We started with one phinisi built in Bira and a loan nobody sensible would have given us.
+          The boats have multiplied. The crew list has barely changed.
+        </p>
+      </div>
+
+      <div x-data="seaNewsletter()">
+        <h2 class="font-mark text-[11px] uppercase tracking-[0.2em] text-white/50">The familia letter</h2>
+        <p class="mt-3 text-sm leading-relaxed text-white/75">
+          Once a month: where the boats are, what the reef is doing, and the occasional cabin that
+          has opened up. No countdown timers.
+        </p>
+        <form @submit.prevent="submit()" novalidate class="mt-5">
+          <div x-show="!sent" class="flex flex-col gap-3 sm:flex-row">
+            <label class="flex-1">
+              <span class="sr-only">Email address</span>
+              <input x-model="email" type="email" required placeholder="you@example.com"
+                     :aria-invalid="error ? 'true' : 'false'"
+                     class="h-12 w-full rounded-full border-white/20 bg-white/5 px-5 text-white placeholder:text-white/40 focus:border-mist focus:ring-2 focus:ring-mist/40">
+            </label>
+            <button type="submit" :disabled="busy"
+                    class="h-12 shrink-0 rounded-full bg-white px-6 font-mark text-[12px] uppercase tracking-[0.16em] text-ink-700 transition hover:bg-sand disabled:opacity-60">
+              <span x-show="!busy">Subscribe</span>
+              <span x-show="busy" x-cloak>Sending…</span>
+            </button>
+          </div>
+          <p x-show="error" x-cloak x-text="error" role="alert" class="mt-2 text-sm text-flame-300"></p>
+          <div x-show="sent" x-cloak class="flex items-start gap-3 rounded-2xl bg-white/5 p-4">
+            <span class="mt-0.5 text-mist-300">
+              <span class="icon icon-check h-5 w-5" aria-hidden="true"></span>
+            </span>
+            <p class="text-sm leading-relaxed text-white/85">
+              You are on the list. The next letter goes out at the start of the month — until then, nothing.
+            </p>
+          </div>
+          <p x-show="!sent" class="mt-3 text-xs leading-relaxed text-white/45">
+            We keep your address on our own server and never pass it on. Unsubscribe is one click, in every letter.
+          </p>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- ---------- link columns ---------- -->
+  <div class="mx-auto max-w-8xl px-5 py-12 sm:px-6 lg:px-8">
+    <div class="grid grid-cols-2 gap-8 sm:grid-cols-4">
+
+      <div>
+        <h3 class="font-mark text-[11px] uppercase tracking-[0.2em] text-white/50">Passages</h3>
+        <ul class="mt-4 space-y-2.5">
+          <li><a href="destinations.html?length=short" class="text-sm text-white/80 transition hover:text-white">3 – 5 nights</a></li>
+          <li><a href="destinations.html?length=classic" class="text-sm text-white/80 transition hover:text-white">6 – 8 nights</a></li>
+          <li><a href="destinations.html?length=long" class="text-sm text-white/80 transition hover:text-white">9 – 14 nights</a></li>
+          <li><a href="destinations.html" class="text-sm text-white/80 transition hover:text-white">All itineraries</a></li>
+          <li><a href="departures.html" class="text-sm text-white/80 transition hover:text-white">Departure calendar</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h3 class="font-mark text-[11px] uppercase tracking-[0.2em] text-white/50">Waters</h3>
+        <ul class="mt-4 space-y-2.5">
+          <li><a href="destination.html?slug=komodo" class="text-sm text-white/80 transition hover:text-white">Komodo</a></li>
+          <li><a href="destination.html?slug=raja-ampat" class="text-sm text-white/80 transition hover:text-white">Raja Ampat</a></li>
+          <li><a href="destination.html?slug=banda" class="text-sm text-white/80 transition hover:text-white">Banda Sea</a></li>
+          <li><a href="destination.html?slug=alor" class="text-sm text-white/80 transition hover:text-white">Alor &amp; Solor</a></li>
+          <li><a href="destination.html?slug=triton" class="text-sm text-white/80 transition hover:text-white">Triton Bay</a></li>
+          <li><a href="destination.html?slug=wakatobi" class="text-sm text-white/80 transition hover:text-white">Wakatobi</a></li>
+          <li><a href="destinations.html" class="text-sm text-white/80 transition hover:text-white">All waters</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h3 class="font-mark text-[11px] uppercase tracking-[0.2em] text-white/50">The familia</h3>
+        <ul class="mt-4 space-y-2.5">
+          <li><a href="our-story.html" class="text-sm text-white/80 transition hover:text-white">Our story</a></li>
+          <li><a href="our-story.html#familia" class="text-sm text-white/80 transition hover:text-white">Meet the familia</a></li>
+          <li><a href="our-story.html#sustainability" class="text-sm text-white/80 transition hover:text-white">Sustainability</a></li>
+          <li><a href="journal.html" class="text-sm text-white/80 transition hover:text-white">Journal</a></li>
+          <li><a href="partners.html" class="text-sm text-white/80 transition hover:text-white">Travel agents</a></li>
+          <li><a href="contact.html" class="text-sm text-white/80 transition hover:text-white">Contact</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h3 class="font-mark text-[11px] uppercase tracking-[0.2em] text-white/50">Private charter</h3>
+        <ul class="mt-4 space-y-2.5">
+          <li><a href="charter.html" class="text-sm text-white/80 transition hover:text-white">How charter works</a></li>
+          <li><a href="charter.html?step=2" class="text-sm text-white/80 transition hover:text-white">Request a charter</a></li>
+          <li><a href="boats.html" class="text-sm text-white/80 transition hover:text-white">The fleet</a></li>
+          <li><a href="boat.html?slug=familia-satu" class="text-sm text-white/80 transition hover:text-white">Familia Satu</a></li>
+          <li><a href="boat.html?slug=nusa-ombak" class="text-sm text-white/80 transition hover:text-white">Nusa Ombak</a></li>
+          <li><a href="faq.html" class="text-sm text-white/80 transition hover:text-white">Frequent questions</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ---------- legal bar ---------- -->
+  <div class="border-t border-white/10">
+    <div class="mx-auto flex max-w-8xl flex-col gap-4 px-5 py-6 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:px-8">
+      <p class="font-mark text-[11px] uppercase tracking-[0.16em] text-white/45">
+        © 2026 Sea Familia · PT Keluarga Laut Nusantara · Labuan Bajo &amp; Bira
+      </p>
+      <nav aria-label="Legal" class="flex flex-wrap items-center gap-x-5 gap-y-2">
+        <a href="policies.html#privacy" class="font-mark text-[11px] uppercase tracking-[0.16em] text-white/60 transition hover:text-white">Privacy</a>
+        <a href="policies.html#terms" class="font-mark text-[11px] uppercase tracking-[0.16em] text-white/60 transition hover:text-white">Terms</a>
+        <a href="policies.html#cancellation" class="font-mark text-[11px] uppercase tracking-[0.16em] text-white/60 transition hover:text-white">Cancellation</a>
+        <a href="policies.html#safety" class="font-mark text-[11px] uppercase tracking-[0.16em] text-white/60 transition hover:text-white">Safety</a>
+        <a href="contact.html" class="font-mark text-[11px] uppercase tracking-[0.16em] text-white/60 transition hover:text-white">Contact</a>
+      </nav>
+    </div>
+  </div>
+</footer>
+<!-- /sea:footer -->
+
+<script>
+/* ==========================================================================
+   Reserve a cabin — seven screens, one state object.
+
+   Steps: 1 search · 2 trip summary · 3 cabin · 4 guests · 5 details
+          6 review · 7 confirmation
+
+   Money: every figure is USD internally and rendered through SEA.fmt.money,
+   so a currency switch mid-funnel re-renders without touching the maths.
+   ======================================================================== */
+function reserveFlow() {
+  return {
+    step: 1,
+    furthest: 1,
+    steps: [
+      { key: 'search', label: 'Search' },
+      { key: 'summary', label: 'Trip summary' },
+      { key: 'cabin', label: 'Cabin' },
+      { key: 'guests', label: 'Guests' },
+      { key: 'details', label: 'Your details' },
+      { key: 'review', label: 'Review' },
+      { key: 'done', label: 'Confirmed' },
+    ],
+
+    // step 1
+    searchState: 'ready',
+    search: { water: '', month: '', length: '' },
+    results: [],
+    months: [],
+
+    // selection
+    dep: null, trip: null, boat: null, water: null, endDate: '',
+    cabins: [], cabin: null,
+
+    // step 4
+    guests: { adults: 2, teens: 0, children: 0 },
+    // `one` is the singular used on a guest's own form — "Children" would read wrong
+    guestBands: [
+      { key: 'adults', label: 'Adults', one: 'Adult', note: '16 and over', min: 1, rate: 1 },
+      { key: 'teens', label: 'Teenagers', one: 'Teenager', note: '12 – 15', min: 0, rate: 0.9 },
+      { key: 'children', label: 'Children', one: 'Child', note: '4 – 11', min: 0, rate: 0.75 },
+    ],
+    extras: [
+      { key: 'gear', label: 'Full dive equipment rental', note: 'BCD, regulator, wetsuit, computer', price: 180, perPerson: true },
+      { key: 'guide', label: 'Private dive guide', note: 'Just your group, every dive', price: 520, perPerson: false },
+      { key: 'massage', label: 'Massage package, four sessions', note: 'With the crew therapists', price: 240, perPerson: true },
+      { key: 'hotel', label: 'Night before, in the gateway port', note: 'Hotel and transfer, twin share', price: 160, perPerson: true },
+    ],
+    chosenExtras: [],
+
+    // step 5
+    guestList: [],
+    lead: { email: '', phone: '', notes: '' },
+
+    // step 6
+    voucher: { code: '', applied: '', rate: 0, error: '' },
+    consent: { terms: false, insurance: false, newsletter: false },
+    errors: {},
+    busy: false,
+    submitError: false,
+    reference: '',
+
+    sheet: false,
+
+    /* ---------------------------------------------------------------- init */
+    init() {
+      this.months = SEA.departureMonths();
+
+      try {
+        const saved = sessionStorage.getItem('sf.reserve');
+        if (saved) {
+          const s = JSON.parse(saved);
+          Object.assign(this.guests, s.guests || {});
+          Object.assign(this.lead, s.lead || {});
+          this.chosenExtras = s.chosenExtras || [];
+          if (s.depId) this.selectDeparture(s.depId, s.cabinCode);
+        }
+      } catch (e) {}
+
+      const q = SEA.query();
+      if (q.dep) this.selectDeparture(q.dep, q.cabin);
+      if (q.guests) this.guests.adults = Math.max(1, Math.min(4, Number(q.guests) || 2));
+
+      this.runSearch();
+      this.syncGuestList();
+
+      const wanted = Math.max(1, Math.min(6, Number(q.step) || 1));
+      this.step = Math.min(wanted, this.firstIncomplete());
+      this.furthest = this.step;
+
+      this.$watch('guests', () => this.syncGuestList());
+      this.$watch('step', () => this.persist());
+    },
+
+    persist() {
+      try {
+        sessionStorage.setItem('sf.reserve', JSON.stringify({
+          depId: this.dep ? this.dep.id : '',
+          cabinCode: this.cabin ? this.cabin.code : '',
+          guests: this.guests,
+          lead: this.lead,
+          chosenExtras: this.chosenExtras,
+        }));
+      } catch (e) {}
+    },
+
+    /* --------------------------------------------------------- step 1 */
+    runSearch() {
+      this.searchState = 'loading';
+      SEA.load(SEA.departures, { delay: 480 })
+        .then(() => {
+          this.results = SEA.emptied(
+            SEA.filterDepartures(Object.assign({ available: true }, this.search))
+          ).slice(0, 8);
+          this.searchState = 'ready';
+        })
+        .catch(() => { this.searchState = 'error'; });
+    },
+    clearSearch() {
+      this.search = { water: '', month: '', length: '' };
+      this.runSearch();
+    },
+    chooseDeparture(id) {
+      this.selectDeparture(id);
+      this.goto(2);
+    },
+
+    selectDeparture(id, cabinCode) {
+      const d = SEA.departure(id);
+      if (!d) return;
+      this.dep = d;
+      this.trip = SEA.trip(d.trip);
+      this.boat = SEA.boat(d.boat);
+      this.water = SEA.water(this.trip.water);
+      this.endDate = SEA.addDays(d.start, d.nights);
+
+      /* Cabin inventory for this date. In production this is the departure's own
+         availability payload; here it is derived from the boat's grades so the
+         numbers can never exceed d.cabinsLeft. */
+      const base = Math.min.apply(null, this.boat.cabinTypes.map(c => c.price));
+      let remaining = d.cabinsLeft;
+      this.cabins = this.boat.cabinTypes.map((c, i) => {
+        const isLast = i === this.boat.cabinTypes.length - 1;
+        const take = isLast ? remaining : Math.min(c.left, Math.max(0, remaining - 1));
+        remaining -= take;
+        return Object.assign({}, c, {
+          left: Math.max(0, take),
+          price: Math.round((d.price + (c.price - base)) / 10) * 10,
+        });
+      });
+
+      const wanted = cabinCode && this.cabins.find(c => c.code === cabinCode && c.left > 0);
+      this.cabin = wanted || null;
+      this.persist();
+    },
+
+    chooseCabin(code) {
+      const c = this.cabins.find(x => x.code === code);
+      if (!c || c.left <= 0) return;
+      this.cabin = c;
+      // trim the party if it no longer fits the new grade
+      while (this.totalGuests > c.maxOccupancy) {
+        if (this.guests.children > 0) this.guests.children--;
+        else if (this.guests.teens > 0) this.guests.teens--;
+        else if (this.guests.adults > 1) this.guests.adults--;
+        else break;
+      }
+      this.persist();
+    },
+
+    /* --------------------------------------------------------- step 4 */
+    get totalGuests() {
+      return this.guests.adults + this.guests.teens + this.guests.children;
+    },
+    get maxOccupancy() {
+      return this.cabin ? this.cabin.maxOccupancy : 2;
+    },
+    get occupancyOk() {
+      return this.totalGuests >= 1 && this.totalGuests <= this.maxOccupancy;
+    },
+    bump(key, delta) {
+      const band = this.guestBands.find(b => b.key === key);
+      const next = this.guests[key] + delta;
+      if (next < band.min) return;
+      if (delta > 0 && this.totalGuests >= this.maxOccupancy) return;
+      this.guests[key] = next;
+      this.persist();
+    },
+
+    /* --------------------------------------------------------- step 5 */
+    syncGuestList() {
+      const wanted = [];
+      this.guestBands.forEach(b => {
+        for (let i = 0; i < this.guests[b.key]; i++) wanted.push(b.one);
+      });
+      const next = wanted.map((band, i) => {
+        const existing = this.guestList[i];
+        return existing
+          ? Object.assign(existing, { band })
+          : { name: '', band, nationality: '', diving: 'none', certNumber: '', dives: 0, dietary: '' };
+      });
+      this.guestList = next;
+    },
+    divingLabel(v) {
+      return {
+        none: 'Snorkelling', learning: 'Learning on board', 'open-water': 'Open Water',
+        advanced: 'Advanced', rescue: 'Rescue+', pro: 'Pro',
+      }[v] || v;
+    },
+
+    /* ---------------------------------------------------------- pricing */
+    get priceLines() {
+      if (!this.cabin) return [];
+      const lines = [];
+      this.guestBands.forEach(b => {
+        const n = this.guests[b.key];
+        if (!n) return;
+        const unit = Math.round(this.cabin.price * b.rate);
+        lines.push({
+          label: b.label + ' × ' + n,
+          detail: this.cabin.name + ' · ' + SEA.fmt.money(unit) + ' each' +
+            (b.rate < 1 ? ' (' + Math.round(b.rate * 100) + '%)' : ''),
+          amount: unit * n,
+        });
+      });
+      this.chosenExtras.forEach(key => {
+        const x = this.extras.find(e => e.key === key);
+        if (!x) return;
+        lines.push({
+          label: x.label,
+          detail: x.perPerson ? SEA.fmt.money(x.price) + ' × ' + this.totalGuests : 'One charge for the group',
+          amount: x.perPerson ? x.price * this.totalGuests : x.price,
+        });
+      });
+      return lines;
+    },
+    get cabinSubtotal() {
+      if (!this.cabin) return 0;
+      return this.guestBands.reduce((sum, b) =>
+        sum + Math.round(this.cabin.price * b.rate) * this.guests[b.key], 0);
+    },
+    get subtotal() {
+      return this.priceLines.reduce((s, l) => s + l.amount, 0);
+    },
+    get discount() {
+      // vouchers apply to the cabin fare, never to third-party extras
+      return this.voucher.rate ? Math.round(this.cabinSubtotal * this.voucher.rate) : 0;
+    },
+    get total() { return Math.max(0, this.subtotal - this.discount); },
+    get deposit() {
+      return this.dep ? Math.round(this.total * this.dep.deposit) : 0;
+    },
+
+    applyVoucher() {
+      const code = (this.voucher.code || '').trim().toUpperCase();
+      this.voucher.error = '';
+      if (!code) { this.voucher.error = 'Type the code first.'; return; }
+      const known = { FAMILIA10: 0.10, RETURNING: 0.05, AGENT15: 0.15 };
+      if (!known[code]) {
+        this.voucher.error = 'We do not recognise that code. Check it with whoever gave it to you — ' +
+          'agent codes are case-insensitive but do expire.';
+        return;
+      }
+      this.voucher.applied = code;
+      this.voucher.rate = known[code];
+      SEA.toast({
+        title: 'Voucher applied',
+        body: Math.round(known[code] * 100) + '% off the cabin fare. Extras are unaffected.',
+        variant: 'success',
+      });
+    },
+    removeVoucher() {
+      this.voucher = { code: '', applied: '', rate: 0, error: '' };
+    },
+
+    /* -------------------------------------------------------- navigation */
+    firstIncomplete() {
+      if (!this.dep) return 1;
+      if (!this.cabin) return 3;
+      if (!this.occupancyOk) return 4;
+      if (!this.leadComplete) return 5;
+      return 6;
+    },
+    get leadComplete() {
+      return !!(this.guestList[0] && this.guestList[0].name.trim() && this.lead.email.trim() && this.lead.phone.trim());
+    },
+
+    get canContinue() {
+      if (this.step === 1) return !!this.dep;
+      if (this.step === 2) return !!this.dep;
+      if (this.step === 3) return !!this.cabin;
+      if (this.step === 4) return this.occupancyOk;
+      if (this.step === 5) return true; // validated on submit so errors can be shown
+      return true;
+    },
+
+    get footerHint() {
+      if (this.step === 1) return this.dep ? 'Date chosen' : this.results.length + ' dates with cabins free';
+      if (this.step === 3) return this.cabin ? this.cabin.name : 'Choose a cabin grade';
+      if (this.step === 4) return this.occupancyOk ? 'Fits the cabin' : 'Too many for this cabin';
+      if (this.step === 5) return this.leadComplete ? 'Lead guest complete' : 'Lead guest details needed';
+      if (this.step === 6) return 'Nothing is charged yet';
+      return 'Your voyage';
+    },
+
+    validate() {
+      this.errors = {};
+      if (this.step === 5) {
+        const lead = this.guestList[0];
+        if (!lead || !lead.name.trim()) this.errors.name0 = 'We need the lead guest’s name as it appears in the passport.';
+        if (!this.lead.email.trim()) this.errors.email = 'Where should the confirmation go?';
+        else if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(this.lead.email.trim())) {
+          this.errors.email = 'That address is missing something — check for a typo.';
+        }
+        if (!this.lead.phone.trim()) this.errors.phone = 'A number the crew can reach you on if a flight goes wrong.';
+      }
+      if (this.step === 6) {
+        if (!this.consent.terms) this.errors.terms = 'Please confirm you have read the booking terms.';
+        if (!this.consent.insurance) this.errors.insurance = 'Insurance covering evacuation is a condition of sailing with us.';
+      }
+      return Object.keys(this.errors).length === 0;
+    },
+
+    next() {
+      if (!this.canContinue) return;
+      if (!this.validate()) {
+        this.$nextTick(() => {
+          const first = document.querySelector('[aria-invalid="true"]');
+          if (first) { first.focus(); first.scrollIntoView({ block: 'center', behavior: 'smooth' }); }
+        });
+        return;
+      }
+      this.goto(this.step + 1);
+    },
+    back() { this.errors = {}; this.goto(this.step - 1); },
+
+    goto(n) {
+      const target = Math.max(1, Math.min(7, n));
+      if (target > this.step && target > this.firstIncomplete()) return;
+      this.step = target;
+      this.furthest = Math.max(this.furthest, target);
+      this.sheet = false;
+      if (target < 7) {
+        window.history.replaceState({}, '', SEA.href('reserve.html', {
+          dep: this.dep ? this.dep.id : null,
+          cabin: this.cabin ? this.cabin.code : null,
+          step: target,
+        }));
+      }
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    },
+
+    /* ------------------------------------------------------------ submit */
+    submit() {
+      if (!this.validate()) {
+        this.$nextTick(() => {
+          const first = document.querySelector('[aria-invalid="true"]');
+          if (first) first.scrollIntoView({ block: 'center', behavior: 'smooth' });
+        });
+        return;
+      }
+      this.busy = true;
+      this.submitError = false;
+
+      // Stand-in for POST /reservations. ?state=error forces the failure path.
+      new Promise((resolve, reject) => {
+        setTimeout(() => SEA.forcedState() === 'error' ? reject(new Error('forced')) : resolve(), 1100);
+      })
+        .then(() => {
+          this.reference = SEA.fmt.reference(
+            this.dep.start.replace(/-/g, '') * 1 + this.totalGuests * 31 + this.cabin.code.length
+          );
+          this.busy = false;
+          this.step = 7;
+          this.sheet = false;
+          try { sessionStorage.removeItem('sf.reserve'); } catch (e) {}
+          window.history.replaceState({}, '', SEA.href('reserve.html', { ref: this.reference }));
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+
+          SEA.toast({
+            title: 'Cabin reserved — ' + this.reference,
+            body: 'Held for 72 hours. The deposit link follows within one working day.',
+            variant: 'success', timeout: 10000,
+            action: { label: 'Print confirmation', href: '#main' },
+          });
+        })
+        .catch(() => {
+          this.busy = false;
+          this.submitError = true;
+          SEA.toast({
+            title: 'The reservation did not go through',
+            body: 'Nothing was charged and your answers are intact. Try again, or message the office.',
+            variant: 'error', timeout: 10000,
+          });
+        });
+    },
+
+    /* ---------------------------------------------------- summary panel
+       One renderer, two mounts (desktop rail + mobile sheet). Interactive
+       bits dispatch a bubbling event because Alpine does not process
+       directives inside x-html.
+       ------------------------------------------------------------------ */
+    summaryHTML(opts) {
+      const o = opts || {};
+      const esc = SEA.escapeHTML;
+      if (!this.dep) return '';
+      const gotoBtn = (n, label) =>
+        '<button type="button" onclick="this.dispatchEvent(new CustomEvent(\'sf-goto\',{bubbles:true,detail:' + n + '}))" ' +
+        'class="font-mark text-[10px] uppercase tracking-[0.14em] text-flame-600 underline underline-offset-4">' +
+        esc(label) + '</button>';
+
+      const row = (dt, dd) =>
+        '<div class="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-0.5 border-b border-sand-200 py-2 last:border-0">' +
+        '<dt class="text-xs text-ink/55">' + esc(dt) + '</dt>' +
+        '<dd class="text-right text-sm text-ink-700">' + dd + '</dd></div>';
+
+      const money = (v) => '<span class="tnum" data-usd="' + v + '">' + SEA.fmt.money(v) + '</span>';
+
+      let out = '';
+      if (!o.bare) {
+        out += '<div class="relative h-28">' +
+          '<div class="ph ph-' + this.trip.ph + ' absolute inset-0">' +
+            '<img class="img-slot" src="' + SEA.photoPath.trip(this.trip.slug) + '" alt="" loading="lazy" onerror="this.style.display=\'none\'">' +
+          '</div>' +
+          '<div class="scrim-soft absolute inset-0"></div>' +
+          '<div class="absolute inset-x-5 bottom-3">' +
+            '<p class="font-mark text-[10px] uppercase tracking-[0.16em] text-white/80">' + esc(this.water.short) + '</p>' +
+            '<p class="font-display text-lg leading-tight text-white">' + esc(this.trip.title) + '</p>' +
+          '</div></div>';
+      }
+
+      out += '<div class="p-5">' +
+        (o.bare ? '' : '<h2 class="font-mark text-[11px] uppercase tracking-[0.18em] text-flame">Your voyage</h2>') +
+        '<dl class="mt-3">' +
+          row('Dates', esc(SEA.fmt.dateRange(this.dep.start, this.dep.nights))) +
+          row('Length', esc(SEA.fmt.nights(this.dep.nights))) +
+          row('Boat', esc(this.boat.name)) +
+          row('Cabin', (this.cabin
+            ? esc(this.cabin.name) + ' <span class="block text-xs text-ink/50">' + esc(this.cabin.beds) + '</span>'
+            : '<span class="text-ink/45">Not chosen</span> ' + gotoBtn(3, 'Choose'))) +
+          row('Guests', (this.totalGuests
+            ? esc(SEA.fmt.guests(this.totalGuests)) + ' ' + gotoBtn(4, 'Edit')
+            : '<span class="text-ink/45">—</span>')) +
+        '</dl>';
+
+      if (this.cabin) {
+        out += '<div class="mt-4 border-t border-sand-300 pt-4">' +
+          '<dl class="space-y-1.5">';
+        this.priceLines.forEach(l => {
+          out += '<div class="flex items-baseline justify-between gap-3">' +
+            '<dt class="text-xs text-ink/60">' + esc(l.label) + '</dt>' +
+            '<dd class="text-sm text-ink-700">' + money(l.amount) + '</dd></div>';
+        });
+        if (this.discount > 0) {
+          out += '<div class="flex items-baseline justify-between gap-3">' +
+            '<dt class="text-xs text-flame-600">Voucher ' + esc(this.voucher.applied) + '</dt>' +
+            '<dd class="text-sm text-flame-600">−' + money(this.discount) + '</dd></div>';
+        }
+        out += '</dl>' +
+          '<div class="mt-3 flex items-baseline justify-between gap-3 border-t border-ink/15 pt-3">' +
+            '<span class="font-mark text-[10px] uppercase tracking-[0.14em] text-ink-700">Total</span>' +
+            '<span class="font-display text-xl text-ink-700">' + money(this.total) + '</span></div>' +
+          '<div class="mt-1.5 flex items-baseline justify-between gap-3">' +
+            '<span class="text-xs text-ink/60">Deposit to reserve</span>' +
+            '<span class="text-sm text-deep-700">' + money(this.deposit) + '</span></div>' +
+          '<p class="mt-3 rounded-xl bg-sand p-3 text-[11px] leading-relaxed text-ink/60">' +
+            'Nothing is charged here. Reserving holds the cabin for 72 hours while the office ' +
+            'confirms it and sends the deposit link.</p>' +
+        '</div>';
+      }
+
+      out += '</div>';
+      return out;
+    },
+  };
+}
+</script>
+<script src="assets/js/layout.js"></script>
+</body>
+</html>

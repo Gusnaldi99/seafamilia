@@ -1,0 +1,694 @@
+<!doctype html>
+<html lang="en" class="scroll-smooth">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Destinations — Sea Familia</title>
+<meta name="description" content="Eight waters across eastern Indonesia — Komodo, Raja Ampat, the Banda Sea, Alor, Triton Bay, Wakatobi, Cenderawasih and Halmahera — and every itinerary we sail in them.">
+<link rel="icon" href="assets/media/favicon.svg" type="image/svg+xml">
+<!-- sea:assets · static — edit partials/assets.html, then: node tools/sync-partials.js -->
+<link rel="preload" href="assets/fonts/fraunces-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/fonts/jost-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="assets/css/fonts.css">
+<link rel="stylesheet" href="assets/css/tailwind.css">
+<link rel="stylesheet" href="assets/css/app.css">
+<script src="assets/js/data.js"></script>
+<script defer src="assets/js/vendor/alpine-3.14.9.min.js"></script>
+<!-- /sea:assets -->
+</head>
+<body class="bg-white font-sans text-ink antialiased">
+<!-- sea:header · static — edit partials/header.html, then: node tools/sync-partials.js -->
+<a href="#main" class="skip-link rounded-full bg-ink px-4 py-2 font-mark text-xs uppercase tracking-[0.16em] text-white">Skip to content</a>
+
+<!-- class="contents": this wrapper exists only to give the chrome one Alpine scope.
+     Without display:contents it generates a ~116px box, and a position:sticky child is
+     constrained to its containing block — so the header would unstick almost immediately.
+     display:contents removes the box, making <body> the header's containing block. -->
+<div class="contents" x-data="seaChrome()" @keydown.escape.window="closeAll()">
+
+  <!-- ---------- utility bar: currency, language, WhatsApp ---------- -->
+  <div class="hidden bg-ink text-white/80 lg:block">
+    <div class="mx-auto flex h-9 max-w-8xl items-center justify-between px-6 lg:px-8">
+      <p class="font-mark text-[11px] uppercase tracking-[0.18em]">
+        Open trips &amp; private charter · Komodo to Raja Ampat
+      </p>
+      <div class="flex items-center gap-1">
+        <label class="sr-only" for="sf-currency" data-i18n="lbl.currency">Currency</label>
+        <select id="sf-currency" x-model="currency" @change="setCurrency($event.target.value)"
+                class="cursor-pointer border-0 bg-transparent py-0 pl-2 pr-6 font-mark text-[11px] uppercase tracking-[0.16em] text-white/80 hover:text-white focus:ring-0 focus:ring-offset-0">
+          <option value="USD">USD</option>
+          <option value="IDR">IDR</option>
+          <option value="EUR">EUR</option>
+          <option value="AUD">AUD</option>
+          <option value="SGD">SGD</option>
+        </select>
+        <span class="h-3 w-px bg-white/20"></span>
+        <label class="sr-only" for="sf-lang" data-i18n="lbl.language">Language</label>
+        <select id="sf-lang" x-model="lang" @change="setLang($event.target.value)"
+                class="cursor-pointer border-0 bg-transparent py-0 pl-2 pr-6 font-mark text-[11px] uppercase tracking-[0.16em] text-white/80 hover:text-white focus:ring-0 focus:ring-offset-0">
+          <option value="en">EN</option>
+          <option value="id">ID</option>
+        </select>
+        <span class="h-3 w-px bg-white/20"></span>
+        <a href="https://wa.me/6281100000000" target="_blank" rel="noopener"
+           class="flex items-center gap-1.5 px-2 font-mark text-[11px] uppercase tracking-[0.16em] hover:text-white">
+          <span class="icon icon-whatsapp h-3.5 w-3.5" aria-hidden="true"></span>
+          <span>WhatsApp</span>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ---------- main header ----------
+       bg-white/[0.92] is deliberately an arbitrary value, not bg-white/92: Tailwind's
+       opacity scale stops at 90 then 95, so /92 produced no rule at all — the header
+       had no background until the compact state took over past 72px of scroll. The
+       Play CDN failed the same way, silently; compiling is what surfaced it. -->
+  <header class="sticky top-0 z-40 border-b border-ink/10 bg-white/[0.92] backdrop-blur-md">
+    <div class="mx-auto max-w-8xl px-5 sm:px-6 lg:px-8">
+      <!-- sf-headbar / sf-mark are hooks for the compact-on-scroll state. layout.js sets
+           data-compact on the header element; the heights live in app.css so the base
+           sizes stay plain Tailwind and still apply without JavaScript. -->
+      <div class="sf-headbar flex h-16 items-center justify-between gap-3 lg:h-20">
+
+        <!-- logo: emblem redrawn from assets/logo/logo.png, wordmark typeset beside it -->
+        <a href="index.html" class="flex shrink-0 items-center gap-3 text-ink-700">
+          <span class="sf-mark icon icon-mark h-9 w-auto lg:h-11" aria-hidden="true"></span>
+          <span class="flex flex-col leading-none">
+            <span class="font-mark text-[15px] font-medium uppercase tracking-[0.3em] lg:text-[17px]">Sea</span>
+            <span class="font-mark text-[15px] font-medium uppercase tracking-[0.3em] text-flame lg:text-[17px]">Familia</span>
+          </span>
+          <span class="sr-only">Sea Familia — home</span>
+        </a>
+
+        <!-- primary nav. The active item is marked with aria-current="page" by
+             tools/sync-partials.js; the colour and underline come from app.css. -->
+        <nav class="hidden items-center gap-0.5 lg:flex" aria-label="Primary">
+          <a href="experiences.html" data-nav="experiences" class="relative rounded-full px-3 py-2 font-mark text-[13px] uppercase tracking-[0.14em] text-ink-700 transition hover:text-flame-600"><span data-i18n="nav.experiences">Experiences</span></a>
+          <a href="destinations.html" data-nav="destinations" aria-current="page" class="relative rounded-full px-3 py-2 font-mark text-[13px] uppercase tracking-[0.14em] text-ink-700 transition hover:text-flame-600"><span data-i18n="nav.destinations">Destinations</span></a>
+          <a href="boats.html" data-nav="boats" class="relative rounded-full px-3 py-2 font-mark text-[13px] uppercase tracking-[0.14em] text-ink-700 transition hover:text-flame-600"><span data-i18n="nav.boats">Boats</span></a>
+          <a href="departures.html" data-nav="departures" class="relative rounded-full px-3 py-2 font-mark text-[13px] uppercase tracking-[0.14em] text-ink-700 transition hover:text-flame-600"><span data-i18n="nav.departures">Departures</span></a>
+          <a href="our-story.html" data-nav="story" class="relative rounded-full px-3 py-2 font-mark text-[13px] uppercase tracking-[0.14em] text-ink-700 transition hover:text-flame-600"><span data-i18n="nav.story">Our Story</span></a>
+          <a href="journal.html" data-nav="journal" class="relative rounded-full px-3 py-2 font-mark text-[13px] uppercase tracking-[0.14em] text-ink-700 transition hover:text-flame-600"><span data-i18n="nav.journal">Journal</span></a>
+        </nav>
+
+        <div class="flex items-center gap-1">
+          <button type="button" @click="toggle('search')" :aria-expanded="open === 'search'"
+                  aria-controls="sf-search-panel" aria-label="Search" data-i18n-aria="nav.search"
+                  class="grid h-10 w-10 place-items-center rounded-full text-ink-700 transition hover:bg-sand">
+            <span class="icon icon-magnifier h-5 w-5" aria-hidden="true"></span>
+          </button>
+
+          <button type="button" @click="toggle('signin')"
+                  class="hidden h-10 items-center gap-2 rounded-full px-3 font-mark text-[12px] uppercase tracking-[0.14em] text-ink-700 transition hover:bg-sand lg:flex">
+            <span class="icon icon-signin h-4 w-4" aria-hidden="true"></span>
+            <span data-i18n="nav.signin">Sign in</span>
+          </button>
+
+          <a href="discover.html"
+             class="hidden h-10 items-center gap-2 rounded-full bg-flame px-4 font-mark text-[12px] uppercase tracking-[0.14em] text-white transition hover:bg-flame-600 lg:flex">
+            Plan your trip
+            <span class="icon icon-chevron-right h-3.5 w-3.5" aria-hidden="true"></span>
+          </a>
+
+          <button type="button" @click="toggle('menu')" :aria-expanded="open === 'menu'"
+                  aria-controls="sf-mobile-panel" aria-label="Menu" data-i18n-aria="nav.menu"
+                  class="grid h-10 w-10 place-items-center rounded-full text-ink-700 transition hover:bg-sand lg:hidden">
+            <span class="icon icon-menu h-5 w-5" aria-hidden="true"></span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ---------- search panel ---------- -->
+    <div id="sf-search-panel" x-show="open === 'search'" x-cloak x-transition.opacity.duration.150ms
+         class="absolute inset-x-0 top-full border-b border-ink/10 bg-white shadow-lift">
+      <div class="mx-auto max-w-3xl px-5 py-6 sm:px-6">
+        <div class="relative">
+          <span class="absolute left-4 top-1/2 -translate-y-1/2 text-mist-700">
+            <span class="icon icon-magnifier h-5 w-5" aria-hidden="true"></span>
+          </span>
+          <input x-ref="searchInput" x-model="term" @input.debounce.180ms="runSearch()" type="search"
+                 placeholder="Reefs, boats, an island, a month…"
+                 aria-label="Search" data-i18n-aria="nav.search"
+                 class="h-14 w-full rounded-full border-sand-300 bg-sand pl-12 pr-4 font-sans text-base text-ink-700 placeholder:text-ink/40 focus:border-mist focus:ring-2 focus:ring-mist/40">
+        </div>
+
+        <!-- idle: suggestions -->
+        <div x-show="term.trim().length < 2" class="mt-5">
+          <p class="font-mark text-[11px] uppercase tracking-[0.18em] text-mist-700">Try</p>
+          <div class="mt-3 flex flex-wrap gap-2">
+            <button type="button" @click="term = 'Komodo'; runSearch()" class="rounded-full border border-sand-300 px-3 py-1.5 font-mark text-[11px] uppercase tracking-[0.14em] text-ink-700 transition hover:border-mist hover:bg-sand">Komodo</button>
+            <button type="button" @click="term = 'Raja Ampat'; runSearch()" class="rounded-full border border-sand-300 px-3 py-1.5 font-mark text-[11px] uppercase tracking-[0.14em] text-ink-700 transition hover:border-mist hover:bg-sand">Raja Ampat</button>
+            <button type="button" @click="term = 'Banda Sea'; runSearch()" class="rounded-full border border-sand-300 px-3 py-1.5 font-mark text-[11px] uppercase tracking-[0.14em] text-ink-700 transition hover:border-mist hover:bg-sand">Banda Sea</button>
+            <button type="button" @click="term = 'family'; runSearch()" class="rounded-full border border-sand-300 px-3 py-1.5 font-mark text-[11px] uppercase tracking-[0.14em] text-ink-700 transition hover:border-mist hover:bg-sand">family</button>
+            <button type="button" @click="term = 'whale shark'; runSearch()" class="rounded-full border border-sand-300 px-3 py-1.5 font-mark text-[11px] uppercase tracking-[0.14em] text-ink-700 transition hover:border-mist hover:bg-sand">whale shark</button>
+            <button type="button" @click="term = 'private charter'; runSearch()" class="rounded-full border border-sand-300 px-3 py-1.5 font-mark text-[11px] uppercase tracking-[0.14em] text-ink-700 transition hover:border-mist hover:bg-sand">private charter</button>
+          </div>
+        </div>
+
+        <!-- results, or the empty search state -->
+        <div x-show="term.trim().length >= 2" class="mt-5 max-h-[60vh] overflow-y-auto">
+          <div x-show="results.total > 0" x-html="resultsHTML()"></div>
+          <div x-show="results.total === 0" class="py-10 text-center">
+            <p class="font-display text-xl text-ink-700">Nothing matched “<span x-text="term"></span>”</p>
+            <p class="mx-auto mt-2 max-w-sm text-sm leading-relaxed text-ink/70">
+              Try an island, a boat name or a month. Or tell us what you are after —
+              half of what we run never makes it onto a search page.
+            </p>
+            <a href="contact.html" data-i18n="cta.help"
+               class="mt-5 inline-flex h-11 items-center rounded-full bg-ink px-5 font-mark text-sm uppercase tracking-[0.12em] text-white transition hover:bg-ink-600">Talk to the familia</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ---------- mobile drawer ---------- -->
+  <div x-show="open === 'menu'" x-cloak class="fixed inset-0 z-50 lg:hidden" role="dialog" aria-modal="true" aria-label="Menu">
+    <div x-show="open === 'menu'" x-transition.opacity class="absolute inset-0 bg-ink-950/60" @click="closeAll()"></div>
+    <div id="sf-mobile-panel" x-show="open === 'menu'"
+         x-transition:enter="transition ease-swell duration-300"
+         x-transition:enter-start="translate-x-full" x-transition:enter-end="translate-x-0"
+         x-transition:leave="transition ease-in duration-200"
+         x-transition:leave-start="translate-x-0" x-transition:leave-end="translate-x-full"
+         class="absolute inset-y-0 right-0 flex w-full max-w-sm flex-col bg-ink text-white">
+      <div class="flex h-16 shrink-0 items-center justify-between px-5">
+        <span class="flex items-center gap-2.5 text-white">
+          <span class="icon icon-mark h-8 w-auto" aria-hidden="true"></span>
+          <span class="font-mark text-[13px] uppercase tracking-[0.28em]">Sea Familia</span>
+        </span>
+        <button type="button" @click="closeAll()" aria-label="Close" data-i18n-aria="nav.close"
+                class="grid h-10 w-10 place-items-center rounded-full text-white/80 transition hover:bg-white/10">
+          <span class="icon icon-cross h-5 w-5" aria-hidden="true"></span>
+        </button>
+      </div>
+
+      <div class="flex-1 overflow-y-auto px-5 pb-6">
+        <nav aria-label="Primary mobile">
+          <a href="experiences.html" data-nav="experiences" class="flex items-baseline justify-between border-b border-white/10 py-4 text-white"><span class="font-display text-3xl" data-i18n="nav.experiences">Experiences</span><span class="font-mark text-[11px] tracking-[0.2em] text-white/40">01</span></a>
+          <a href="destinations.html" data-nav="destinations" aria-current="page" class="flex items-baseline justify-between border-b border-white/10 py-4 text-white"><span class="font-display text-3xl" data-i18n="nav.destinations">Destinations</span><span class="font-mark text-[11px] tracking-[0.2em] text-white/40">02</span></a>
+          <a href="boats.html" data-nav="boats" class="flex items-baseline justify-between border-b border-white/10 py-4 text-white"><span class="font-display text-3xl" data-i18n="nav.boats">Boats</span><span class="font-mark text-[11px] tracking-[0.2em] text-white/40">03</span></a>
+          <a href="departures.html" data-nav="departures" class="flex items-baseline justify-between border-b border-white/10 py-4 text-white"><span class="font-display text-3xl" data-i18n="nav.departures">Departures</span><span class="font-mark text-[11px] tracking-[0.2em] text-white/40">04</span></a>
+          <a href="our-story.html" data-nav="story" class="flex items-baseline justify-between border-b border-white/10 py-4 text-white"><span class="font-display text-3xl" data-i18n="nav.story">Our Story</span><span class="font-mark text-[11px] tracking-[0.2em] text-white/40">05</span></a>
+          <a href="journal.html" data-nav="journal" class="flex items-baseline justify-between border-b border-white/10 py-4 text-white"><span class="font-display text-3xl" data-i18n="nav.journal">Journal</span><span class="font-mark text-[11px] tracking-[0.2em] text-white/40">06</span></a>
+        </nav>
+
+        <div class="mt-6 grid gap-2">
+          <a href="discover.html" class="flex h-12 items-center justify-center gap-2 rounded-full bg-flame font-mark text-[12px] uppercase tracking-[0.16em] text-white">
+            Plan your trip
+            <span class="icon icon-chevron-right h-3.5 w-3.5" aria-hidden="true"></span>
+          </a>
+          <a href="charter.html" data-i18n="cta.charter"
+             class="flex h-12 items-center justify-center rounded-full border border-white/25 font-mark text-[12px] uppercase tracking-[0.16em] text-white">Request a charter</a>
+          <button type="button" @click="toggle('signin')"
+                  class="flex h-12 items-center justify-center gap-2 rounded-full border border-white/25 font-mark text-[12px] uppercase tracking-[0.16em] text-white">
+            <span class="icon icon-signin h-4 w-4" aria-hidden="true"></span>
+            <span data-i18n="nav.signin">Sign in</span>
+          </button>
+        </div>
+
+        <div class="mt-6 grid grid-cols-2 gap-3 border-t border-white/10 pt-6">
+          <label class="block">
+            <span class="font-mark text-[10px] uppercase tracking-[0.18em] text-white/50" data-i18n="lbl.currency">Currency</span>
+            <select x-model="currency" @change="setCurrency($event.target.value)"
+                    class="mt-1.5 h-11 w-full rounded-xl border-white/20 bg-white/5 font-mark text-sm text-white focus:border-mist focus:ring-mist/40">
+              <option value="USD">USD</option>
+              <option value="IDR">IDR</option>
+              <option value="EUR">EUR</option>
+              <option value="AUD">AUD</option>
+              <option value="SGD">SGD</option>
+            </select>
+          </label>
+          <label class="block">
+            <span class="font-mark text-[10px] uppercase tracking-[0.18em] text-white/50" data-i18n="lbl.language">Language</span>
+            <select x-model="lang" @change="setLang($event.target.value)"
+                    class="mt-1.5 h-11 w-full rounded-xl border-white/20 bg-white/5 font-mark text-sm text-white focus:border-mist focus:ring-mist/40">
+              <option value="en">English</option>
+              <option value="id">Bahasa Indonesia</option>
+            </select>
+          </label>
+        </div>
+
+        <a href="https://wa.me/6281100000000" target="_blank" rel="noopener"
+           class="mt-4 flex items-center gap-2 font-mark text-[11px] uppercase tracking-[0.16em] text-white/70">
+          <span class="icon icon-whatsapp h-4 w-4" aria-hidden="true"></span>
+          WhatsApp the office
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ---------- sign-in modal ---------- -->
+  <div x-show="open === 'signin'" x-cloak class="fixed inset-0 z-50 grid place-items-end sm:place-items-center"
+       role="dialog" aria-modal="true" aria-labelledby="sf-signin-title">
+    <div x-show="open === 'signin'" x-transition.opacity class="absolute inset-0 bg-ink-950/60" @click="closeAll()"></div>
+    <div x-show="open === 'signin'"
+         x-transition:enter="transition ease-swell duration-300"
+         x-transition:enter-start="opacity-0 translate-y-6 sm:scale-95"
+         x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
+         class="relative w-full max-w-md rounded-t-3xl bg-white p-6 shadow-lift sm:rounded-3xl sm:p-8">
+      <button type="button" @click="closeAll()" aria-label="Close" data-i18n-aria="nav.close"
+              class="absolute right-4 top-4 grid h-9 w-9 place-items-center rounded-full text-ink/50 transition hover:bg-sand">
+        <span class="icon icon-cross h-4 w-4" aria-hidden="true"></span>
+      </button>
+
+      <!-- success state -->
+      <div x-show="signin.sent" class="py-6 text-center">
+        <span class="mx-auto grid h-14 w-14 place-items-center rounded-full bg-mist-100 text-ink-700">
+          <span class="icon icon-check h-7 w-7" aria-hidden="true"></span>
+        </span>
+        <h2 class="mt-5 font-display text-2xl text-ink-700">Check your inbox</h2>
+        <p class="mt-2 text-sm leading-relaxed text-ink/70">
+          We sent a sign-in link to <strong class="text-ink-700" x-text="signin.email"></strong>. It is valid for one hour.
+        </p>
+        <button type="button" @click="signin.sent = false"
+                class="mt-6 font-mark text-[11px] uppercase tracking-[0.16em] text-flame-600 underline underline-offset-4">Use a different address</button>
+      </div>
+
+      <!-- form state -->
+      <form x-show="!signin.sent" @submit.prevent="submitSignin()" novalidate>
+        <span class="wave-rule wave-rule-flame mb-4 block"></span>
+        <h2 id="sf-signin-title" class="font-display text-2xl text-ink-700">Welcome back</h2>
+        <p class="mt-1.5 text-sm text-ink/65">Your bookings, joining forms and past voyages.</p>
+        <label class="mt-6 block">
+          <span class="font-mark text-[11px] uppercase tracking-[0.16em] text-ink-700">Email</span>
+          <input x-model="signin.email" x-ref="signinEmail" type="email" autocomplete="email" required
+                 :aria-invalid="signin.error ? 'true' : 'false'" placeholder="you@example.com"
+                 class="mt-1.5 h-12 w-full rounded-xl border-sand-300 bg-sand text-ink-700 focus:border-mist focus:ring-2 focus:ring-mist/40">
+        </label>
+        <p x-show="signin.error" x-cloak x-text="signin.error" role="alert"
+           class="mt-2 flex items-start gap-1.5 text-sm text-flame-600"></p>
+        <button type="submit" :disabled="signin.busy"
+                class="mt-5 flex h-12 w-full items-center justify-center rounded-full bg-flame font-mark text-[12px] uppercase tracking-[0.16em] text-white transition hover:bg-flame-600 disabled:opacity-60">
+          <span x-show="!signin.busy">Email me a sign-in link</span>
+          <span x-show="signin.busy" x-cloak>Sending…</span>
+        </button>
+        <p class="mt-4 text-center text-xs leading-relaxed text-ink/50">
+          No password to remember. New here? A guest account is created with your first reservation.
+        </p>
+      </form>
+    </div>
+  </div>
+</div>
+<!-- /sea:header -->
+
+<main id="main">
+
+  <!-- page header -->
+  <section class="border-b border-sand-300 bg-sand">
+    <div class="mx-auto max-w-8xl px-5 pb-12 pt-8 sm:px-6 lg:px-8 lg:pb-16 lg:pt-12">
+      <nav aria-label="Breadcrumb" class="font-mark text-[11px] uppercase tracking-[0.16em] text-mist-700">
+        <a href="index.html" class="hover:text-flame-600">Home</a>
+        <span class="px-2 text-mist-300" aria-hidden="true">/</span>
+        <span class="text-ink-700">Destinations</span>
+      </nav>
+      <div class="mt-8 grid gap-8 lg:grid-cols-[1.3fr_1fr] lg:items-end lg:gap-16">
+        <div>
+          <p class="font-mark text-eyebrow uppercase text-flame">Destinations</p>
+          <h1 class="mt-4 font-display text-4xl font-light leading-[1.06] tracking-tight text-ink-700 sm:text-5xl lg:text-6xl">
+            Eight waters,<br class="hidden sm:block"> eight seasons
+          </h1>
+        </div>
+        <p class="text-base leading-relaxed text-ink/70">
+          Indonesia is four thousand kilometres wide and the monsoon does not arrive everywhere at
+          once. Whichever month you are free, one of these regions is at its best — which is the
+          whole reason we sail all eight.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================================================================
+       WATERS INDEX — filterable grid, in the logo's arch
+       ==================================================================== -->
+  <section class="mx-auto max-w-8xl px-5 py-12 sm:px-6 lg:px-8 lg:py-16"
+           x-data="waterIndex()" x-init="init()" @sf-reset="reset()" @sf-retry="load()">
+
+    <div class="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+      <div class="-mx-5 flex gap-2 overflow-x-auto px-5 no-scrollbar lg:mx-0 lg:flex-wrap lg:px-0"
+           role="group" aria-label="Filter waters by experience">
+        <button type="button" @click="f.experience = ''; apply()"
+                :class="f.experience === '' ? 'border-ink bg-ink text-white' : 'border-sand-300 text-ink-700 hover:border-mist'"
+                class="shrink-0 rounded-full border px-4 py-2 font-mark text-[11px] uppercase tracking-[0.14em] transition">
+          All eight
+        </button>
+        <template x-for="e in SEA.experiences" :key="e.slug">
+          <button type="button" @click="f.experience = e.slug; apply()"
+                  :class="f.experience === e.slug ? 'border-ink bg-ink text-white' : 'border-sand-300 text-ink-700 hover:border-mist'"
+                  class="shrink-0 rounded-full border px-4 py-2 font-mark text-[11px] uppercase tracking-[0.14em] transition"
+                  x-text="'Best for ' + e.name.toLowerCase()"></button>
+        </template>
+      </div>
+      <p class="font-mark text-[11px] uppercase tracking-[0.16em] text-mist-700" aria-live="polite">
+        <span x-text="rows.length"></span> of 8 waters
+      </p>
+    </div>
+
+    <div x-show="state === 'loading'" class="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-4"
+         x-html="SEA.states.skeleton('water', 4)"></div>
+
+    <div x-show="state === 'error'" class="mt-10" x-html="SEA.states.error({ onRetry: true })"></div>
+
+    <div x-show="state === 'ready' && rows.length === 0" class="mt-10"
+         x-html="SEA.states.empty({
+           title: 'No water is built for that, yet',
+           body: 'We only claim a region is right for something when it genuinely is. Clear the filter to see all eight, or tell us what you are after.',
+           onReset: true, resetLabel: 'Show all eight' })"></div>
+
+    <div x-show="state === 'ready' && rows.length > 0" class="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+      <template x-for="w in rows" :key="w.slug">
+        <div x-html="SEA.cards.water(w)"></div>
+      </template>
+    </div>
+  </section>
+
+  <!-- season table: helps the "when can I go" question without a form -->
+  <section class="border-y border-sand-300 bg-sand">
+    <div class="mx-auto max-w-8xl px-5 py-14 sm:px-6 lg:px-8 lg:py-20">
+      <div class="max-w-xl">
+        <p class="font-mark text-eyebrow uppercase text-flame">When to go where</p>
+        <h2 class="mt-4 font-display text-3xl font-light leading-tight tracking-tight text-ink-700 sm:text-4xl">
+          Pick the month, and the region picks itself
+        </h2>
+      </div>
+
+      <div class="mt-8 overflow-x-auto">
+        <table class="w-full min-w-[42rem] border-collapse text-left">
+          <caption class="sr-only">Best sailing season by region and gateway port</caption>
+          <thead>
+            <tr class="border-b border-sand-300">
+              <th scope="col" class="pb-3 pr-4 font-mark text-[10px] uppercase tracking-[0.16em] text-mist-700">Water</th>
+              <th scope="col" class="pb-3 pr-4 font-mark text-[10px] uppercase tracking-[0.16em] text-mist-700">Season</th>
+              <th scope="col" class="pb-3 pr-4 font-mark text-[10px] uppercase tracking-[0.16em] text-mist-700">Gateway</th>
+              <th scope="col" class="pb-3 pr-4 font-mark text-[10px] uppercase tracking-[0.16em] text-mist-700">Crossings</th>
+              <th scope="col" class="pb-3 font-mark text-[10px] uppercase tracking-[0.16em] text-mist-700">Routes</th>
+            </tr>
+          </thead>
+          <tbody x-data>
+            <template x-for="w in SEA.waters" :key="w.slug">
+              <tr class="group border-b border-sand-200 align-top transition hover:bg-white/70">
+                <th scope="row" class="py-4 pr-4 font-normal">
+                  <a :href="SEA.href('destination.html', { slug: w.slug })"
+                     class="font-display text-lg text-ink-700 transition-colors group-hover:text-flame-600"
+                     x-text="w.short"></a>
+                </th>
+                <td class="py-4 pr-4 text-sm text-ink/75" x-text="w.season"></td>
+                <td class="py-4 pr-4 text-sm text-ink/75" x-text="w.gateway"></td>
+                <td class="py-4 pr-4 text-sm text-ink/60" x-text="w.crossing"></td>
+                <td class="py-4 text-sm text-ink/75">
+                  <span x-text="SEA.tripsInWater(w.slug).length"></span>
+                </td>
+              </tr>
+            </template>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================================================================
+       ALL ITINERARIES — the grid version of the homepage index.
+       Deep-linkable from the footer: destinations.html?length=short
+       ==================================================================== -->
+  <section id="itineraries" class="mx-auto max-w-8xl px-5 py-14 sm:px-6 lg:px-8 lg:py-20"
+           x-data="tripGrid()" x-init="init()" @sf-reset="reset()" @sf-retry="load()">
+
+    <div class="flex flex-wrap items-end justify-between gap-6">
+      <div class="max-w-xl">
+        <p class="font-mark text-eyebrow uppercase text-flame">Itineraries</p>
+        <h2 class="mt-4 font-display text-3xl font-light leading-tight tracking-tight text-ink-700 sm:text-4xl lg:text-5xl">
+          Every route we sail
+        </h2>
+      </div>
+      <a href="discover.html" class="group inline-flex items-center gap-2 font-mark text-[11px] uppercase tracking-[0.18em] text-ink-700 hover:text-flame-600">
+        Let us narrow it down instead
+        <span class="icon icon-chevron-right h-3.5 w-3.5 transition-transform group-hover:translate-x-1" aria-hidden="true"></span>
+      </a>
+    </div>
+
+    <!-- filter bar -->
+    <div class="mt-8 grid gap-4 rounded-3xl border border-sand-300 bg-sand p-5 sm:grid-cols-2 lg:grid-cols-4 lg:p-6">
+      <label class="block">
+        <span class="font-mark text-[10px] uppercase tracking-[0.16em] text-mist-700">Water</span>
+        <select x-model="f.water" @change="apply()"
+                class="mt-1.5 h-12 w-full rounded-xl border-sand-300 bg-white text-ink-700 focus:border-mist focus:ring-2 focus:ring-mist/40">
+          <option value="">Anywhere</option>
+          <template x-for="w in SEA.waters" :key="w.slug">
+            <option :value="w.slug" x-text="w.short"></option>
+          </template>
+        </select>
+      </label>
+      <label class="block">
+        <span class="font-mark text-[10px] uppercase tracking-[0.16em] text-mist-700">Experience</span>
+        <select x-model="f.experience" @change="apply()"
+                class="mt-1.5 h-12 w-full rounded-xl border-sand-300 bg-white text-ink-700 focus:border-mist focus:ring-2 focus:ring-mist/40">
+          <option value="">Any</option>
+          <template x-for="e in SEA.experiences" :key="e.slug">
+            <option :value="e.slug" x-text="e.name"></option>
+          </template>
+        </select>
+      </label>
+      <label class="block">
+        <span class="font-mark text-[10px] uppercase tracking-[0.16em] text-mist-700">Length</span>
+        <select x-model="f.length" @change="apply()"
+                class="mt-1.5 h-12 w-full rounded-xl border-sand-300 bg-white text-ink-700 focus:border-mist focus:ring-2 focus:ring-mist/40">
+          <option value="">Any</option>
+          <template x-for="l in SEA.lengths" :key="l.slug">
+            <option :value="l.slug" x-text="l.label"></option>
+          </template>
+        </select>
+      </label>
+      <label class="block">
+        <span class="font-mark text-[10px] uppercase tracking-[0.16em] text-mist-700">Boat</span>
+        <select x-model="f.boat" @change="apply()"
+                class="mt-1.5 h-12 w-full rounded-xl border-sand-300 bg-white text-ink-700 focus:border-mist focus:ring-2 focus:ring-mist/40">
+          <option value="">Any of the four</option>
+          <template x-for="b in SEA.boats" :key="b.slug">
+            <option :value="b.slug" x-text="b.name"></option>
+          </template>
+        </select>
+      </label>
+
+      <div class="flex items-center justify-between gap-4 sm:col-span-2 lg:col-span-4">
+        <p class="text-sm text-ink/70" aria-live="polite">
+          <strong class="font-display text-lg text-ink-700" x-text="rows.length"></strong>
+          <span x-text="rows.length === 1 ? 'itinerary' : 'itineraries'"></span>
+        </p>
+        <button type="button" @click="reset()" x-show="isFiltered"
+                class="font-mark text-[11px] uppercase tracking-[0.16em] text-flame-600 underline underline-offset-4">
+          Clear filters
+        </button>
+      </div>
+    </div>
+
+    <div x-show="state === 'loading'" class="mt-10 grid gap-8 sm:grid-cols-2 lg:grid-cols-3 lg:gap-6"
+         x-html="SEA.states.skeleton('trip', 6)"></div>
+
+    <div x-show="state === 'error'" class="mt-10" x-html="SEA.states.error({ onRetry: true })"></div>
+
+    <div x-show="state === 'ready' && rows.length === 0" class="mt-10"
+         x-html="SEA.states.empty({
+           title: 'That combination is not in this season',
+           body: 'Seasons move, and so does the fleet. Clear a filter to see what is close — or ask us; a fair number of guests end up on a route that was never published.',
+           onReset: true, altHref: 'charter.html', altLabel: 'Build it as a charter' })"></div>
+
+    <div x-show="state === 'ready' && rows.length > 0" class="mt-10 grid gap-8 sm:grid-cols-2 lg:grid-cols-3 lg:gap-6">
+      <template x-for="t in rows" :key="t.slug">
+        <div x-html="SEA.cards.trip(t)"></div>
+      </template>
+    </div>
+  </section>
+
+</main>
+
+<!-- sea:footer · static — edit partials/footer.html, then: node tools/sync-partials.js -->
+<footer class="bg-ink text-white">
+
+  <!-- ---------- brand + the familia letter ---------- -->
+  <div class="border-b border-white/10">
+    <div class="mx-auto grid max-w-8xl gap-10 px-5 py-14 sm:px-6 lg:grid-cols-[1.1fr_1fr] lg:gap-16 lg:px-8 lg:py-20">
+      <div>
+        <img src="assets/logo/logo-light.png" alt="Sea Familia" width="120" height="118"
+             class="h-24 w-auto opacity-95" loading="lazy">
+        <p class="mt-6 max-w-md font-display text-2xl leading-snug text-white/90 sm:text-3xl">
+          Four boats, one family, and the eastern half of Indonesia.
+        </p>
+        <p class="mt-4 max-w-md text-sm leading-relaxed text-white/60">
+          We started with one phinisi built in Bira and a loan nobody sensible would have given us.
+          The boats have multiplied. The crew list has barely changed.
+        </p>
+      </div>
+
+      <div x-data="seaNewsletter()">
+        <h2 class="font-mark text-[11px] uppercase tracking-[0.2em] text-white/50">The familia letter</h2>
+        <p class="mt-3 text-sm leading-relaxed text-white/75">
+          Once a month: where the boats are, what the reef is doing, and the occasional cabin that
+          has opened up. No countdown timers.
+        </p>
+        <form @submit.prevent="submit()" novalidate class="mt-5">
+          <div x-show="!sent" class="flex flex-col gap-3 sm:flex-row">
+            <label class="flex-1">
+              <span class="sr-only">Email address</span>
+              <input x-model="email" type="email" required placeholder="you@example.com"
+                     :aria-invalid="error ? 'true' : 'false'"
+                     class="h-12 w-full rounded-full border-white/20 bg-white/5 px-5 text-white placeholder:text-white/40 focus:border-mist focus:ring-2 focus:ring-mist/40">
+            </label>
+            <button type="submit" :disabled="busy"
+                    class="h-12 shrink-0 rounded-full bg-white px-6 font-mark text-[12px] uppercase tracking-[0.16em] text-ink-700 transition hover:bg-sand disabled:opacity-60">
+              <span x-show="!busy">Subscribe</span>
+              <span x-show="busy" x-cloak>Sending…</span>
+            </button>
+          </div>
+          <p x-show="error" x-cloak x-text="error" role="alert" class="mt-2 text-sm text-flame-300"></p>
+          <div x-show="sent" x-cloak class="flex items-start gap-3 rounded-2xl bg-white/5 p-4">
+            <span class="mt-0.5 text-mist-300">
+              <span class="icon icon-check h-5 w-5" aria-hidden="true"></span>
+            </span>
+            <p class="text-sm leading-relaxed text-white/85">
+              You are on the list. The next letter goes out at the start of the month — until then, nothing.
+            </p>
+          </div>
+          <p x-show="!sent" class="mt-3 text-xs leading-relaxed text-white/45">
+            We keep your address on our own server and never pass it on. Unsubscribe is one click, in every letter.
+          </p>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- ---------- link columns ---------- -->
+  <div class="mx-auto max-w-8xl px-5 py-12 sm:px-6 lg:px-8">
+    <div class="grid grid-cols-2 gap-8 sm:grid-cols-4">
+
+      <div>
+        <h3 class="font-mark text-[11px] uppercase tracking-[0.2em] text-white/50">Passages</h3>
+        <ul class="mt-4 space-y-2.5">
+          <li><a href="destinations.html?length=short" class="text-sm text-white/80 transition hover:text-white">3 – 5 nights</a></li>
+          <li><a href="destinations.html?length=classic" class="text-sm text-white/80 transition hover:text-white">6 – 8 nights</a></li>
+          <li><a href="destinations.html?length=long" class="text-sm text-white/80 transition hover:text-white">9 – 14 nights</a></li>
+          <li><a href="destinations.html" class="text-sm text-white/80 transition hover:text-white">All itineraries</a></li>
+          <li><a href="departures.html" class="text-sm text-white/80 transition hover:text-white">Departure calendar</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h3 class="font-mark text-[11px] uppercase tracking-[0.2em] text-white/50">Waters</h3>
+        <ul class="mt-4 space-y-2.5">
+          <li><a href="destination.html?slug=komodo" class="text-sm text-white/80 transition hover:text-white">Komodo</a></li>
+          <li><a href="destination.html?slug=raja-ampat" class="text-sm text-white/80 transition hover:text-white">Raja Ampat</a></li>
+          <li><a href="destination.html?slug=banda" class="text-sm text-white/80 transition hover:text-white">Banda Sea</a></li>
+          <li><a href="destination.html?slug=alor" class="text-sm text-white/80 transition hover:text-white">Alor &amp; Solor</a></li>
+          <li><a href="destination.html?slug=triton" class="text-sm text-white/80 transition hover:text-white">Triton Bay</a></li>
+          <li><a href="destination.html?slug=wakatobi" class="text-sm text-white/80 transition hover:text-white">Wakatobi</a></li>
+          <li><a href="destinations.html" class="text-sm text-white/80 transition hover:text-white">All waters</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h3 class="font-mark text-[11px] uppercase tracking-[0.2em] text-white/50">The familia</h3>
+        <ul class="mt-4 space-y-2.5">
+          <li><a href="our-story.html" class="text-sm text-white/80 transition hover:text-white">Our story</a></li>
+          <li><a href="our-story.html#familia" class="text-sm text-white/80 transition hover:text-white">Meet the familia</a></li>
+          <li><a href="our-story.html#sustainability" class="text-sm text-white/80 transition hover:text-white">Sustainability</a></li>
+          <li><a href="journal.html" class="text-sm text-white/80 transition hover:text-white">Journal</a></li>
+          <li><a href="partners.html" class="text-sm text-white/80 transition hover:text-white">Travel agents</a></li>
+          <li><a href="contact.html" class="text-sm text-white/80 transition hover:text-white">Contact</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h3 class="font-mark text-[11px] uppercase tracking-[0.2em] text-white/50">Private charter</h3>
+        <ul class="mt-4 space-y-2.5">
+          <li><a href="charter.html" class="text-sm text-white/80 transition hover:text-white">How charter works</a></li>
+          <li><a href="charter.html?step=2" class="text-sm text-white/80 transition hover:text-white">Request a charter</a></li>
+          <li><a href="boats.html" class="text-sm text-white/80 transition hover:text-white">The fleet</a></li>
+          <li><a href="boat.html?slug=familia-satu" class="text-sm text-white/80 transition hover:text-white">Familia Satu</a></li>
+          <li><a href="boat.html?slug=nusa-ombak" class="text-sm text-white/80 transition hover:text-white">Nusa Ombak</a></li>
+          <li><a href="faq.html" class="text-sm text-white/80 transition hover:text-white">Frequent questions</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ---------- legal bar ---------- -->
+  <div class="border-t border-white/10">
+    <div class="mx-auto flex max-w-8xl flex-col gap-4 px-5 py-6 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:px-8">
+      <p class="font-mark text-[11px] uppercase tracking-[0.16em] text-white/45">
+        © 2026 Sea Familia · PT Keluarga Laut Nusantara · Labuan Bajo &amp; Bira
+      </p>
+      <nav aria-label="Legal" class="flex flex-wrap items-center gap-x-5 gap-y-2">
+        <a href="policies.html#privacy" class="font-mark text-[11px] uppercase tracking-[0.16em] text-white/60 transition hover:text-white">Privacy</a>
+        <a href="policies.html#terms" class="font-mark text-[11px] uppercase tracking-[0.16em] text-white/60 transition hover:text-white">Terms</a>
+        <a href="policies.html#cancellation" class="font-mark text-[11px] uppercase tracking-[0.16em] text-white/60 transition hover:text-white">Cancellation</a>
+        <a href="policies.html#safety" class="font-mark text-[11px] uppercase tracking-[0.16em] text-white/60 transition hover:text-white">Safety</a>
+        <a href="contact.html" class="font-mark text-[11px] uppercase tracking-[0.16em] text-white/60 transition hover:text-white">Contact</a>
+      </nav>
+    </div>
+  </div>
+</footer>
+
+<div class="no-print fixed bottom-5 right-5 z-40 hidden lg:block">
+  <a href="https://wa.me/6281100000000" target="_blank" rel="noopener"
+     class="flex items-center gap-2.5 rounded-full bg-ink py-3 pl-4 pr-5 text-white shadow-lift transition hover:bg-ink-600">
+    <span class="icon icon-whatsapp h-5 w-5" aria-hidden="true"></span>
+    <span class="font-mark text-[11px] uppercase tracking-[0.16em]" data-i18n="cta.help">Talk to the familia</span>
+  </a>
+</div>
+<!-- /sea:footer -->
+
+<script>
+function waterIndex() {
+  return {
+    state: 'loading', rows: [], f: { experience: '' },
+    init() {
+      const q = SEA.query();
+      if (q.experience) this.f.experience = q.experience;
+      this.load();
+    },
+    load() {
+      this.state = 'loading';
+      SEA.load(SEA.waters)
+        .then(() => { this.state = 'ready'; this.apply(); })
+        .catch(() => { this.state = 'error'; });
+    },
+    apply() {
+      this.rows = SEA.emptied(this.f.experience
+        ? SEA.waters.filter(w => w.bestFor.indexOf(this.f.experience) !== -1)
+        : SEA.waters.slice());
+    },
+    reset() { this.f.experience = ''; this.apply(); },
+  };
+}
+
+function tripGrid() {
+  return {
+    state: 'loading', rows: [],
+    f: { water: '', experience: '', length: '', boat: '' },
+    init() {
+      const q = SEA.query();
+      Object.keys(this.f).forEach(k => { if (q[k]) this.f[k] = q[k]; });
+      this.load();
+    },
+    get isFiltered() { return Object.keys(this.f).some(k => this.f[k] !== ''); },
+    load() {
+      this.state = 'loading';
+      SEA.load(SEA.trips, { delay: 520 })
+        .then(() => { this.state = 'ready'; this.apply(); })
+        .catch(() => { this.state = 'error'; });
+    },
+    apply() {
+      this.rows = SEA.emptied(SEA.filterTrips(this.f));
+      window.history.replaceState({}, '', SEA.href('destinations.html', this.f) + '#itineraries');
+    },
+    reset() {
+      this.f = { water: '', experience: '', length: '', boat: '' };
+      this.apply();
+    },
+  };
+}
+</script>
+<script src="assets/js/layout.js"></script>
+</body>
+</html>

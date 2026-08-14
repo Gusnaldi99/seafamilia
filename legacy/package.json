@@ -1,0 +1,21 @@
+{
+  "name": "seafamilia-frontend",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Sea Familia — UI/UX + HTML/CSS/JS slicing deliverable. See docs/HANDOFF.md.",
+  "scripts": {
+    "css": "tailwindcss -i assets/css/tailwind-input.css -o assets/css/tailwind.css",
+    "css:watch": "tailwindcss -i assets/css/tailwind-input.css -o assets/css/tailwind.css --watch",
+    "css:min": "tailwindcss -i assets/css/tailwind-input.css -o assets/css/tailwind.min.css --minify",
+    "css:check": "node tools/check-css.js",
+    "vendor": "node tools/vendor.js",
+    "sync": "node tools/sync-partials.js",
+    "serve": "node tools/serve.js",
+    "qa": "node tools/sync-partials.js --check && node tools/check-pages.js && node tools/check-data.js && node tools/check-css.js"
+  },
+  "devDependencies": {
+    "@tailwindcss/forms": "^0.5.11",
+    "@tailwindcss/typography": "^0.5.20",
+    "tailwindcss": "3.4.19"
+  }
+}

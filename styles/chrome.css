@@ -1,0 +1,77 @@
+/* Sea Familia — header/nav chrome states. Ported from assets/css/app.css.
+
+   Active nav: the header markup is now a shared React component (Header,
+   later phase) with aria-current="page" set from lib/nav.ts's route→section
+   match instead of tools/sync-partials.js's build-time string injection.
+   Everything visual still happens on this attribute selector, same
+   specificity trick as before.
+
+   nav[…] a[aria-current] is (0,2,1), beating .text-ink-700 (0,1,0) and
+   .hover\:text-flame-600:hover (0,2,0), which every anchor still carries. */
+nav[aria-label='Primary'] a[aria-current='page'] {
+  color: var(--color-flame);
+}
+nav[aria-label='Primary'] a[aria-current='page']::after {
+  content: '';
+  position: absolute;
+  left: 0.75rem;
+  right: 0.75rem;
+  bottom: -1px;
+  height: 1px;
+  background: var(--color-flame);
+}
+nav[aria-label='Primary mobile'] a[aria-current='page'] {
+  color: #e4737a; /* flame-300 — the drawer sits on ink */
+}
+
+/* Sticky header, compact state. A scroll hook sets data-compact="true" on the
+   <header> once scrolled past the utility bar. Base sizes stay plain
+   Tailwind classes on the component so the header is correct before
+   hydration; these attribute rules only override the h-* utilities once
+   compact. */
+.sf-headbar,
+.sf-mark {
+  transition: height 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+}
+header[data-compact='true'] {
+  background-color: rgba(255, 255, 255, 0.97);
+  box-shadow: var(--shadow-card);
+}
+header[data-compact='true'] .sf-headbar {
+  height: 3.25rem;
+}
+header[data-compact='true'] .sf-mark {
+  height: 1.75rem;
+}
+@media (min-width: 1024px) {
+  header[data-compact='true'] .sf-headbar {
+    height: 4rem;
+  }
+  header[data-compact='true'] .sf-mark {
+    height: 2.25rem;
+  }
+}
+
+/* Reveal on scroll. The hidden state is applied only by JS (RevealSections,
+   later phase), never by markup — so with JS off, or under
+   prefers-reduced-motion, every section is simply visible. Ends at
+   transform:none, not translateY(0), so no lingering transform becomes a
+   containing block for sticky children inside the section. */
+[data-reveal] {
+  opacity: 0;
+  transform: translateY(16px);
+  transition:
+    opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+}
+[data-reveal].is-visible {
+  opacity: 1;
+  transform: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-reveal] {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+}

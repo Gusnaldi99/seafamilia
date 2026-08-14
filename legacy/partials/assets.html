@@ -1,0 +1,35 @@
+<!-- ============================================================================
+     Sea Familia — shared <head> assets (canonical source)
+     ----------------------------------------------------------------------------
+     Edit THIS file, then run:  node tools/sync-partials.js
+     The script writes it verbatim into every page between the sea:assets markers.
+     Nothing varies per page — <title>, description and robots stay above the block.
+
+     Nothing here is loaded from a third-party origin. The three that used to be —
+     the Tailwind Play CDN, the Alpine bundle on jsDelivr, and Google Fonts — are
+     vendored, so a repo-wide grep for a remote host should return nothing:
+       · assets/css/tailwind.css   compiled — npm run css       (tailwind.config.js)
+       · assets/css/fonts.css      generated — node tools/vendor.js fonts
+       · assets/js/vendor/         downloaded — node tools/vendor.js alpine
+
+     Order matters twice:
+       1. tailwind.css BEFORE app.css. app.css holds what Tailwind cannot express
+          and is meant to be the last word, so it comes second.
+       2. data.js is a classic script and Alpine is deferred, so window.SEA exists
+          before Alpine initialises. layout.js still has to be the last tag in
+          <body> — see the note there.
+
+     `crossorigin` on a font preload is required even same-origin: fonts are always
+     fetched in CORS mode, and without it the browser downloads the file twice.
+     Only the three Latin romans are preloaded — they are all above the fold. The
+     latin-ext and italic faces load on demand through their unicode-range.
+     ========================================================================= -->
+
+<link rel="preload" href="assets/fonts/fraunces-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/fonts/jost-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="assets/css/fonts.css">
+<link rel="stylesheet" href="assets/css/tailwind.css">
+<link rel="stylesheet" href="assets/css/app.css">
+<script src="assets/js/data.js"></script>
+<script defer src="assets/js/vendor/alpine-3.14.9.min.js"></script>

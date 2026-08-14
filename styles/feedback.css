@@ -1,0 +1,54 @@
+/* Sea Familia — loading/submitting feedback. Ported from assets/css/app.css.
+
+   NOTE: .skeleton deliberately omits its own border-radius, unlike the v3
+   original. The original had .skeleton's border-radius:.5rem beating a
+   card's rounded-2xl on specificity (both in the same cascade position),
+   giving loading skeletons 8px corners against the real card's 16px.
+   Fixed here — dropping it lets each skeleton element's own rounded-*
+   utility win, which is what "no layout shift on swap" (HANDOFF §7) already
+   promised. */
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  background-color: #eff2f5;
+}
+.skeleton::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background-image: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.75) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  animation: sf-shimmer 1.4s infinite;
+}
+@keyframes sf-shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+/* Indeterminate progress bar for step submits */
+.bar-indeterminate {
+  position: relative;
+  overflow: hidden;
+}
+.bar-indeterminate::after {
+  content: '';
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 40%;
+  background: var(--color-flame);
+  animation: sf-slide 1.1s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+@keyframes sf-slide {
+  0% {
+    left: -40%;
+  }
+  100% {
+    left: 100%;
+  }
+}

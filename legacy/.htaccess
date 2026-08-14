@@ -1,0 +1,17 @@
+# Sea Familia — icon assets rely on <svg> files loaded as CSS mask-image
+# sources (assets/media/icons/*.svg, assets/media/mark.svg). If .svg isn't
+# mapped to image/svg+xml, some browsers refuse to use the response as a
+# mask and render the icon as fully transparent instead of falling back to
+# a solid fill — this is what makes the icon boxes look empty rather than
+# obviously "broken".
+<IfModule mod_mime.c>
+  AddType image/svg+xml .svg .svgz
+</IfModule>
+
+# Fallback for servers without mod_mime enabled, or where AddType is
+# overridden earlier in the config.
+<IfModule mod_headers.c>
+  <FilesMatch "\.svg$">
+    Header set Content-Type "image/svg+xml"
+  </FilesMatch>
+</IfModule>
