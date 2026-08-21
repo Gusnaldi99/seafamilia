@@ -23,11 +23,15 @@ import { boatBySlug, waterBySlug } from '@/lib/queries';
 import { forcedStateFrom } from '@/lib/qa';
 import { routes } from '@/lib/routes';
 import { toast } from '@/lib/toast';
-import { boats, waters, experiences, inclusions } from '@/lib/data';
+import { boats, waters, experiences } from '@/lib/data';
 import { cn } from '@/lib/utils';
 
 const PROGRESS_STEPS = [2, 3, 4];
 const STEP_LABELS: Record<number, string> = { 2: 'Dates and group', 3: 'Preferences', 4: 'Your details' };
+// Fares differ per boat (e.g. dive support is Sea Familia 2 only) — the
+// step-1 preview, shown before a boat is chosen, lists only what every boat
+// includes.
+const COMMON_INCLUDED = boats[0]?.included.filter((i) => boats.every((b) => b.included.includes(i))) ?? [];
 
 function computeDefaults(searchParams: URLSearchParams): CharterFormValues {
   let values = { ...CHARTER_DEFAULTS };
@@ -77,6 +81,20 @@ export function CharterEnquiry() {
   const values = form.watch();
   const groupTotal = values.adults + values.teens + values.children;
   const fitsBoats = boats.filter((b) => b.guests >= groupTotal);
+  const selectedBoat = values.boat && values.boat !== 'recommend' ? boatBySlug(values.boat) : undefined;
+  const waterOptions = selectedBoat ? waters.filter((w) => selectedBoat.waters.includes(w.slug)) : waters;
+  const experienceOptions = selectedBoat && !selectedBoat.offersDiving ? experiences.filter((e) => e.slug !== 'diving') : experiences;
+
+  React.useEffect(() => {
+    if (!selectedBoat) return;
+    const validWaters = values.waters.filter((s) => selectedBoat.waters.includes(s));
+    if (validWaters.length !== values.waters.length) form.setValue('waters', validWaters);
+    if (!selectedBoat.offersDiving && values.experiences.includes('diving')) {
+      form.setValue('experiences', values.experiences.filter((s) => s !== 'diving'));
+    }
+    // Only re-run when the boat choice itself changes — pruning waters/experiences here would re-trigger this effect.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [values.boat]);
 
   function goto(n: number) {
     const target = Math.max(1, Math.min(5, n));
@@ -263,7 +281,7 @@ export function CharterEnquiry() {
                   <br className="hidden sm:block" /> and no strangers at dinner
                 </h1>
                 <p className="mt-5 max-w-xl text-base leading-relaxed text-white/85 sm:text-lg">
-                  Eight to twenty of you, on any dates a boat is free, sailing a route we draw with you rather than hand to you. Most of our
+                  Twelve to sixteen of you, on any dates a boat is free, sailing a route we draw with you rather than hand to you. Most of our
                   charters are families, a few are dive clubs, and one was a wedding.
                 </p>
               </div>
@@ -296,7 +314,7 @@ export function CharterEnquiry() {
                 <div className="rounded-3xl bg-white p-6 lg:p-7">
                   <h2 className="font-mark text-[11px] uppercase tracking-[0.18em] text-flame">Indicative day rates</h2>
                   <p className="mt-2 text-xs leading-relaxed text-ink/60">
-                    Per boat, per day, all guests included. High season and remote waters carry a surcharge; long charters carry a discount. The
+                    Per boat, per night, all guests included. High season and remote waters carry a surcharge; long charters carry a discount. The
                     quote you get is firm.
                   </p>
                   <ul className="mt-5 space-y-3">
@@ -310,7 +328,7 @@ export function CharterEnquiry() {
                         </span>
                         <span className="shrink-0 text-right">
                           <span className="tnum font-display text-lg text-deep-700">{money(b.charterDay)}</span>
-                          <span className="block text-[11px] text-ink/50">per day</span>
+                          <span className="block text-[11px] text-ink/50">per night</span>
                         </span>
                       </li>
                     ))}
@@ -320,7 +338,7 @@ export function CharterEnquiry() {
                 <div className="rounded-3xl border border-sand-300 p-6 lg:p-7">
                   <h2 className="font-mark text-[11px] uppercase tracking-[0.18em] text-flame">What that covers</h2>
                   <ul className="mt-4 space-y-2.5">
-                    {inclusions.included.slice(0, 6).map((i) => (
+                    {COMMON_INCLUDED.slice(0, 6).map((i) => (
                       <li key={i} className="flex gap-3 text-sm leading-relaxed text-ink/80">
                         <Check className="mt-0.5 h-4 w-4 shrink-0 text-mist" aria-hidden="true" />
                         <span>{i}</span>
@@ -477,7 +495,7 @@ export function CharterEnquiry() {
                       {groupTotal > 0 ? (
                         <>
                           {' '}
-                          · {fitsBoats.length} of our four boats fit you
+                          · {fitsBoats.length} of our {boats.length} boats fit you
                         </>
                       ) : null}
                       {groupTotal > 20 ? (
@@ -554,9 +572,13 @@ export function CharterEnquiry() {
                       <span>Waters</span>
                       <span className="h-px flex-1 bg-sand-300" />
                     </legend>
-                    <p className="mt-1 text-xs text-ink/55">Choose any that appeal. Season may decide for us.</p>
+                    <p className="mt-1 text-xs text-ink/55">
+                      {selectedBoat
+                        ? `${selectedBoat.name} sails ${waterOptions.length > 1 ? 'these waters' : 'this water'}.`
+                        : 'Choose any that appeal. Season may decide for us.'}
+                    </p>
                     <div className="mt-4 flex flex-wrap gap-2">
-                      {waters.map((w) => (
+                      {waterOptions.map((w) => (
                         <button
                           key={w.slug}
                           type="button"
@@ -580,7 +602,7 @@ export function CharterEnquiry() {
                       <span className="h-px flex-1 bg-sand-300" />
                     </legend>
                     <div className="mt-4 grid gap-2 sm:grid-cols-2">
-                      {experiences.map((e) => {
+                      {experienceOptions.map((e) => {
                         const Icon = EXPERIENCE_ICONS[e.slug as keyof typeof EXPERIENCE_ICONS];
                         const selected = values.experiences.includes(e.slug);
                         return (

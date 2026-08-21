@@ -10,15 +10,10 @@ import { boats, lengths, waters } from '@/lib/data';
 import { routes } from '@/lib/routes';
 import { NewsletterForm } from './newsletter-form';
 
-const CHARTER_BOAT_SLUGS = ['familia-satu', 'nusa-ombak'];
 const LINK_CLASSNAME = 'text-sm text-white/80 transition hover:text-white';
 const LEGAL_LINK_CLASSNAME = 'font-mark text-[11px] uppercase tracking-[0.16em] text-white/60 transition hover:text-white';
 
 export function Footer() {
-  const charterBoats = CHARTER_BOAT_SLUGS.map((slug) => boats.find((b) => b.slug === slug)).filter(
-    (b): b is (typeof boats)[number] => b !== undefined
-  );
-
   return (
     <footer className="bg-ink text-white">
       <div className="border-b border-white/10">
@@ -34,11 +29,11 @@ export function Footer() {
               className="h-24 w-auto opacity-95"
             />
             <p className="mt-6 max-w-md font-display text-2xl leading-snug text-white/90 sm:text-3xl">
-              Four boats, one family, and the eastern half of Indonesia.
+              Two boats, one family, and the waters around Labuan Bajo.
             </p>
             <p className="mt-4 max-w-md text-sm leading-relaxed text-white/60">
-              We started with one phinisi built in Bira and a loan nobody sensible would have given us. The
-              boats have multiplied. The crew list has barely changed.
+              We have sailed out of Labuan Bajo since 2018 — Sea Familia in Komodo, and Sea Familia 2 a little
+              further out, to Sumbawa and Alor.
             </p>
           </div>
 
@@ -143,7 +138,7 @@ export function Footer() {
                   The fleet
                 </Link>
               </li>
-              {charterBoats.map((boat) => (
+              {boats.map((boat) => (
                 <li key={boat.slug}>
                   <Link href={routes.boat(boat.slug)} className={LINK_CLASSNAME}>
                     {boat.name}
@@ -163,7 +158,7 @@ export function Footer() {
       <div className="border-t border-white/10">
         <div className="mx-auto flex max-w-8xl flex-col gap-4 px-5 py-6 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:px-8">
           <p className="font-mark text-[11px] uppercase tracking-[0.16em] text-white/60">
-            © 2026 Sea Familia · PT Keluarga Laut Nusantara · Labuan Bajo &amp; Bira
+            © 2026 Sea Familia · PT. FAMINDO WISATA BAJO · Labuan Bajo
           </p>
           <nav aria-label="Legal" className="flex flex-wrap items-center gap-x-5 gap-y-2">
             <Link href={routes.policies('privacy')} className={LEGAL_LINK_CLASSNAME}>

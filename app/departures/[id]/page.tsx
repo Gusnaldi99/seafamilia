@@ -11,7 +11,7 @@ import { PHOTO_SIZES, photoPath } from '@/lib/photo-paths';
 import { addDays, formatDateRange } from '@/lib/format';
 import { boatBySlug, departureById, departuresFor, deriveCabinInventory, gatewayParts, routeFor, tripBySlug, waterBySlug } from '@/lib/queries';
 import { routes } from '@/lib/routes';
-import { departures, inclusions } from '@/lib/data';
+import { departures } from '@/lib/data';
 
 export function generateStaticParams() {
   return departures.map((d) => ({ id: d.id }));
@@ -47,7 +47,7 @@ export default async function DepartureDetailPage({ params }: PageProps<'/depart
     .slice(0, 3);
   const { boards } = gatewayParts(trip);
   const bookable = (departure.status === 'open' || departure.status === 'limited') && departure.cabinsLeft > 0;
-  const included = trip.included ?? inclusions.included;
+  const included = trip.included ?? boat.included;
 
   return (
     <div className="pb-20 lg:pb-0">

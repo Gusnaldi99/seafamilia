@@ -173,7 +173,7 @@ export function DepartureSearch({ departureCards }: { departureCards: Record<str
                 onChange={(e) => setF((p) => ({ ...p, boat: e.target.value }))}
                 className="mt-1.5 h-12 w-full rounded-xl border border-sand-300 bg-sand text-ink-700"
               >
-                <option value="">Any of the four</option>
+                <option value="">Either boat</option>
                 {boats.map((b) => (
                   <option key={b.slug} value={b.slug}>
                     {b.name}

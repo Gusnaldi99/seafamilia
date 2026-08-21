@@ -92,6 +92,33 @@ export interface CabinType {
   features?: string[];
 }
 
+/**
+ * One trip-length tier of a boat's private-charter rate card, priced as a
+ * flat package for the whole trip rather than a nightly rate — the source
+ * rate sheet prices "3D2N" as one figure for both nights together, and
+ * longer trips are often cheaper per night than shorter ones (a long-charter
+ * discount). Deriving a nightly rate from these would misrepresent that.
+ */
+export interface CharterRateTier {
+  /** Exactly as the rate card labels it, e.g. "One Day Trip", "3D2N". */
+  label: string;
+  /** Nights aboard for this tier (0 for a same-day trip). */
+  nights: number;
+  /** Total package price in USD — one entry per Boat.charterRates.paxBands, same order/length. */
+  prices: number[];
+  /** Extra-bed surcharge, USD per extra person, for this tier. Absent where the rate card quotes none. */
+  extraBedPerPerson?: number;
+}
+
+/** A boat's full private-charter rate card. Optional — only populated where the client's brochure includes one. */
+export interface CharterRates {
+  /** Pax-band labels, e.g. ["1–8 pax", "9–12 pax"]. Same order/length as every tier's `prices`. */
+  paxBands: string[];
+  tiers: CharterRateTier[];
+  /** Per-person-per-day add-ons not tied to a specific tier, e.g. diving. */
+  addOns?: { label: string; pricePerPersonPerDay: number }[];
+}
+
 export interface Boat {
   slug: string;
   name: string;
@@ -113,12 +140,21 @@ export interface Boat {
   decks: number;
   /** Integer USD, per boat per day — charter step 1 and step 3. */
   charterDay: number;
+  /** Full private-charter rate card (trip-length × pax-band), where the client has supplied one. charterDay always holds regardless. */
+  charterRates?: CharterRates;
   facilities: string[];
   safety: string[];
   /** 4 image slots, 4:3. */
   gallery: PhVariant[];
-  /** Minimum 3 grades. */
+  /** At least 2 grades. Not enforced by any test — a convention, not a hard rule. */
   cabinTypes: CabinType[];
+  /** Water slugs this boat operates in — must resolve. Drives the charter water-picker. */
+  waters: string[];
+  /** True only for boats that carry dive gear/guides. Diving is never offered on a boat where this is false. */
+  offersDiving: boolean;
+  /** What a cabin fare on this boat covers. A Trip may override either with its own included/excluded array. */
+  included: string[];
+  excluded: string[];
 }
 
 export interface RouteDay {
@@ -247,11 +283,4 @@ export interface PartyOption {
   slug: PartySlug;
   label: string;
   note: string;
-}
-
-/** What a cabin fare covers, brand-level default. A Trip may override either
- * list with its own included/excluded array (see Trip.included/excluded). */
-export interface Inclusions {
-  included: string[];
-  excluded: string[];
 }

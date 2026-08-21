@@ -7,4 +7,4 @@ export { departures } from './departures';
 export { articles } from './articles';
 export { team } from './team';
 export { faq } from './faq';
-export { lengths, parties, inclusions } from './taxonomy';
+export { lengths, parties } from './taxonomy';

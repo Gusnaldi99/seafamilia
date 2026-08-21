@@ -108,17 +108,17 @@ export default function PoliciesPage() {
                 </p>
                 <h3>Deposit and balance</h3>
                 <ul>
-                  <li>25% of the cabin total confirms your place. 30% on the twelve-night Banda crossings.</li>
+                  <li>25% of the cabin total confirms your place.</li>
                   <li>The balance is due 60 days before you sail. We will remind you twice, not eleven times.</li>
                   <li>Booking inside 60 days means the full amount at once.</li>
                   <li>Private charter: 30% to hold the boat, balance at 60 days.</li>
                 </ul>
                 <h3>What the fare covers</h3>
                 <p>
-                  Everything listed on the itinerary page, including national park and marine
-                  conservation fees, airport transfers on both travel days, all meals, and diving
-                  where the route allows. Flights, insurance, alcohol, equipment rental and
-                  gratuities are not included.
+                  Everything listed on the itinerary page: airport transfers on both travel days, all
+                  meals, and diving where the boat and route allow. National park and marine
+                  conservation fees, flights, insurance, alcohol, equipment rental and gratuities are
+                  not included.
                 </p>
                 <h3>Currency</h3>
                 <p>
@@ -218,25 +218,24 @@ export default function PoliciesPage() {
               <h2 className="font-display text-3xl font-light tracking-tight text-ink-700">Safety</h2>
               <div className="prose prose-familia mt-5 max-w-none prose-headings:font-display prose-headings:font-light">
                 <p>
-                  All four boats carry oxygen and a first-response kit on every deck, two or more
+                  Both boats carry oxygen and a first-response kit on every deck, two or more
                   liferafts, an EPIRB, a satellite phone and a full complement of lifejackets
                   including child sizes. Crew are drilled monthly, not annually, and the drill log
                   is on the chart table if you would like to read it.
                 </p>
                 <h3>Diving</h3>
                 <p>
-                  Maximum depth 40 metres, no decompression diving, computers mandatory, and a
-                  safety stop on every ascent. Guides carry surface marker buoys and a DSMB is
-                  deployed on every drift. Nitrox is analysed in front of you and you sign for it
-                  yourself. A guide will turn a dive around and we will back them every time.
+                  Diving is offered only on Sea Familia 2, our dive-equipped boat. Maximum depth 40
+                  metres, no decompression diving, computers mandatory, and a safety stop on every
+                  ascent. Guides carry surface marker buoys and a DSMB is deployed on every drift. A
+                  guide will turn a dive around and we will back them every time.
                 </p>
                 <h3>Evacuation</h3>
                 <p>
-                  DAN-affiliated on all four boats. The nearest chambers are Bali, Makassar and
-                  Manado, and on the remote crossings we are honest with you about the numbers:
-                  from the middle of the Banda Sea, a serious incident is many hours from a
-                  chamber. That is a real risk and we would rather you weighed it than discovered
-                  it.
+                  DAN-affiliated on both boats. The nearest chambers are Bali, Makassar and Manado,
+                  and on the more remote stretches of Sea Familia 2&rsquo;s route we are honest with
+                  you about the numbers: a serious incident can be several hours from a chamber.
+                  That is a real risk and we would rather you weighed it than discovered it.
                 </p>
                 <h3>Children</h3>
                 <p>
@@ -258,11 +257,11 @@ export default function PoliciesPage() {
                 </p>
                 <p>
                   The boats are a harder problem and we will not pretend otherwise. A traditional
-                  phinisi has steep companionways, high sills and narrow doorways; none of the four
-                  is wheelchair-accessible below deck. Guests with limited mobility have sailed
-                  with us happily — Layar Kecil and Nusa Ombak are the most workable, with
-                  main-deck cabins and a wide boarding platform. Talk to us first and we will tell
-                  you honestly what is and is not possible on each hull.
+                  phinisi has steep companionways, high sills and narrow doorways; neither boat is
+                  wheelchair-accessible below deck. Guests with limited mobility have sailed with us
+                  happily — Sea Familia 2 is the more workable of the two, with main-deck cabins and a
+                  wide boarding platform. Talk to us first and we will tell you honestly what is and
+                  is not possible on each hull.
                 </p>
                 <p>
                   Found something on this site that does not work with your assistive technology?{' '}
@@ -276,7 +275,7 @@ export default function PoliciesPage() {
               <dl className="mt-4 grid gap-4 text-sm sm:grid-cols-2">
                 <div>
                   <dt className="text-ink/60">Registered name</dt>
-                  <dd className="text-ink-700">PT Keluarga Laut Nusantara</dd>
+                  <dd className="text-ink-700">PT. FAMINDO WISATA BAJO</dd>
                 </div>
                 <div>
                   <dt className="text-ink/60">Trading as</dt>

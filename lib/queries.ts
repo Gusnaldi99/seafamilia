@@ -55,6 +55,7 @@ export function filterTrips(f?: TripFilters): Trip[] {
     if (q.water && tr.water !== q.water) return false;
     if (q.boat && tr.boat !== q.boat) return false;
     if (q.experience && !tr.experiences.includes(q.experience)) return false;
+    if (q.experience === 'diving' && !boatBySlug(tr.boat)?.offersDiving) return false;
     if (q.length && lengthOf(tr.nights) !== q.length) return false;
     if (q.party && !tr.party.includes(q.party)) return false;
     if (needle) {

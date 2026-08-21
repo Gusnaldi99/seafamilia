@@ -9,14 +9,14 @@ import { team } from '@/lib/data';
 export const metadata: Metadata = {
   title: 'Our Story',
   description:
-    'One boat, one loan, and a very long list — how Sea Familia started in Bira in 2014 and grew to four boats and fifty-one people.',
+    'One boat, one loan, and a very long list — how Sea Familia started out of Labuan Bajo in 2018 and grew to two boats and twenty-five people.', // TODO: headcount is a placeholder, confirm with client
 };
 
 const VALUES = [
   {
     n: '01',
-    title: 'The crew ratio',
-    body: 'Nearly one crew member per guest, on every boat. It is the single largest line in our costs and the reason guests remember names.',
+    title: 'A crew that stays',
+    body: 'Trained in-house and paid through the off season rather than hired by the week. It is the single largest line in our costs and the reason guests remember names.',
   },
   {
     n: '02',
@@ -31,7 +31,7 @@ const VALUES = [
   {
     n: '04',
     title: 'Local first, always',
-    body: 'Every one of our fifty-one people is Indonesian, forty-three are from the islands we sail, and the boats were built by a family we have known for generations.',
+    body: 'Every one of our twenty-five people is Indonesian, most from the islands we sail, and the boats were built by a family we have known for generations.',
   },
 ];
 
@@ -42,7 +42,7 @@ const STATS = [
   },
   {
     value: 'Zero',
-    body: 'single-use plastic bottles on any boat since 2019. Filtered water, refillable steel flasks, and a watermaker on all four hulls.',
+    body: 'single-use plastic bottles on any boat since 2019. Filtered water, refillable steel flasks, and a watermaker on both hulls.',
   },
   {
     value: '14',
@@ -72,7 +72,7 @@ export default function OurStoryPage() {
           </nav>
           <div className="mt-8 max-w-2xl">
             <span className="wave-rule wave-rule-light block" aria-hidden="true" />
-            <p className="mt-5 font-mark text-eyebrow uppercase text-white/70">Since 2015</p>
+            <p className="mt-5 font-mark text-eyebrow uppercase text-white/70">Since 2018</p>
             <h1 className="mt-4 font-display text-4xl font-light leading-[1.04] tracking-tight text-white sm:text-5xl lg:text-6xl">
               One boat, one loan,
               <br className="hidden sm:block" /> and a very long list
@@ -90,13 +90,13 @@ export default function OurStoryPage() {
         <div className="grid gap-12 lg:grid-cols-[1fr_1.5fr] lg:gap-20">
           <div className="lg:sticky lg:top-28 lg:self-start">
             <p className="font-mark text-eyebrow uppercase text-flame">How it started</p>
-            <h2 className="mt-4 font-display text-3xl font-light leading-tight tracking-tight text-ink-700 sm:text-4xl">Bira, 2014</h2>
+            <h2 className="mt-4 font-display text-3xl font-light leading-tight tracking-tight text-ink-700 sm:text-4xl">Bira to Labuan Bajo, 2018</h2>
             <div className="mt-8 hidden lg:block">
               <div className="arch-soft relative aspect-[3/4] overflow-hidden bg-ink">
-                <PhotoSlot ph="boat" src={LITERAL_PHOTOS.ourStoryFounding} alt="Familia Satu on the beach at Bira before launch" sizes={PHOTO_SIZES.portrait} />
+                <PhotoSlot ph="boat" src={LITERAL_PHOTOS.ourStoryFounding} alt="Sea Familia on the beach at Bira before launch" sizes={PHOTO_SIZES.portrait} />
               </div>
               <p className="mt-3 text-xs leading-relaxed text-ink/55">
-                Familia Satu on the beach at Bira, two months before launch. The keel is ironwood and still is.
+                Sea Familia on the beach at Bira, two months before launch. The keel is ironwood and still is.
               </p>
             </div>
           </div>
@@ -118,7 +118,7 @@ export default function OurStoryPage() {
             </p>
             <h2>The unreasonable part</h2>
             <p>
-              In 2014 he and Ratih borrowed more than either of them wants written down, and asked
+              In 2017 he and Ratih borrowed more than either of them wants written down, and asked
               the yard for a thirty-two metre gaff-rigged ketch with eight cabins. The bank thought
               this was a poor idea. The yard, who had known the family for three generations,
               quietly extended the payment schedule and got on with it.
@@ -130,20 +130,19 @@ export default function OurStoryPage() {
               </p>
             </blockquote>
             <p>
-              Familia Satu launched in 2016 with a crew of fourteen for sixteen guests — a ratio
-              that made no commercial sense and which we have never changed. Nine of those
-              fourteen are still with us. Two have since captained their own hulls.
+              Sea Familia launched out of Labuan Bajo in 2018 with a crew of fourteen for sixteen
+              guests — a ratio that made no commercial sense and which we have never changed. Nine
+              of those fourteen are still with us.
             </p>
             <h2>What actually grew</h2>
             <p>
-              The second boat came in 2018 because divers kept asking for something faster. The
-              third in 2020, badly timed, and finished during a season when nobody sailed anywhere
-              — we spent that year surveying reefs with a marine biologist and rebuilding the
-              galley twice. The fourth in 2021, deliberately small, because half our guests turned
-              out to want the opposite of scale.
+              The second boat came in 2021 — deliberately small, because half our guests turned out
+              to want the opposite of scale. Sea Familia 2 goes further than the first boat ever
+              could, into Sumbawa and Alor as well as Komodo, and carries the dive gear the first
+              boat never has.
             </p>
             <p>
-              Eleven years in, the company is four boats and fifty-one people. It is not large, it
+              Eight years in, the company is two boats and twenty-five people. It is not large, it
               does not intend to be, and roughly a third of our guests each season were recommended
               by someone who sailed with us before.
             </p>
@@ -201,19 +200,18 @@ export default function OurStoryPage() {
               <div className="rounded-3xl bg-white/5 p-6 lg:p-7">
                 <h3 className="font-mark text-[11px] uppercase tracking-[0.18em] text-mist-300">The part we have not solved</h3>
                 <p className="mt-3 text-sm leading-relaxed text-white/80">
-                  Your flights. A return from Europe to Sorong emits several times more than your
-                  entire two weeks on board, and no amount of solar panels on our sun deck changes
+                  Your flights. A return from Europe to Labuan Bajo emits several times more than
+                  your entire trip on board, and no amount of solar panels on our sun deck changes
                   that arithmetic. We do not sell offsets, because we do not believe the ones
-                  available are worth what they cost. What we do instead is encourage longer trips
-                  — if you are going to make that flight, make it count for twelve nights rather
-                  than five.
+                  available are worth what they cost. What we do instead is encourage longer stays
+                  on the ground before or after you sail, rather than a single quick trip.
                 </p>
               </div>
 
               <div className="rounded-3xl bg-white/5 p-6 lg:p-7">
                 <h3 className="font-mark text-[11px] uppercase tracking-[0.18em] text-mist-300">On the villages</h3>
                 <p className="mt-3 text-sm leading-relaxed text-white/80">
-                  We visit eleven communities regularly and we arrive when they say to arrive.
+                  We visit a handful of communities regularly and we arrive when they say to arrive.
                   Nobody performs a welcome. Nobody dances unless there is a reason to dance.
                   Guests are asked to put the camera down for the first hour, which almost everyone
                   finds harder than the diving.
@@ -229,7 +227,7 @@ export default function OurStoryPage() {
           <div className="max-w-xl">
             <p className="font-mark text-eyebrow uppercase text-flame">Meet the familia</p>
             <h2 className="mt-4 font-display text-3xl font-light leading-tight tracking-tight text-ink-700 sm:text-4xl lg:text-5xl">
-              Fifty-one people, six of them here
+              Twenty-five people, six of them here
             </h2>
             <p className="mt-4 text-base leading-relaxed text-ink/70">
               You will meet the rest on board, which is rather the point. These six are the ones
@@ -286,7 +284,7 @@ export default function OurStoryPage() {
               </h2>
               <p className="mt-4 max-w-lg text-base leading-relaxed text-ink/70">
                 Everything on this page is easy to write and harder to do. The only test that
-                matters is eight nights on a boat, so start there.
+                matters is three nights on a boat, so start there.
               </p>
             </div>
             <div className="flex flex-col gap-3 sm:flex-row lg:flex-col">

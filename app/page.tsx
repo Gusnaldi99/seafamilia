@@ -48,9 +48,8 @@ export default function Home() {
               <br className="hidden sm:block" /> the familia
             </h1>
             <p className="mt-6 max-w-xl text-base leading-relaxed text-white/85 sm:text-lg">
-              Four hand-built phinisi, a crew who mostly grew up on these reefs, and eleven years of
-              finding the anchorage nobody else is in. Reserve a single cabin — or take the whole
-              boat.
+              Two hand-built phinisi and a crew who mostly grew up on these reefs, sailing out of
+              Labuan Bajo since 2018. Reserve a single cabin — or take the whole boat.
             </p>
 
             <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
@@ -70,22 +69,18 @@ export default function Home() {
             </div>
           </div>
 
-          <dl className="mt-12 grid max-w-3xl grid-cols-2 gap-x-6 gap-y-6 border-t border-white/15 pt-8 sm:grid-cols-4 lg:mt-16">
+          <dl className="mt-12 grid max-w-2xl grid-cols-3 gap-x-6 gap-y-6 border-t border-white/15 pt-8 lg:mt-16">
             <div>
               <dt className="font-mark text-[10px] uppercase tracking-[0.18em] text-white/55">The fleet</dt>
-              <dd className="mt-1.5 font-display text-2xl text-white">4 boats</dd>
+              <dd className="mt-1.5 font-display text-2xl text-white">2 boats</dd>
             </div>
             <div>
               <dt className="font-mark text-[10px] uppercase tracking-[0.18em] text-white/55">Waters we sail</dt>
-              <dd className="mt-1.5 font-display text-2xl text-white">8 regions</dd>
-            </div>
-            <div>
-              <dt className="font-mark text-[10px] uppercase tracking-[0.18em] text-white/55">Crew to guest</dt>
-              <dd className="mt-1.5 font-display text-2xl text-white">Nearly 1:1</dd>
+              <dd className="mt-1.5 font-display text-2xl text-white">3 regions</dd>
             </div>
             <div>
               <dt className="font-mark text-[10px] uppercase tracking-[0.18em] text-white/55">Sailing since</dt>
-              <dd className="mt-1.5 font-display text-2xl text-white">2015</dd>
+              <dd className="mt-1.5 font-display text-2xl text-white">2018</dd>
             </div>
           </dl>
         </div>
@@ -111,7 +106,7 @@ export default function Home() {
               <PathWavesMast className="mt-5 h-8 w-8 text-ink-700" aria-hidden="true" />
               <h3 className="mt-5 font-display text-2xl text-ink-700">Browse and be inspired</h3>
               <p className="mt-2.5 flex-1 text-sm leading-relaxed text-ink/70">
-                No form, no funnel. Eight waters, twelve itineraries, four boats — wander through in
+                No form, no funnel. Three waters, two itineraries, two boats — wander through in
                 any order and see what catches.
               </p>
               <span className="mt-5 inline-flex items-center gap-2 font-mark text-[11px] uppercase tracking-[0.18em] text-flame-600">
@@ -145,7 +140,7 @@ export default function Home() {
               <HullMast className="mt-5 h-8 w-8 text-ink-700" aria-hidden="true" />
               <h3 className="mt-5 font-display text-2xl text-ink-700">Take the whole boat</h3>
               <p className="mt-2.5 flex-1 text-sm leading-relaxed text-ink/70">
-                Your dates, your group, an itinerary we build together. Eight to twenty guests, and
+                Your dates, your group, an itinerary we build together. Twelve to sixteen guests, and
                 no strangers at dinner.
               </p>
               <span className="mt-5 inline-flex items-center gap-2 font-mark text-[11px] uppercase tracking-[0.18em] text-flame-600">
@@ -164,7 +159,7 @@ export default function Home() {
             <div className="max-w-xl">
               <p className="font-mark text-eyebrow uppercase text-flame">Editor&rsquo;s pick</p>
               <h2 className="mt-4 font-display text-3xl font-light leading-tight tracking-tight text-ink-700 sm:text-4xl lg:text-5xl">
-                The two the crew argue about
+                Two favourites, one per boat
               </h2>
               <p className="mt-4 text-base leading-relaxed text-ink/70">
                 Chosen at the end of last season by the people who sailed them. Nobody consulted the
@@ -175,7 +170,7 @@ export default function Home() {
               href={routes.destinations()}
               className="group inline-flex items-center gap-2 font-mark text-[11px] uppercase tracking-[0.18em] text-ink-700 hover:text-flame-600"
             >
-              All twelve itineraries
+              Both itineraries
               <ChevronRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" aria-hidden="true" />
             </Link>
           </div>
@@ -194,7 +189,7 @@ export default function Home() {
                   <div className="scrim absolute inset-0" aria-hidden="true" />
                   <div className="absolute inset-x-5 bottom-5 lg:inset-x-8 lg:bottom-8">
                     <span className="inline-flex items-center rounded-full bg-flame px-3 py-1.5 font-mark text-[10px] uppercase tracking-[0.18em] text-white">
-                      Crew&rsquo;s first choice
+                      Guest favourite
                     </span>
                     <h3 className="mt-4 font-display text-3xl leading-tight text-white lg:text-4xl">{lead.title}</h3>
                     <p className="mt-2.5 max-w-md text-sm leading-relaxed text-white/85">{lead.summary}</p>
@@ -258,7 +253,7 @@ export default function Home() {
               <span className="wave-rule wave-rule-light block" aria-hidden="true" />
               <p className="mt-5 font-mark text-eyebrow uppercase text-mist-300">Waters</p>
               <h2 className="mt-4 font-display text-3xl font-light leading-tight tracking-tight text-white sm:text-4xl lg:text-5xl">
-                Eight regions, each with its own season
+                Three regions, each with its own season
               </h2>
             </div>
             <Link
@@ -272,7 +267,7 @@ export default function Home() {
         </div>
 
         <div className="mt-10 -mx-5 px-5 sm:-mx-6 sm:px-6 lg:mx-0 lg:px-0">
-          <div className="rail mx-auto max-w-8xl pb-2 lg:grid lg:grid-cols-4 lg:gap-6 lg:overflow-visible lg:px-8">
+          <div className="rail mx-auto max-w-8xl pb-2 lg:grid lg:grid-cols-3 lg:gap-6 lg:overflow-visible lg:px-8">
             {railWaters.map((w) => (
               <div key={w.slug} className="w-[68vw] max-w-xs lg:w-auto lg:max-w-none">
                 <WaterCard water={w} />
@@ -288,7 +283,7 @@ export default function Home() {
           <div className="max-w-xl">
             <p className="font-mark text-eyebrow uppercase text-flame">The fleet</p>
             <h2 className="mt-4 font-display text-3xl font-light leading-tight tracking-tight text-ink-700 sm:text-4xl lg:text-5xl">
-              Four boats, built in Bira
+              Two boats, built in Bira
             </h2>
             <p className="mt-4 text-base leading-relaxed text-ink/70">
               Every hull came out of the same yard in South Sulawesi, from the same family of Konjo
@@ -328,7 +323,7 @@ export default function Home() {
             <div className="rounded-3xl border border-sand-300 bg-white p-6 lg:p-8">
               <h3 className="font-display text-2xl text-ink-700">Open trip</h3>
               <p className="mt-2 text-sm leading-relaxed text-ink/70">
-                A scheduled departure. You reserve one cabin and share the boat with eight to twenty
+                A scheduled departure. You reserve one cabin and share the boat with up to fifteen
                 others.
               </p>
               <ul className="mt-5 space-y-2.5 text-sm text-ink/80">
@@ -366,7 +361,7 @@ export default function Home() {
               <ul className="mt-5 space-y-2.5 text-sm text-white/85">
                 <li className="flex gap-2.5">
                   <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-mist-300" />
-                  Priced per boat, per day
+                  Priced per boat, per night
                 </li>
                 <li className="flex gap-2.5">
                   <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-mist-300" />
@@ -431,7 +426,7 @@ export default function Home() {
                 remembered our daughter&rsquo;s name before we remembered theirs.&rdquo;
               </blockquote>
               <figcaption className="mt-4 text-sm text-mist-700">
-                Marieke &amp; Tom V. · Lagoons &amp; Little Explorers · October 2025
+                Marieke &amp; Tom V. · Three Days Aboard Sea Familia 2 · October 2025
               </figcaption>
             </figure>
 
@@ -446,7 +441,7 @@ export default function Home() {
               <div>
                 <dt className="font-mark text-[11px] uppercase tracking-[0.18em] text-flame">Diving cover</dt>
                 <dd className="mt-2 text-sm leading-relaxed text-ink/75">
-                  DAN-affiliated evacuation cover on all four boats. We ask for your policy number
+                  DAN-affiliated evacuation cover on both boats. We ask for your policy number
                   with the joining form, and we do check it.
                 </dd>
               </div>

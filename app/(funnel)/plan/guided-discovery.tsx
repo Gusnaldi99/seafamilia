@@ -415,7 +415,7 @@ export function GuidedDiscovery({
           <section>
             <h1 className="font-display text-3xl font-light leading-tight tracking-tight text-ink-700 sm:text-4xl lg:text-5xl">Who is coming with you?</h1>
             <p className="mt-4 max-w-xl text-base leading-relaxed text-ink/70">
-              This changes the boat more than the route. Some hulls are built for children; one is built for eight people who want quiet.
+              This changes the boat more than the route. Some hulls are built for children; one is built for twelve people who want quiet.
             </p>
 
             <div className="mt-9 grid gap-3 sm:grid-cols-2">

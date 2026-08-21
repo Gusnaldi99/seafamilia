@@ -58,7 +58,7 @@ export default async function BoatDetailPage({ params }: PageProps<'/boats/[slug
   return (
     <>
       <section className="relative isolate flex min-h-[72vh] items-end overflow-hidden bg-ink">
-        <PhotoSlot ph={boat.ph} src={photoPath.boat(boat.slug)} alt={boat.name} sizes={PHOTO_SIZES.hero} />
+        <PhotoSlot ph={boat.ph} src={photoPath.boat(boat.slug)} alt={boat.name} sizes={PHOTO_SIZES.hero} priority />
         <div className="scrim absolute inset-0" aria-hidden="true" />
         <div className="relative mx-auto w-full max-w-8xl px-5 pb-12 pt-28 sm:px-6 lg:px-8 lg:pb-16">
           <nav aria-label="Breadcrumb" className="font-mark text-[11px] uppercase tracking-[0.16em] text-white/60">
@@ -242,7 +242,7 @@ export default async function BoatDetailPage({ params }: PageProps<'/boats/[slug
             <div className="mt-8 rounded-3xl border border-dashed border-white/25 px-6 py-12 text-center">
               <h3 className="font-display text-xl">She is fully booked</h3>
               <p className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-white/70">
-                Every published date on this boat has gone. The other three sail the same waters — or ask about a
+                Every published date on this boat has gone. The other boat may sail the same waters — or ask about a
                 charter, where cancellations tend to surface first.
               </p>
               <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
@@ -265,8 +265,8 @@ export default async function BoatDetailPage({ params }: PageProps<'/boats/[slug
       </section>
 
       <section className="mx-auto max-w-8xl px-5 py-14 sm:px-6 lg:px-8 lg:py-20">
-        <h2 className="font-display text-2xl font-light text-ink-700 sm:text-3xl">The other three</h2>
-        <div className="mt-8 grid gap-8 sm:grid-cols-2 lg:grid-cols-3 lg:gap-6">
+        <h2 className="font-display text-2xl font-light text-ink-700 sm:text-3xl">The other boat</h2>
+        <div className="mt-8 grid gap-8 sm:grid-cols-2 lg:max-w-md lg:gap-6">
           {others.map((o) => (
             <BoatCard key={o.slug} boat={o} />
           ))}

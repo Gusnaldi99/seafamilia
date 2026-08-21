@@ -29,7 +29,7 @@ export function WaterIndex({ waterCards }: { waterCards: Record<string, React.Re
 
   return (
     <section className="mx-auto max-w-8xl px-5 py-12 sm:px-6 lg:px-8 lg:py-16">
-      <h2 className="sr-only">The eight waters</h2>
+      <h2 className="sr-only">The three waters</h2>
       <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
         <div className="no-scrollbar -mx-5 flex gap-2 overflow-x-auto px-5 lg:mx-0 lg:flex-wrap lg:px-0" role="group" aria-label="Filter waters by experience">
           <button
@@ -39,7 +39,7 @@ export function WaterIndex({ waterCards }: { waterCards: Record<string, React.Re
               experience === '' ? 'border-ink bg-ink text-white' : 'border-sand-300 text-ink-700 hover:border-mist'
             }`}
           >
-            All eight
+            All waters
           </button>
           {experiences.map((e) => (
             <button

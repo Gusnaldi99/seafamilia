@@ -31,10 +31,10 @@ export const team: TeamMember[] = [
   {
     slug: 'yos-tanuwijaya',
     name: 'Captain Yos Tanuwijaya',
-    role: 'Master, Bintang Laut',
-    home: 'Ambon',
+    role: 'Master, Sea Familia 2',
+    home: 'Labuan Bajo',
     ph: 'portrait',
-    note: 'Twenty-two Banda crossings. Will change the day’s plan for a good breeze and make no apology.',
+    note: 'Twenty-two seasons in the Flores Sea. Will change the day’s plan for a good breeze and make no apology.',
   },
   {
     slug: 'rudi-hartawan',
@@ -42,7 +42,7 @@ export const team: TeamMember[] = [
     role: 'Head cook',
     home: 'Makassar',
     ph: 'portrait',
-    note: 'Cooks for sixteen with no gimballed stove. Buys whatever the market had, which is why the menu is written at 6am.',
+    note: 'Cooks for twelve with no gimballed stove. Buys whatever the market had, which is why the menu is written at 6am.',
   },
   {
     slug: 'lila-moerdani',
