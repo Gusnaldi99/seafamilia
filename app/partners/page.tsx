@@ -51,11 +51,11 @@ const ASSETS = [
   },
   {
     title: 'Deck plans & specs',
-    body: 'Measured plans for all four hulls, cabin dimensions, bed configurations and safety equipment lists, as PDF.',
+    body: 'Measured plans for both hulls, cabin dimensions, bed configurations and safety equipment lists, as PDF.',
   },
   {
     title: 'Itinerary copy',
-    body: 'Long and short versions of all twelve routes, in English and Bahasa Indonesia, free to adapt for your own audience.',
+    body: 'Long and short versions of both routes, in English and Bahasa Indonesia, free to adapt for your own audience.',
   },
   {
     title: 'Brand marks',

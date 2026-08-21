@@ -152,7 +152,7 @@ export function FaqBrowser() {
             <p className="mt-3 max-w-2xl text-sm leading-relaxed text-white/80">
               Every itinerary on this site is a plan rather than a promise. The captain will
               reorder your week for weather, current or simply a better day, and we would rather
-              tell you that before you book than apologise for it afterwards. In eleven years no
+              tell you that before you book than apologise for it afterwards. In eight years no
               guest has told us the swap was worse.
             </p>
             <div className="mt-6 flex flex-wrap gap-3">

@@ -36,14 +36,14 @@ const LANGS = Object.keys(DICTIONARIES) as Lang[];
 describe('content counts (transcription tripwire)', () => {
   it('matches the verified source counts', () => {
     expect(experiences).toHaveLength(6);
-    expect(waters).toHaveLength(8);
-    expect(boats).toHaveLength(4);
-    expect(trips).toHaveLength(12);
-    expect(departures).toHaveLength(16);
+    expect(waters).toHaveLength(3);
+    expect(boats).toHaveLength(2);
+    expect(trips).toHaveLength(2);
+    expect(departures).toHaveLength(6);
     expect(articles).toHaveLength(8);
     expect(team).toHaveLength(6);
     expect(faq).toHaveLength(12);
-    expect(boats.flatMap((b) => b.cabinTypes)).toHaveLength(16);
+    expect(boats.flatMap((b) => b.cabinTypes)).toHaveLength(6);
   });
 });
 
@@ -96,6 +96,32 @@ describe('referential integrity', () => {
     for (const tr of trips) expect(tr.highlights, `trip ${tr.slug}`).toHaveLength(3);
     for (const w of waters) expect(w.highlights, `water ${w.slug}`).toHaveLength(3);
   });
+  it('every boat.waters[] resolves', () => {
+    for (const b of boats) {
+      for (const slug of b.waters) {
+        expect(waterBySlug(slug), `boat ${b.slug} → water ${slug}`).toBeDefined();
+      }
+    }
+  });
+  it('every boat.charterRates tier prices[] matches paxBands[] length', () => {
+    for (const b of boats) {
+      if (!b.charterRates) continue;
+      for (const tier of b.charterRates.tiers) {
+        expect(tier.prices, `boat ${b.slug} → tier ${tier.label}`).toHaveLength(b.charterRates.paxBands.length);
+      }
+    }
+  });
+  it('no boat facility or inclusion mentions nitrox or paddleboard', () => {
+    const hay = boats.flatMap((b) => [...b.facilities, ...b.included, ...b.excluded]).join(' ').toLowerCase();
+    expect(hay).not.toMatch(/nitrox|paddleboard/);
+  });
+  it('diving-tagged trips only ever use a diving-capable boat', () => {
+    for (const tr of trips) {
+      if (tr.experiences.includes('diving')) {
+        expect(boatBySlug(tr.boat)?.offersDiving, `trip ${tr.slug} → boat ${tr.boat}`).toBe(true);
+      }
+    }
+  });
 });
 
 describe('lookups return undefined for an unknown slug', () => {
@@ -121,9 +147,9 @@ describe('routeFor / bodyFor never render blank', () => {
     }
   });
   it('synthesized routes are flagged provisional; hand-written ones are not', () => {
-    const withRoute = tripBySlug('manta-passage')!;
+    const withRoute = tripBySlug('three-days-aboard-sea-familia')!;
     expect(routeFor(withRoute).some((d) => d.provisional)).toBe(false);
-    const withoutRoute = tripBySlug('misool-slowly')!;
+    const withoutRoute = tripBySlug('three-days-aboard-sea-familia-2')!;
     expect(routeFor(withoutRoute).every((d) => d.provisional)).toBe(true);
   });
   it('every article has a non-empty body (hand-written or synthesized from the dek)', () => {

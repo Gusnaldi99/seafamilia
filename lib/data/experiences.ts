@@ -8,12 +8,12 @@ export const experiences: Experience[] = [
     ph: 'reef',
     tagline: 'Reefs that still surprise the crew',
     blurb:
-      'Three to four dives a day on walls, seamounts and coral gardens, led by guides who grew up on these reefs. Nitrox on board, small groups in the water, and no rushing back to the boat.',
+      'Three to four dives a day on walls, seamounts and coral gardens, led by guides who grew up on these reefs. Small groups in the water, and no rushing back to the boat. Offered by private charter on Sea Familia 2.',
     forWho: ['Certified divers', 'Confident snorkellers', 'Anyone working on a course'],
     signature: [
       'Manta cleaning stations at dawn',
       'Two dedicated tenders, never a queue',
-      'Free nitrox for certified guests',
+      'Tanks and weights provided for certified guests',
     ],
   },
   {
@@ -42,9 +42,9 @@ export const experiences: Experience[] = [
     ph: 'village',
     tagline: 'Ikat looms, spice gardens, boat builders',
     blurb:
-      'Village visits arranged by people who are related to half the village. Weaving on Solor, nutmeg drying in Banda, phinisi hulls taking shape in Bira — all on the villages’ terms, never as a photo stop.',
+      'Village visits arranged by people who are related to half the village. Weaving villages off Alor, stilt villages around Komodo — all on the villages’ terms, never as a photo stop.',
     forWho: ['Slow travellers', 'Textile and craft people', 'Anyone tired of resorts'],
-    signature: ['Loom sessions with Solor weavers', 'Spice-garden walk in Banda Neira', 'Boatyard visit in Bira'],
+    signature: ['Loom sessions with Alor weavers', 'Village visits around Komodo', 'Boatyard stories from Bira'],
   },
   {
     slug: 'wellness',

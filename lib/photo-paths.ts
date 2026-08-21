@@ -15,7 +15,7 @@
 export const photoPath = {
   trip: (slug: string) => `/assets/media/photos/trips/${slug}.jpg`,
   boat: (slug: string) => `/assets/media/photos/boats/${slug}.jpg`,
-  boatGallery: (slug: string, i: number) => `/assets/media/photos/boats/${slug}-${i + 1}.jpg`,
+  boatGallery: (slug: string, i: number) => `/assets/media/photos/boats/${slug}-gallery-${i + 1}.jpg`,
   water: (slug: string) => `/assets/media/photos/waters/${slug}.jpg`,
   article: (slug: string) => `/assets/media/photos/articles/${slug}.jpg`,
   experience: (slug: string) => `/assets/media/photos/experiences/${slug}.jpg`,

@@ -50,10 +50,8 @@ import { filterDepartures, departureMonthOptions, tripBySlug, boatBySlug } from 
 import { forcedStateFrom, emptied } from '@/lib/qa';
 import { routes } from '@/lib/routes';
 import { toast } from '@/lib/toast';
-import { waters, lengths, inclusions, type LengthSlug } from '@/lib/data';
+import { waters, lengths, type LengthSlug } from '@/lib/data';
 import { cn } from '@/lib/utils';
-
-const INCLUSIONS_PREVIEW = inclusions.included.slice(0, 6);
 
 const STEPS = [
   { key: 'search', label: 'Search' },
@@ -117,6 +115,7 @@ export function ReserveFlow() {
   }, [state.search, forced, searchTick]);
 
   const { dep, cabin, guests, guestList, lead, chosenExtras, step } = state;
+  const inclusionsPreview = state.boat?.included.slice(0, 6) ?? [];
   React.useEffect(() => {
     try {
       window.sessionStorage.setItem('sf.reserve', JSON.stringify(toPersisted({ dep, cabin, guests, guestList, lead, chosenExtras })));
@@ -568,7 +567,7 @@ export function ReserveFlow() {
                   <div className="rounded-2xl bg-white p-5">
                     <h2 className="font-mark text-[11px] uppercase tracking-[0.16em] text-flame">Key inclusions</h2>
                     <ul className="mt-3 space-y-2">
-                      {INCLUSIONS_PREVIEW.map((i) => (
+                      {inclusionsPreview.map((i) => (
                         <li key={i} className="flex gap-2.5 text-sm leading-relaxed text-ink/80">
                           <Check className="mt-0.5 h-4 w-4 shrink-0 text-mist" aria-hidden="true" />
                           <span>{i}</span>
