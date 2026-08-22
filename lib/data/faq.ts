@@ -5,12 +5,12 @@ export const faq: FaqItem[] = [
   {
     group: 'Booking',
     q: 'What is the difference between an open trip and a private charter?',
-    a: 'An open trip is a scheduled departure where you reserve a cabin and share the boat with other guests — usually eight to twenty of you. A private charter is the whole boat, on your dates, with an itinerary we build with you. Open trips are priced per person; charters are priced per boat per day.',
+    a: 'An open trip is a scheduled departure where you reserve a cabin and share the boat with other guests. A private charter is the whole boat, on your dates, with an itinerary we build with you. Open trips are priced per person; charters are priced per boat per night.',
   },
   {
     group: 'Booking',
     q: 'How much deposit do you take?',
-    a: 'Twenty-five percent of the cabin total to confirm your place, thirty percent on the twelve-night Banda crossings. The balance is due sixty days before departure. Nothing is charged to your card during this reservation — we send a payment link once a human has confirmed availability.',
+    a: 'Twenty-five percent of the cabin total to confirm your place. The balance is due sixty days before departure. Nothing is charged to your card during this reservation — we send a payment link once a human has confirmed availability.',
   },
   {
     group: 'Booking',
@@ -25,17 +25,17 @@ export const faq: FaqItem[] = [
   {
     group: 'On board',
     q: 'Do I need to be a certified diver?',
-    a: 'Not on most routes. Every itinerary works for confident snorkellers, and several are built for families where only some of the group dives. The Banda and Cenderawasih crossings are the exception: they are long, remote and genuinely diving-led.',
+    a: 'Not on either open trip — both work for confident snorkellers, and are built for families where only some of the group dives. Diving is offered by private charter on Sea Familia 2 only.',
   },
   {
     group: 'On board',
     q: 'Is there wifi?',
-    a: 'Starlink on all four boats, and it mostly works. We do ask guests to leave calls until after dinner, because the aft deck is small and everyone can hear you.',
+    a: 'Starlink on both boats, and it mostly works. We do ask guests to leave calls until after dinner, because the aft deck is small and everyone can hear you.',
   },
   {
     group: 'On board',
     q: 'What about children?',
-    a: 'Very welcome from four upwards, and two of our routes are built specifically around them. Nusa Ombak has interconnecting family suites and a crew who run reef school in the mornings.',
+    a: 'Very welcome from four upwards, and both open trips are built with them in mind — a crew who run reef school in the mornings, and flexible meal times.',
   },
   {
     group: 'On board',

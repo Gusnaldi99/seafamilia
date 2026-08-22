@@ -13,7 +13,7 @@ import { trips, waters } from '@/lib/data';
 export const metadata: Metadata = {
   title: 'Destinations',
   description:
-    'Eight waters, eight seasons — Komodo, Raja Ampat, the Banda Sea and beyond. Whichever month you are free, one region is at its best.',
+    'Three waters — Komodo, Sumbawa and Alor — each within reach of Labuan Bajo.',
 };
 
 const waterCards = Object.fromEntries(waters.map((w) => [w.slug, <WaterCard key={w.slug} water={w} />]));
@@ -29,14 +29,13 @@ export default function DestinationsPage() {
             <div>
               <p className="font-mark text-eyebrow uppercase text-flame">Destinations</p>
               <h1 className="mt-4 font-display text-4xl font-light leading-[1.06] tracking-tight text-ink-700 sm:text-5xl lg:text-6xl">
-                Eight waters,
-                <br className="hidden sm:block" /> eight seasons
+                Three waters,
+                <br className="hidden sm:block" /> all near Labuan Bajo
               </h1>
             </div>
             <p className="text-base leading-relaxed text-ink/70">
-              Indonesia is four thousand kilometres wide and the monsoon does not arrive everywhere
-              at once. Whichever month you are free, one of these regions is at its best — which is
-              the whole reason we sail all eight.
+              Sea Familia stays in Komodo. Sea Familia 2 covers Komodo as well, and goes further —
+              Sumbawa and Alor — for guests who want to see more of the Flores Sea.
             </p>
           </div>
         </div>

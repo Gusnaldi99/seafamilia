@@ -11,8 +11,7 @@ import { boats } from '@/lib/data';
 
 export const metadata: Metadata = {
   title: 'The Fleet',
-  description:
-    'Four boats, one boatyard in Bira, South Sulawesi — Familia Satu, Bintang Laut, Nusa Ombak and Layar Kecil. Compare length, cabins, guests and crew side by side.',
+  description: 'Two boats — Sea Familia and Sea Familia 2. Compare length, cabins, guests and crew side by side.',
 };
 
 const SPEC_ROWS: { label: string; render: (b: (typeof boats)[number]) => React.ReactNode }[] = [
@@ -52,14 +51,13 @@ export default function BoatsPage() {
             <div>
               <p className="font-mark text-eyebrow uppercase text-flame">The fleet</p>
               <h1 className="mt-4 font-display text-4xl font-light leading-[1.06] tracking-tight text-ink-700 sm:text-5xl lg:text-6xl">
-                Four boats,
-                <br className="hidden sm:block" /> one boatyard
+                Two boats,
+                <br className="hidden sm:block" /> one family
               </h1>
             </div>
             <p className="text-base leading-relaxed text-ink/70">
-              Every hull came out of the same yard in Bira, South Sulawesi, cut by the same family of
-              Konjo shipwrights who built for our grandfather. They differ in size and rig — not in
-              how they were made, or who looks after them.
+              Sea Familia 2 carries the bigger groups and the dive gear, and goes further — Sumbawa and
+              Alor as well as Komodo. Sea Familia is smaller, and stays around Komodo.
             </p>
           </div>
         </div>
@@ -82,45 +80,24 @@ export default function BoatsPage() {
             </h2>
           </div>
 
-          <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4 lg:gap-6">
+          <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:gap-6">
             <div className="rounded-2xl bg-white p-6">
-              <h3 className="font-mark text-[11px] uppercase tracking-[0.16em] text-flame">Diving-led weeks</h3>
+              <h3 className="font-mark text-[11px] uppercase tracking-[0.16em] text-flame">Bigger groups, or diving</h3>
               <p className="mt-3 text-sm leading-relaxed text-ink/75">
-                <Link href={routes.boat('bintang-laut')} className="font-display text-lg text-ink-700 hover:text-flame-600">
-                  Bintang Laut
+                <Link href={routes.boat('sea-familia-2')} className="font-display text-lg text-ink-700 hover:text-flame-600">
+                  Sea Familia 2
                 </Link>{' '}
-                — narrow, fast, open dive deck, twelve guests. She can hold a seamount for two days
-                waiting for the right water.
+                — sixteen guests across six cabins, the only boat that carries dive gear, and goes
+                further — Sumbawa and Alor as well as Komodo. Half her season is charter.
               </p>
             </div>
             <div className="rounded-2xl bg-white p-6">
-              <h3 className="font-mark text-[11px] uppercase tracking-[0.16em] text-flame">With children</h3>
+              <h3 className="font-mark text-[11px] uppercase tracking-[0.16em] text-flame">Smaller groups, or quiet and private</h3>
               <p className="mt-3 text-sm leading-relaxed text-ink/75">
-                <Link href={routes.boat('nusa-ombak')} className="font-display text-lg text-ink-700 hover:text-flame-600">
-                  Nusa Ombak
+                <Link href={routes.boat('sea-familia')} className="font-display text-lg text-ink-700 hover:text-flame-600">
+                  Sea Familia
                 </Link>{' '}
-                — interconnecting family suites, a plunge pool, and a crew who run reef school before
-                breakfast.
-              </p>
-            </div>
-            <div className="rounded-2xl bg-white p-6">
-              <h3 className="font-mark text-[11px] uppercase tracking-[0.16em] text-flame">Long crossings</h3>
-              <p className="mt-3 text-sm leading-relaxed text-ink/75">
-                <Link href={routes.boat('familia-satu')} className="font-display text-lg text-ink-700 hover:text-flame-600">
-                  Familia Satu
-                </Link>{' '}
-                — provisioned for two weeks out, fourteen crew, and the boat the family still sails
-                on.
-              </p>
-            </div>
-            <div className="rounded-2xl bg-white p-6">
-              <h3 className="font-mark text-[11px] uppercase tracking-[0.16em] text-flame">Quiet, or private</h3>
-              <p className="mt-3 text-sm leading-relaxed text-ink/75">
-                <Link href={routes.boat('layar-kecil')} className="font-display text-lg text-ink-700 hover:text-flame-600">
-                  Layar Kecil
-                </Link>{' '}
-                — eight guests, nine crew, and anchorages the larger boats cannot enter. Half her
-                season is charter.
+                — twelve guests across six cabins, and the boat the family still sails on.
               </p>
             </div>
           </div>
@@ -137,7 +114,7 @@ export default function BoatsPage() {
 
         <div className="mt-8 overflow-x-auto">
           <table className="w-full min-w-[46rem] border-collapse text-left">
-            <caption className="sr-only">Specification comparison across the four boats</caption>
+            <caption className="sr-only">Specification comparison across both boats</caption>
             <thead>
               <tr>
                 <th scope="col" className="w-40 border-b border-sand-300 pb-4 pr-4 font-mark text-[10px] uppercase tracking-[0.16em] text-mist-700">
@@ -189,10 +166,10 @@ export default function BoatsPage() {
           <div>
             <span className="wave-rule wave-rule-light block" aria-hidden="true" />
             <h2 className="mt-5 font-display text-3xl font-light leading-tight tracking-tight sm:text-4xl">
-              Any of the four, entirely to yourselves
+              Either boat, entirely to yourselves
             </h2>
             <p className="mt-4 max-w-lg text-base leading-relaxed text-white/75">
-              Charter is priced per boat per day, on any dates the boat is free, with a route we draw
+              Charter is priced per boat per night, on any dates the boat is free, with a route we draw
               together rather than hand you. Four questions to start, and a real quote from Ratih
               within one working day.
             </p>

@@ -91,7 +91,7 @@ export default function ContactPage() {
             <div className="rounded-3xl border border-sand-300 p-6 lg:p-7">
               <h2 className="font-mark text-[11px] uppercase tracking-[0.18em] text-flame">The office</h2>
               <address className="mt-4 text-sm not-italic leading-relaxed text-ink/75">
-                PT Keluarga Laut Nusantara
+                PT. FAMINDO WISATA BAJO
                 <br />
                 Jalan Soekarno Hatta 42, first floor
                 <br />

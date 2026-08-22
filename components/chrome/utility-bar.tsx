@@ -25,7 +25,7 @@ export function UtilityBar() {
     <div className="hidden bg-ink text-white/80 lg:block">
       <div className="mx-auto flex h-9 max-w-8xl items-center justify-between px-6 lg:px-8">
         <p className="font-mark text-[11px] uppercase tracking-[0.18em]">
-          Open trips &amp; private charter · Komodo to Raja Ampat
+          Open trips &amp; private charter · Labuan Bajo, Sumbawa &amp; Alor
         </p>
         <div className="flex items-center gap-1">
           <label className="sr-only" htmlFor="sf-currency">

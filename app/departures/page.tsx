@@ -10,7 +10,7 @@ import { departures } from '@/lib/data';
 export const metadata: Metadata = {
   title: 'Departures',
   description:
-    'Every scheduled date across four boats. Reserve one cabin and share the boat — availability updates as cabins go.',
+    'Every scheduled date across both boats. Reserve one cabin and share the boat — availability updates as cabins go.',
 };
 
 const departureCards = Object.fromEntries(departures.map((d) => [d.id, <DepartureCard key={d.id} departure={d} />]));
@@ -26,7 +26,7 @@ export default function DeparturesPage() {
               <p className="font-mark text-eyebrow uppercase text-flame">Departures</p>
               <h1 className="mt-4 font-display text-4xl font-light leading-[1.06] tracking-tight text-ink-700 sm:text-5xl lg:text-6xl">
                 Every date,
-                <br className="hidden sm:block" /> across four boats
+                <br className="hidden sm:block" /> across both boats
               </h1>
             </div>
             <p className="text-base leading-relaxed text-ink/70">

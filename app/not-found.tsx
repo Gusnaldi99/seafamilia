@@ -10,7 +10,7 @@ import { waters } from '@/lib/data';
 
 export const metadata: Metadata = {
   title: 'Off the Chart',
-  description: 'That page is not here. Search, or start from one of the eight waters we sail.',
+  description: 'That page is not here. Search, or start from one of the waters we sail.',
   robots: { index: false, follow: false },
 };
 
@@ -56,10 +56,10 @@ export default function NotFound() {
         <div className="max-w-xl">
           <p className="font-mark text-eyebrow uppercase text-flame">Or start here</p>
           <h2 className="mt-4 font-display text-3xl font-light leading-tight tracking-tight text-ink-700 sm:text-4xl">
-            The four waters people ask about most
+            The waters people ask about most
           </h2>
         </div>
-        <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {waters.slice(0, 4).map((w) => (
             <WaterCard key={w.slug} water={w} />
           ))}
@@ -71,8 +71,8 @@ export default function NotFound() {
             <p className="mt-1.5 text-sm leading-relaxed text-ink/65">Diving, family, remote, culture, slow sailing, photography.</p>
           </Link>
           <Link href={routes.boats()} className="group rounded-2xl border border-sand-300 p-5 transition hover:border-mist hover:bg-sand">
-            <h3 className="font-display text-lg text-ink-700 group-hover:text-flame-600">Four boats</h3>
-            <p className="mt-1.5 text-sm leading-relaxed text-ink/65">All built in the same yard in Bira, by the same family.</p>
+            <h3 className="font-display text-lg text-ink-700 group-hover:text-flame-600">Two boats</h3>
+            <p className="mt-1.5 text-sm leading-relaxed text-ink/65">Sea Familia and Sea Familia 2, both built in Bira.</p>
           </Link>
           <Link href={routes.journal()} className="group rounded-2xl border border-sand-300 p-5 transition hover:border-mist hover:bg-sand">
             <h3 className="font-display text-lg text-ink-700 group-hover:text-flame-600">The journal</h3>

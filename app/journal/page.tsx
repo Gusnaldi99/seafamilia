@@ -61,7 +61,7 @@ export default function JournalPage() {
               </h2>
               <p className="mt-4 text-base leading-relaxed text-ink/70">
                 Four regular contributors, none of whom were hired to write. Ayu reads currents, Yos
-                crosses the Banda Sea, Rudi feeds sixteen people off a market stall, and Lila counts
+                crosses the Banda Sea, Rudi feeds twelve people off a market stall, and Lila counts
                 coral.
               </p>
               <Link

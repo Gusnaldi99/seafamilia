@@ -79,7 +79,7 @@ export function HomeItineraryIndex({ tripPhotos }: { tripPhotos: Record<string, 
               Everything we sail, on one page
             </h2>
             <p className="mt-4 text-base leading-relaxed text-ink/70">
-              Twelve routes across eight waters. Filter it down, or read the whole list — it is
+              Two routes across three waters. Filter it down, or read the whole list — it is
               short on purpose.
             </p>
           </div>

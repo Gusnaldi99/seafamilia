@@ -9,7 +9,7 @@
 import * as React from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { ChevronRight, Magnifier, Mark, Menu as MenuIcon, SignIn as SignInIcon } from '@/components/icons';
+import { ChevronRight, Magnifier, Menu as MenuIcon, SignIn as SignInIcon } from '@/components/icons';
 import { UtilityBar } from './utility-bar';
 import { PrimaryNav } from './primary-nav';
 import { SearchPanel } from './search-panel';
@@ -70,7 +70,15 @@ export function Header() {
         <div className="mx-auto max-w-8xl px-5 sm:px-6 lg:px-8">
           <div className="sf-headbar flex h-16 items-center justify-between gap-3 lg:h-20">
             <Link href={routes.home()} className="flex shrink-0 items-center gap-3 text-ink-700">
-              <Mark className="sf-mark h-9 w-auto lg:h-11" aria-hidden="true" />
+              {/* eslint-disable-next-line @next/next/no-img-element -- static brand asset, not content photography (see lib/photo.ts) */}
+              <img
+                src="/assets/logo/logo_no_text.png"
+                alt=""
+                width={768}
+                height={721}
+                className="sf-mark h-9 w-auto lg:h-11"
+                aria-hidden="true"
+              />
               <span className="flex flex-col leading-none">
                 <span className="font-mark text-[15px] font-medium uppercase tracking-[0.3em] lg:text-[17px]">
                   Sea

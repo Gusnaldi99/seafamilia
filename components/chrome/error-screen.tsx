@@ -125,7 +125,7 @@ export function ErrorScreen({
             <div className="rounded-2xl border border-sand-300 p-5">
               <h3 className="font-mark text-[11px] uppercase tracking-[0.16em] text-flame">Being fixed</h3>
               <p className="mt-2 text-sm leading-relaxed text-ink/70">
-                Someone has been paged. In eleven years the longest this has lasted is about forty minutes.
+                Someone has been paged. In eight years the longest this has lasted is about forty minutes.
               </p>
             </div>
           </div>

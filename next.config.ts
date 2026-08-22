@@ -7,6 +7,17 @@ const nextConfig: NextConfig = {
   turbopack: {
     root: path.join(__dirname),
   },
+  images: {
+    formats: ['image/avif', 'image/webp'],
+  },
+  async redirects() {
+    // familia-satu/layar-kecil were renamed to sea-familia/sea-familia-2 in
+    // the Aug 2026 client revision — same boats, corrected names.
+    return [
+      { source: '/boats/familia-satu', destination: '/boats/sea-familia', permanent: true },
+      { source: '/boats/layar-kecil', destination: '/boats/sea-familia-2', permanent: true },
+    ];
+  },
 };
 
 export default nextConfig;

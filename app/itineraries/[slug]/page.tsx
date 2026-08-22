@@ -21,7 +21,7 @@ import {
   waterBySlug,
 } from '@/lib/queries';
 import { routes } from '@/lib/routes';
-import { inclusions, trips } from '@/lib/data';
+import { trips } from '@/lib/data';
 
 export function generateStaticParams() {
   return trips.map((t) => ({ slug: t.slug }));
@@ -48,8 +48,8 @@ export default async function TripDetailPage({ params }: PageProps<'/itineraries
   const deps = departuresFor(trip.slug);
   const route = routeFor(trip);
   const routeIsProvisional = route.some((d) => d.provisional);
-  const included = trip.included ?? inclusions.included;
-  const excluded = trip.excluded ?? inclusions.excluded;
+  const included = trip.included ?? boat.included;
+  const excluded = trip.excluded ?? boat.excluded;
 
   const sameWater = tripsInWater(trip.water).filter((x) => x.slug !== trip.slug);
   const sameExp = filterTrips({ experience: trip.experiences[0] }).filter(
@@ -218,8 +218,7 @@ export default async function TripDetailPage({ params }: PageProps<'/itineraries
                 ))}
               </ul>
               <p className="mt-6 text-xs leading-relaxed text-ink/70">
-                Deposit is 25% of the cabin total (30% on the twelve-night Banda crossings), balance due 60 days
-                before you sail.{' '}
+                Deposit is 25% of the cabin total, balance due 60 days before you sail.{' '}
                 <Link href={routes.policies('cancellation')} className="text-flame-600 underline underline-offset-4">
                   Cancellation policy
                 </Link>

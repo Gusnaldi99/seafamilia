@@ -10,7 +10,7 @@
 import Link from 'next/link';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
-import { ChevronRight, Cross, Mark, SignIn as SignInIcon, WhatsApp } from '@/components/icons';
+import { ChevronRight, Cross, SignIn as SignInIcon, WhatsApp } from '@/components/icons';
 import { PrimaryNav } from './primary-nav';
 import { useLocale } from '@/components/providers/locale-provider';
 import { routes } from '@/lib/routes';
@@ -48,7 +48,15 @@ export function MobileDrawer({
       >
         <div className="flex h-16 shrink-0 items-center justify-between px-5">
           <span className="flex items-center gap-2.5 text-white">
-            <Mark className="h-8 w-auto" aria-hidden="true" />
+            {/* eslint-disable-next-line @next/next/no-img-element -- static brand asset, not content photography (see lib/photo.ts) */}
+            <img
+              src="/assets/logo/logo_no_text.png"
+              alt=""
+              width={768}
+              height={721}
+              className="h-8 w-auto"
+              aria-hidden="true"
+            />
             <span className="font-mark text-[13px] uppercase tracking-[0.28em]">Sea Familia</span>
           </span>
           <button
