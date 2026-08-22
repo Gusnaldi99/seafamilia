@@ -242,12 +242,22 @@ Still open:
 
 ## 10. Deliberately not built
 
-Unchanged from the legacy spec — named so they're decisions, not gaps: multi-cabin
-bookings (one cabin per reservation; larger parties are pushed to charter or the office),
-real authentication (the sign-in dialog validates and shows success with no session),
-payment capture (the flow ends at a held cabin with a payment link to follow, by design),
-a live availability socket (read once per page load), full-page i18n (chrome/controls
-only — body copy is editorial and un-translated, same as before).
+Named so they're decisions, not gaps: real authentication (the sign-in dialog validates
+and shows success with no session), payment capture (the flow ends at held cabins with a
+payment link to follow, by design), a live availability socket (read once per page load),
+full-page i18n (chrome/controls only — body copy is editorial and un-translated, same as
+before).
+
+**No longer on this list:** multi-cabin bookings. A reservation now holds any number of
+cabins, each with its own party — `ReserveState.selections`, capped per grade by the
+derived inventory and overall by `Departure.cabinsLeft`. Larger parties are no longer
+pushed to the office.
+
+Related: per-guest details (name, nationality, diving, dietary) are no longer collected
+during the funnel. Step 5 takes contact details only, and `/joining-form` collects the
+rest after the deposit — reached from the confirmation screen, and in production from the
+link the office emails. Since there is no booking store, that form cannot look a reference
+up; the guest adds a row per person instead.
 
 ---
 

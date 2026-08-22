@@ -86,6 +86,9 @@ export const routes = {
   plan: (entry?: PlanEntry) => withQuery('/plan', entry as QueryParams),
   reserve: (entry?: ReserveEntry) => withQuery('/reserve', entry as QueryParams),
   charter: (entry?: CharterEntry) => withQuery('/charter', entry as QueryParams),
+  /** Per-guest joining details, filled after the deposit is paid. Reached
+   * from the confirmation screen, and from the link the office emails. */
+  joiningForm: (ref?: string) => withQuery('/joining-form', ref ? { ref } : undefined),
 
   contact: (o?: { ref?: string; topic?: string }) => withQuery('/contact', o as QueryParams),
   ourStory: () => '/our-story',

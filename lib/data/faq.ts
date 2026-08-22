@@ -15,7 +15,7 @@ export const faq: FaqItem[] = [
   {
     group: 'Booking',
     q: 'What happens after I reserve?',
-    a: 'You get a booking reference immediately and an email within a few minutes. Someone from the office — usually Ratih — replies within one working day with the payment link, joining instructions and a form for dietary and diving details.',
+    a: 'You get a booking reference immediately and an email within a few minutes. Someone from the office — usually Ratih — replies within one working day with the payment link and joining instructions. Once the deposit is paid you get a link to the joining form, where you tell us who is coming — names, nationalities, diving tickets and what everyone eats.',
   },
   {
     group: 'Booking',

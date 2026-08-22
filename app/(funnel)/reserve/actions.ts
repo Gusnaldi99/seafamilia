@@ -10,7 +10,8 @@ import { formatReference } from '@/lib/format';
 export interface ReserveSubmission {
   depStart: string;
   totalGuests: number;
-  cabinCode: string;
+  /** One entry per booked cabin — same grade twice means two cabins. */
+  cabinCodes: string[];
   leadName: string;
   leadEmail: string;
 }
@@ -21,13 +22,13 @@ export interface ReserveActionResult {
 }
 
 export async function submitReservation(data: ReserveSubmission, forcedError?: boolean): Promise<ReserveActionResult> {
-  if (!data.leadName.trim() || !data.leadEmail.trim() || !data.cabinCode || !data.depStart) {
+  if (!data.leadName.trim() || !data.leadEmail.trim() || data.cabinCodes.length === 0 || !data.depStart) {
     return { ok: false };
   }
 
   await new Promise((resolve) => setTimeout(resolve, 1100));
   if (forcedError) return { ok: false };
 
-  const seed = Number(data.depStart.replace(/-/g, '')) + data.totalGuests * 31 + data.cabinCode.length;
+  const seed = Number(data.depStart.replace(/-/g, '')) + data.totalGuests * 31 + data.cabinCodes.join('').length;
   return { ok: true, reference: formatReference(seed) };
 }

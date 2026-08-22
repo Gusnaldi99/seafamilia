@@ -2,21 +2,29 @@
  * Reducer-driven state for /reserve, ported from reserve.html's
  * `reserveFlow()`. A reducer (not one big react-hook-form, unlike
  * /charter) because the real logic here is business-transitions —
- * choosing a cabin can silently trim the party, changing guest counts
- * reshapes guestList — which map onto discrete actions far more directly
- * than form-field bindings do.
+ * adding a cabin, moving guests between cabins, applying a voucher —
+ * which map onto discrete actions far more directly than form-field
+ * bindings do.
+ *
+ * Two revisions since the original port:
+ *   1. A reservation now holds several cabins (`selections`), each with its
+ *      own party, rather than exactly one grade with one party.
+ *   2. Per-guest details (nationality, diving, dietary) are no longer
+ *      collected here — they move to /joining-form, after payment. The
+ *      funnel only takes contact details now.
  */
 import { departureById, tripBySlug, boatBySlug, waterBySlug, deriveCabinInventory, type DerivedCabin } from '@/lib/queries';
 import { addDays } from '@/lib/format';
 import { EMAIL_RE } from '@/lib/validation';
-import { GUEST_BANDS, VOUCHERS, totalGuestsOf, type GuestCounts } from './pricing';
+import { GUEST_BANDS, VOUCHERS, totalGuestsOf, sumGuests, type GuestCounts, type SelectedCabin } from './pricing';
 import type { Departure, Trip, Boat, Water } from '@/lib/data/types';
 
 export type DivingLevel = 'none' | 'learning' | 'open-water' | 'advanced' | 'rescue' | 'pro';
 
+/** Per-guest joining-form record. Collected at /joining-form after the
+ * deposit is paid, no longer part of the reservation funnel's state. */
 export interface Guest {
   name: string;
-  band: string;
   nationality: string;
   diving: DivingLevel;
   certNumber: string;
@@ -24,10 +32,24 @@ export interface Guest {
   dietary: string;
 }
 
-export interface Lead {
+export const EMPTY_GUEST: Guest = { name: '', nationality: '', diving: 'none', certNumber: '', dives: 0, dietary: '' };
+
+/** Everything the office needs to reach the booker before payment. The
+ * lead guest's name used to live in `guestList[0].name`; it belongs here
+ * now that the guest list itself has moved past the payment step. */
+export interface Contact {
+  name: string;
   email: string;
   phone: string;
   notes: string;
+}
+
+/** One physical cabin. Two units of the same grade are two entries, so the
+ * grade code is no longer unique — `uid` is the identity. */
+export interface CabinSelection {
+  uid: number;
+  code: string;
+  guests: GuestCounts;
 }
 
 export interface VoucherState {
@@ -60,18 +82,17 @@ export interface ReserveState {
   water: Water | null;
   endDate: string | null;
   cabins: DerivedCabin[];
-  cabin: DerivedCabin | null;
-  guests: GuestCounts;
+  selections: CabinSelection[];
+  /** Monotonic source of `CabinSelection.uid`, kept in state so the reducer
+   * stays pure and the tests stay deterministic. */
+  uidSeq: number;
   chosenExtras: string[];
-  guestList: Guest[];
-  lead: Lead;
+  contact: Contact;
   voucher: VoucherState;
   consent: Consent;
   errors: Record<string, string>;
   sheet: boolean;
 }
-
-export const EMPTY_GUEST: Guest = { name: '', band: '', nationality: '', diving: 'none', certNumber: '', dives: 0, dietary: '' };
 
 export const INITIAL_STATE: ReserveState = {
   step: 1,
@@ -84,26 +105,55 @@ export const INITIAL_STATE: ReserveState = {
   water: null,
   endDate: null,
   cabins: [],
-  cabin: null,
-  guests: { adults: 2, teens: 0, children: 0 },
+  selections: [],
+  uidSeq: 1,
   chosenExtras: [],
-  guestList: [],
-  lead: { email: '', phone: '', notes: '' },
+  contact: { name: '', email: '', phone: '', notes: '' },
   voucher: { code: '', applied: '', rate: 0, error: '' },
   consent: { terms: false, insurance: false, newsletter: false },
   errors: {},
   sheet: false,
 };
 
-export function syncGuestList(guestList: Guest[], guests: GuestCounts): Guest[] {
-  const wanted: string[] = [];
-  GUEST_BANDS.forEach((b) => {
-    for (let i = 0; i < guests[b.key]; i++) wanted.push(b.one);
+/** A new cabin opens at its standard occupancy rather than empty or full —
+ * `occupancy` is exactly what that field means in the catalogue. */
+function defaultGuestsFor(cabin: DerivedCabin): GuestCounts {
+  return { adults: Math.max(1, Math.min(cabin.occupancy, cabin.maxOccupancy)), teens: 0, children: 0 };
+}
+
+export function gradeCountOf(selections: CabinSelection[], code: string): number {
+  return selections.filter((s) => s.code === code).length;
+}
+
+/**
+ * How many more cabins of this grade may be added. Capped both by the
+ * grade's own derived stock and by the departure's total — deriveCabinInventory
+ * guarantees the per-grade figures sum to `cabinsLeft`, but its last grade is
+ * not capped by its own catalogue stock, and multi-cabin makes that reachable.
+ */
+export function headroomFor(state: ReserveState, code: string): number {
+  const grade = state.cabins.find((c) => c.code === code);
+  if (!grade) return 0;
+  const perGrade = grade.left - gradeCountOf(state.selections, code);
+  const overall = (state.dep?.cabinsLeft ?? 0) - state.selections.length;
+  return Math.max(0, Math.min(perGrade, overall));
+}
+
+/** Resolves the selections against the derived inventory for pricing. */
+export function selectedCabinsOf(state: ReserveState): SelectedCabin[] {
+  return state.selections.flatMap((s) => {
+    const cabin = state.cabins.find((c) => c.code === s.code);
+    return cabin ? [{ uid: s.uid, cabin, guests: s.guests }] : [];
   });
-  return wanted.map((band, i) => {
-    const existing = guestList[i];
-    return existing ? { ...existing, band } : { ...EMPTY_GUEST, band };
-  });
+}
+
+/** The whole party, across every booked cabin. */
+export function partyGuestsOf(state: ReserveState): GuestCounts {
+  return sumGuests(state.selections.map((s) => s.guests));
+}
+
+export function maxOccupancyOf(state: ReserveState, code: string): number {
+  return state.cabins.find((c) => c.code === code)?.maxOccupancy ?? 2;
 }
 
 function selectDeparture(state: ReserveState, depId: string, cabinCode?: string): ReserveState {
@@ -116,19 +166,23 @@ function selectDeparture(state: ReserveState, depId: string, cabinCode?: string)
   const water = waterBySlug(trip.water) ?? null;
   const endDate = addDays(dep.start, dep.nights);
   const cabins = deriveCabinInventory(dep, boat);
+  // A different departure has different inventory, so any existing choice
+  // is meaningless — start clean, then honour a ?cabin= preselect.
   const wanted = cabinCode ? cabins.find((c) => c.code === cabinCode && c.left > 0) : undefined;
-  return { ...state, dep, trip, boat, water, endDate, cabins, cabin: wanted ?? null };
+  const selections: CabinSelection[] =
+    wanted && dep.cabinsLeft > 0 ? [{ uid: state.uidSeq, code: wanted.code, guests: defaultGuestsFor(wanted) }] : [];
+  return { ...state, dep, trip, boat, water, endDate, cabins, selections, uidSeq: state.uidSeq + selections.length };
 }
 
 export type ReserveAction =
   | { type: 'SET_SEARCH'; search: Partial<SearchFilters> }
   | { type: 'SET_RESULTS'; results: Departure[] }
   | { type: 'SELECT_DEPARTURE'; depId: string; cabinCode?: string }
-  | { type: 'CHOOSE_CABIN'; code: string }
-  | { type: 'BUMP_GUESTS'; key: keyof GuestCounts; delta: number }
+  | { type: 'ADD_CABIN'; code: string }
+  | { type: 'REMOVE_CABIN'; code: string }
+  | { type: 'BUMP_GUESTS'; uid: number; key: keyof GuestCounts; delta: number }
   | { type: 'TOGGLE_EXTRA'; key: string }
-  | { type: 'SET_GUEST_FIELD'; index: number; field: keyof Guest; value: string | number }
-  | { type: 'SET_LEAD_FIELD'; field: keyof Lead; value: string }
+  | { type: 'SET_CONTACT_FIELD'; field: keyof Contact; value: string }
   | { type: 'SET_CONSENT'; field: keyof Consent; value: boolean }
   | { type: 'SET_VOUCHER_CODE'; code: string }
   | { type: 'APPLY_VOUCHER' }
@@ -145,39 +199,40 @@ export function reserveReducer(state: ReserveState, action: ReserveAction): Rese
       return { ...state, results: action.results };
     case 'SELECT_DEPARTURE':
       return selectDeparture(state, action.depId, action.cabinCode);
-    case 'CHOOSE_CABIN': {
-      const c = state.cabins.find((x) => x.code === action.code);
-      if (!c || c.left <= 0) return state;
-      const guests = { ...state.guests };
-      // Silently trims the party (children -> teens -> adults, floor 1
-      // adult) to fit the newly chosen grade — matches the original
-      // exactly, including the lack of any confirmation prompt.
-      while (totalGuestsOf(guests) > c.maxOccupancy) {
-        if (guests.children > 0) guests.children--;
-        else if (guests.teens > 0) guests.teens--;
-        else if (guests.adults > 1) guests.adults--;
-        else break;
-      }
-      return { ...state, cabin: c, guests, guestList: syncGuestList(state.guestList, guests) };
+    case 'ADD_CABIN': {
+      const grade = state.cabins.find((c) => c.code === action.code);
+      if (!grade || headroomFor(state, action.code) <= 0) return state;
+      return {
+        ...state,
+        selections: [...state.selections, { uid: state.uidSeq, code: grade.code, guests: defaultGuestsFor(grade) }],
+        uidSeq: state.uidSeq + 1,
+      };
+    }
+    case 'REMOVE_CABIN': {
+      // Drops the most recently added unit of that grade, party and all.
+      const idx = state.selections.map((s) => s.code).lastIndexOf(action.code);
+      if (idx === -1) return state;
+      return { ...state, selections: state.selections.filter((_, i) => i !== idx) };
     }
     case 'BUMP_GUESTS': {
       const band = GUEST_BANDS.find((b) => b.key === action.key);
       if (!band) return state;
-      const next = state.guests[action.key] + action.delta;
+      const sel = state.selections.find((s) => s.uid === action.uid);
+      if (!sel) return state;
+      const next = sel.guests[action.key] + action.delta;
       if (next < band.min) return state;
-      const maxOccupancy = state.cabin ? state.cabin.maxOccupancy : 2;
-      if (action.delta > 0 && totalGuestsOf(state.guests) >= maxOccupancy) return state;
-      const guests = { ...state.guests, [action.key]: next };
-      return { ...state, guests, guestList: syncGuestList(state.guestList, guests) };
+      const guests = { ...sel.guests, [action.key]: next };
+      // Guard the resulting total, not the pre-change one — a multi-step
+      // delta from typed input would otherwise vault straight past the cap.
+      if (totalGuestsOf(guests) > maxOccupancyOf(state, sel.code)) return state;
+      return { ...state, selections: state.selections.map((s) => (s.uid === action.uid ? { ...s, guests } : s)) };
     }
     case 'TOGGLE_EXTRA': {
       const has = state.chosenExtras.includes(action.key);
       return { ...state, chosenExtras: has ? state.chosenExtras.filter((k) => k !== action.key) : [...state.chosenExtras, action.key] };
     }
-    case 'SET_GUEST_FIELD':
-      return { ...state, guestList: state.guestList.map((g, i) => (i === action.index ? { ...g, [action.field]: action.value } : g)) };
-    case 'SET_LEAD_FIELD':
-      return { ...state, lead: { ...state.lead, [action.field]: action.value } };
+    case 'SET_CONTACT_FIELD':
+      return { ...state, contact: { ...state.contact, [action.field]: action.value } };
     case 'SET_CONSENT':
       return { ...state, consent: { ...state.consent, [action.field]: action.value } };
     case 'SET_VOUCHER_CODE':
@@ -209,28 +264,31 @@ export function reserveReducer(state: ReserveState, action: ReserveAction): Rese
   }
 }
 
+/** Every booked cabin has to hold at least one guest and no more than it sleeps. */
 export function occupancyOk(state: ReserveState): boolean {
-  const total = totalGuestsOf(state.guests);
-  const max = state.cabin ? state.cabin.maxOccupancy : 2;
-  return total >= 1 && total <= max;
+  if (state.selections.length === 0) return false;
+  return state.selections.every((s) => {
+    const total = totalGuestsOf(s.guests);
+    return total >= 1 && total <= maxOccupancyOf(state, s.code);
+  });
 }
 
-export function leadComplete(state: ReserveState): boolean {
-  return !!(state.guestList[0]?.name.trim() && state.lead.email.trim() && state.lead.phone.trim());
+export function contactComplete(state: ReserveState): boolean {
+  return !!(state.contact.name.trim() && state.contact.email.trim() && state.contact.phone.trim());
 }
 
 export function firstIncomplete(state: ReserveState): number {
   if (!state.dep) return 1;
-  if (!state.cabin) return 3;
+  if (state.selections.length === 0) return 3;
   if (!occupancyOk(state)) return 4;
-  if (!leadComplete(state)) return 5;
+  if (!contactComplete(state)) return 5;
   return 6;
 }
 
 export function canContinue(state: ReserveState): boolean {
   if (state.step === 1) return !!state.dep;
   if (state.step === 2) return !!state.dep;
-  if (state.step === 3) return !!state.cabin;
+  if (state.step === 3) return state.selections.length > 0;
   if (state.step === 4) return occupancyOk(state);
   return true;
 }
@@ -240,12 +298,11 @@ export function canContinue(state: ReserveState): boolean {
 export function validateStep(state: ReserveState, step: number): Record<string, string> {
   const errors: Record<string, string> = {};
   if (step === 5) {
-    const lead0 = state.guestList[0];
-    if (!lead0 || !lead0.name.trim()) errors.name0 = 'We need the lead guest’s name as it appears in the passport.';
-    const email = state.lead.email.trim();
+    if (!state.contact.name.trim()) errors.name = 'We need the lead guest’s name as it appears in the passport.';
+    const email = state.contact.email.trim();
     if (!email) errors.email = 'Where should the confirmation go?';
     else if (!EMAIL_RE.test(email)) errors.email = 'That address is missing something — check for a typo.';
-    if (!state.lead.phone.trim()) errors.phone = 'A number the crew can reach you on if a flight goes wrong.';
+    if (!state.contact.phone.trim()) errors.phone = 'A number the crew can reach you on if a flight goes wrong.';
   }
   if (step === 6) {
     if (!state.consent.terms) errors.terms = 'Please confirm you have read the booking terms.';
@@ -254,28 +311,42 @@ export function validateStep(state: ReserveState, step: number): Record<string, 
   return errors;
 }
 
-/** Only the fields the original persists to sessionStorage, plus
- * `guestList` — the original drops per-guest names/nationality/diving/
- * dietary notes (and even the lead's own name) on reload; ported as a real
- * fix per the migration plan rather than carried over. */
+/** Versioned since the multi-cabin revision: a v1 draft describes a single
+ * `cabinCode` and a guest list this shape no longer has, so it is discarded
+ * rather than half-restored. */
+export const PERSIST_VERSION = 2;
+
 export interface PersistedReserve {
+  v: number;
   depId: string;
-  cabinCode: string;
-  guests: GuestCounts;
-  guestList: Guest[];
-  lead: Lead;
+  selections: Array<{ code: string; guests: GuestCounts }>;
+  contact: Contact;
   chosenExtras: string[];
 }
 
-export function toPersisted(state: Pick<ReserveState, 'dep' | 'cabin' | 'guests' | 'guestList' | 'lead' | 'chosenExtras'>): PersistedReserve {
+export function toPersisted(state: Pick<ReserveState, 'dep' | 'selections' | 'contact' | 'chosenExtras'>): PersistedReserve {
   return {
+    v: PERSIST_VERSION,
     depId: state.dep?.id ?? '',
-    cabinCode: state.cabin?.code ?? '',
-    guests: state.guests,
-    guestList: state.guestList,
-    lead: state.lead,
+    selections: state.selections.map((s) => ({ code: s.code, guests: s.guests })),
+    contact: state.contact,
     chosenExtras: state.chosenExtras,
   };
+}
+
+/** Re-adds saved cabins one at a time so each is re-checked against current
+ * stock — inventory may have moved since the draft was written. */
+function restoreSelections(state: ReserveState, saved: Array<{ code: string; guests: GuestCounts }>): ReserveState {
+  let next: ReserveState = { ...state, selections: [] };
+  saved.forEach((s) => {
+    const grade = next.cabins.find((c) => c.code === s.code);
+    if (!grade || headroomFor(next, s.code) <= 0) return;
+    const guests = { ...defaultGuestsFor(grade), ...s.guests };
+    const total = totalGuestsOf(guests);
+    if (total < 1 || total > grade.maxOccupancy) return;
+    next = { ...next, selections: [...next.selections, { uid: next.uidSeq, code: s.code, guests }], uidSeq: next.uidSeq + 1 };
+  });
+  return next;
 }
 
 /**
@@ -292,27 +363,37 @@ export function computeInitialState(searchParams: URLSearchParams): ReserveState
       const saved = window.sessionStorage.getItem('sf.reserve');
       if (saved) {
         const s = JSON.parse(saved) as Partial<PersistedReserve>;
-        state = {
-          ...state,
-          guests: { ...state.guests, ...s.guests },
-          lead: { ...state.lead, ...s.lead },
-          chosenExtras: s.chosenExtras ?? [],
-          guestList: s.guestList ?? [],
-        };
-        if (s.depId) state = selectDeparture(state, s.depId, s.cabinCode);
+        if (s.v === PERSIST_VERSION) {
+          state = {
+            ...state,
+            contact: { ...state.contact, ...s.contact },
+            chosenExtras: s.chosenExtras ?? [],
+          };
+          if (s.depId) {
+            state = selectDeparture(state, s.depId);
+            state = restoreSelections(state, s.selections ?? []);
+          }
+        }
       }
     } catch {
       // ignore malformed/unavailable storage
     }
   }
 
+  // selectDeparture() clears the cabins, so re-running it for a departure the
+  // draft already restored would throw away every cabin but a `?cabin=` one.
+  // Only re-select when the URL actually names a different departure.
   const depId = searchParams.get('dep');
-  if (depId) state = selectDeparture(state, depId, searchParams.get('cabin') ?? undefined);
+  if (depId && (state.dep?.id !== depId || state.selections.length === 0)) {
+    state = selectDeparture(state, depId, searchParams.get('cabin') ?? undefined);
+  }
 
   const guestsParam = searchParams.get('guests');
-  if (guestsParam) state = { ...state, guests: { ...state.guests, adults: Math.max(1, Math.min(4, Number(guestsParam) || 2)) } };
-
-  state = { ...state, guestList: syncGuestList(state.guestList, state.guests) };
+  if (guestsParam && state.selections.length > 0) {
+    const first = state.selections[0];
+    const adults = Math.max(1, Math.min(maxOccupancyOf(state, first.code), Number(guestsParam) || 2));
+    state = { ...state, selections: [{ ...first, guests: { ...first.guests, adults } }, ...state.selections.slice(1)] };
+  }
 
   const wanted = Math.max(1, Math.min(6, Number(searchParams.get('step')) || 1));
   const step = Math.min(wanted, firstIncomplete(state));

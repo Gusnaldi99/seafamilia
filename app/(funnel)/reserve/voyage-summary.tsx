@@ -3,18 +3,18 @@
 /** Ported from reserve.html's `summaryHTML()` — one panel, reused by both
  * the desktop sticky rail and the mobile bottom sheet (`bare` drops the
  * photo + "Your voyage" heading the sheet already shows in its own
- * header). */
+ * header). Since the multi-cabin revision it lists a row per booked cabin
+ * and groups the fare lines under them. */
 import { PhotoPlate } from '@/components/media/photo-plate';
-import type { PriceLine } from '@/features/reserve/pricing';
+import { cabinLabelsFor, totalGuestsOf, type PriceLine, type SelectedCabin } from '@/features/reserve/pricing';
 import type { Trip, Water, Boat } from '@/lib/data/types';
-import type { DerivedCabin } from '@/lib/queries';
 
 export function VoyageSummary({
   bare,
   trip,
   water,
   boat,
-  cabin,
+  selected,
   dateRange,
   nights,
   totalGuests,
@@ -31,7 +31,7 @@ export function VoyageSummary({
   trip: Trip;
   water: Water;
   boat: Boat;
-  cabin: DerivedCabin | null;
+  selected: SelectedCabin[];
   dateRange: string;
   nights: string;
   totalGuests: number;
@@ -44,6 +44,16 @@ export function VoyageSummary({
   money: (n: number) => string;
   onGoto: (step: number) => void;
 }) {
+  const labels = cabinLabelsFor(selected);
+  // Fare lines carry their cabin in `group`; extras carry ''. Preserve the
+  // order they arrive in rather than re-sorting.
+  const groups: Array<{ group: string; lines: PriceLine[] }> = [];
+  priceLines.forEach((l) => {
+    const last = groups[groups.length - 1];
+    if (last && last.group === l.group) last.lines.push(l);
+    else groups.push({ group: l.group, lines: [l] });
+  });
+
   return (
     <div>
       {!bare ? (
@@ -64,12 +74,21 @@ export function VoyageSummary({
           <SummaryRow label="Length" value={nights} />
           <SummaryRow label="Boat" value={boat.name} />
           <SummaryRow
-            label="Cabin"
+            label={selected.length > 1 ? 'Cabins' : 'Cabin'}
             value={
-              cabin ? (
+              selected.length ? (
                 <>
-                  {cabin.name}
-                  <span className="block text-xs text-ink/50">{cabin.beds}</span>
+                  {selected.map((s) => (
+                    <span key={s.uid} className="block first:mt-0 [&:not(:first-child)]:mt-1.5">
+                      {labels[s.uid]}
+                      <span className="block text-xs text-ink/50">
+                        {s.cabin.beds} · {totalGuestsOf(s.guests)} {totalGuestsOf(s.guests) === 1 ? 'guest' : 'guests'}
+                      </span>
+                    </span>
+                  ))}{' '}
+                  <button type="button" onClick={() => onGoto(3)} className="font-mark text-[10px] uppercase tracking-[0.14em] text-flame-600 underline underline-offset-4">
+                    Edit
+                  </button>
                 </>
               ) : (
                 <>
@@ -98,13 +117,20 @@ export function VoyageSummary({
           />
         </dl>
 
-        {cabin ? (
+        {selected.length ? (
           <div className="mt-4 border-t border-sand-300 pt-4">
             <dl className="space-y-1.5">
-              {priceLines.map((l) => (
-                <div key={l.label} className="flex items-baseline justify-between gap-3">
-                  <dt className="text-xs text-ink/60">{l.label}</dt>
-                  <dd className="text-sm text-ink-700">{money(l.amount)}</dd>
+              {groups.map((g) => (
+                <div key={g.group || 'extras'} className="space-y-1.5">
+                  {g.group && selected.length > 1 ? (
+                    <dt className="pt-1 font-mark text-[10px] uppercase tracking-[0.14em] text-mist-700">{g.group}</dt>
+                  ) : null}
+                  {g.lines.map((l) => (
+                    <div key={l.key} className="flex items-baseline justify-between gap-3">
+                      <dt className="text-xs text-ink/60">{l.label}</dt>
+                      <dd className="text-sm text-ink-700">{money(l.amount)}</dd>
+                    </div>
+                  ))}
                 </div>
               ))}
               {discount > 0 ? (
@@ -123,7 +149,8 @@ export function VoyageSummary({
               <span className="text-sm text-deep-700">{money(deposit)}</span>
             </div>
             <p className="mt-3 rounded-xl bg-sand p-3 text-[11px] leading-relaxed text-ink/60">
-              Nothing is charged here. Reserving holds the cabin for 72 hours while the office confirms it and sends the deposit link.
+              Nothing is charged here. Reserving holds {selected.length > 1 ? 'the cabins' : 'the cabin'} for 72 hours while the office confirms
+              {selected.length > 1 ? ' them' : ' it'} and sends the deposit link.
             </p>
           </div>
         ) : null}

@@ -3,12 +3,15 @@
 /**
  * Ported from reserve.html's `reserveFlow()` — the most complex of the
  * three funnels, hence the reducer (features/reserve/state.ts) rather than
- * a form library. Two deliberate fixes over the original, both called out
- * in the migration plan: `guestList` now survives a sessionStorage reload
- * (the original loses every typed name, including the lead's own, on
- * reload mid-step-5 — see state.ts's PersistedReserve), and the
- * `[aria-invalid="true"]` autofocus-on-error query is scoped to this
- * funnel's own root rather than the whole document.
+ * a form library. One deliberate fix over the original, called out in the
+ * migration plan: the `[aria-invalid="true"]` autofocus-on-error query is
+ * scoped to this funnel's own root rather than the whole document.
+ *
+ * Since the multi-cabin revision a reservation holds several cabins, each
+ * with its own party (step 3 picks quantities, step 4 fills them), and
+ * per-guest details are no longer asked for here at all — step 5 collects
+ * contact details only, and the joining form at /joining-form takes the
+ * rest once the deposit is paid.
  */
 import * as React from 'react';
 import Link from 'next/link';
@@ -35,16 +38,20 @@ import { VoyageSummary } from './voyage-summary';
 import { submitReservation } from './actions';
 import {
   computeInitialState,
+  contactComplete,
   firstIncomplete,
-  leadComplete,
+  gradeCountOf,
+  headroomFor,
+  maxOccupancyOf,
   occupancyOk,
+  partyGuestsOf,
   reserveReducer,
+  selectedCabinsOf,
   toPersisted,
   validateStep,
   canContinue as canContinueOf,
-  type DivingLevel,
 } from '@/features/reserve/state';
-import { EXTRAS, GUEST_BANDS, cabinSubtotal, priceLinesFor, subtotalOf, totalGuestsOf } from '@/features/reserve/pricing';
+import { EXTRAS, GUEST_BANDS, cabinLabelsFor, cabinsSubtotal, priceLinesFor, subtotalOf, totalGuestsOf } from '@/features/reserve/pricing';
 import { useLocale } from '@/components/providers/locale-provider';
 import { filterDepartures, departureMonthOptions, tripBySlug, boatBySlug } from '@/lib/queries';
 import { forcedStateFrom, emptied } from '@/lib/qa';
@@ -56,20 +63,11 @@ import { cn } from '@/lib/utils';
 const STEPS = [
   { key: 'search', label: 'Search' },
   { key: 'summary', label: 'Trip summary' },
-  { key: 'cabin', label: 'Cabin' },
+  { key: 'cabin', label: 'Cabins' },
   { key: 'guests', label: 'Guests' },
-  { key: 'details', label: 'Your details' },
+  { key: 'details', label: 'Contact' },
   { key: 'review', label: 'Review' },
 ];
-
-const DIVING_LABELS: Record<DivingLevel, string> = {
-  none: 'Snorkelling',
-  learning: 'Learning on board',
-  'open-water': 'Open Water',
-  advanced: 'Advanced',
-  rescue: 'Rescue+',
-  pro: 'Pro',
-};
 
 export function ReserveFlow() {
   const router = useRouter();
@@ -114,24 +112,26 @@ export function ReserveFlow() {
     return () => clearTimeout(handle);
   }, [state.search, forced, searchTick]);
 
-  const { dep, cabin, guests, guestList, lead, chosenExtras, step } = state;
+  const { dep, selections, contact, chosenExtras, step } = state;
   const inclusionsPreview = state.boat?.included.slice(0, 6) ?? [];
   React.useEffect(() => {
+    // Step 7 has already cleared the draft on a successful submit — writing
+    // it back here would resurrect the completed reservation and drop the
+    // guest on step 1 the next time they open the confirmation URL.
+    if (step === 7) return;
     try {
-      window.sessionStorage.setItem('sf.reserve', JSON.stringify(toPersisted({ dep, cabin, guests, guestList, lead, chosenExtras })));
+      window.sessionStorage.setItem('sf.reserve', JSON.stringify(toPersisted({ dep, selections, contact, chosenExtras })));
     } catch {
       // ignore quota/availability errors — the draft just won't survive a reload
     }
-  }, [dep, cabin, guests, guestList, lead, chosenExtras, step]);
+  }, [dep, selections, contact, chosenExtras, step]);
 
-  const totalGuests = totalGuestsOf(state.guests);
-  const maxOccupancy = state.cabin ? state.cabin.maxOccupancy : 2;
-  const priceLines = React.useMemo(
-    () => (state.cabin ? priceLinesFor(state.cabin, state.guests, state.chosenExtras, money) : []),
-    [state.cabin, state.guests, state.chosenExtras, money]
-  );
+  const selected = React.useMemo(() => selectedCabinsOf(state), [state]);
+  const cabinLabels = React.useMemo(() => cabinLabelsFor(selected), [selected]);
+  const totalGuests = totalGuestsOf(partyGuestsOf(state));
+  const priceLines = React.useMemo(() => priceLinesFor(selected, state.chosenExtras, money), [selected, state.chosenExtras, money]);
   const subtotal = subtotalOf(priceLines);
-  const discount = state.cabin && state.voucher.rate ? Math.round(cabinSubtotal(state.cabin.price, state.guests) * state.voucher.rate) : 0;
+  const discount = state.voucher.rate ? Math.round(cabinsSubtotal(selected) * state.voucher.rate) : 0;
   const total = Math.max(0, subtotal - discount);
   const deposit = state.dep ? Math.round(total * state.dep.deposit) : 0;
 
@@ -150,7 +150,10 @@ export function ReserveFlow() {
     if (target > state.step && target > firstIncomplete(state)) return;
     dispatch({ type: 'GOTO', step: target });
     if (target < 7) {
-      router.replace(routes.reserve({ dep: state.dep?.id, cabin: state.cabin?.code, step: target }), { scroll: false });
+      // `?cabin=` is an inbound deep-link param only — it can name one grade,
+      // so mirroring a multi-cabin selection through it would silently drop
+      // every cabin but the first on reload. The draft carries them instead.
+      router.replace(routes.reserve({ dep: state.dep?.id, step: target }), { scroll: false });
     }
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
@@ -179,7 +182,7 @@ export function ReserveFlow() {
     if (!nextState.dep) return;
     dispatch({ type: 'SELECT_DEPARTURE', depId: id });
     dispatch({ type: 'GOTO', step: 2 });
-    router.replace(routes.reserve({ dep: nextState.dep.id, cabin: nextState.cabin?.code, step: 2 }), { scroll: false });
+    router.replace(routes.reserve({ dep: nextState.dep.id, step: 2 }), { scroll: false });
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
@@ -190,16 +193,16 @@ export function ReserveFlow() {
       focusFirstInvalid();
       return;
     }
-    if (!state.dep || !state.cabin) return;
+    if (!state.dep || state.selections.length === 0) return;
     setBusy(true);
     setSubmitError(false);
     const result = await submitReservation(
       {
         depStart: state.dep.start,
         totalGuests,
-        cabinCode: state.cabin.code,
-        leadName: state.guestList[0]?.name ?? '',
-        leadEmail: state.lead.email,
+        cabinCodes: state.selections.map((s) => s.code),
+        leadName: state.contact.name,
+        leadEmail: state.contact.email,
       },
       forced === 'error'
     );
@@ -219,27 +222,83 @@ export function ReserveFlow() {
     }
     router.replace(routes.reserve({ ref: result.reference }), { scroll: false });
     window.scrollTo({ top: 0, behavior: 'smooth' });
-    toast({ title: `Cabin reserved — ${result.reference}`, body: 'Held for 72 hours. The deposit link follows within one working day.', variant: 'success' });
+    toast({
+      title: `${state.selections.length > 1 ? 'Cabins' : 'Cabin'} reserved — ${result.reference}`,
+      body: 'Held for 72 hours. The deposit link follows within one working day.',
+      variant: 'success',
+    });
   }
 
+  const cabinCountLabel = state.selections.length === 1 ? '1 cabin' : `${state.selections.length} cabins`;
   const footerHint =
     state.step === 1
       ? state.dep
         ? 'Date chosen'
         : `${state.results.length} dates with cabins free`
       : state.step === 3
-        ? state.cabin?.name ?? 'Choose a cabin grade'
+        ? state.selections.length
+          ? cabinCountLabel
+          : 'Choose a cabin grade'
         : state.step === 4
           ? occupancyOk(state)
-            ? 'Fits the cabin'
-            : 'Too many for this cabin'
+            ? state.selections.length > 1
+              ? 'Everyone fits'
+              : 'Fits the cabin'
+            : 'Check the cabin numbers'
           : state.step === 5
-            ? leadComplete(state)
-              ? 'Lead guest complete'
-              : 'Lead guest details needed'
+            ? contactComplete(state)
+              ? 'Contact details complete'
+              : 'Contact details needed'
             : state.step === 6
               ? 'Nothing is charged yet'
               : 'Your voyage';
+
+  // A confirmation URL opened fresh — bookmarked, shared, or simply
+  // reloaded. The draft is deliberately cleared on submit and there is no
+  // booking store to read the reference back from, so the rich confirmation
+  // cannot be rebuilt; show what is genuinely known rather than dropping the
+  // guest into an empty step 1.
+  const refParam = searchParams.get('ref');
+  if (refParam && state.step !== 7) {
+    return (
+      <main className="pb-32 lg:pb-28">
+        <div className="mx-auto max-w-7xl px-5 py-8 sm:px-6 lg:px-8 lg:py-12">
+          <div className="mx-auto max-w-2xl rounded-4xl bg-white p-7 shadow-card lg:p-12">
+            <span className="grid h-14 w-14 place-items-center rounded-full bg-mist-100 text-ink-700">
+              <BigCheck className="h-7 w-7" aria-hidden="true" />
+            </span>
+            <p className="mt-6 font-mark text-eyebrow uppercase text-flame">Reservation held</p>
+            <h1 className="mt-4 font-display text-3xl font-light leading-tight tracking-tight text-ink-700 sm:text-4xl">{refParam}</h1>
+            <p className="mt-4 text-base leading-relaxed text-ink/70">
+              This is your booking reference. The full confirmation went to the email you booked with — we do not keep it on this screen once you leave, so the email is the copy to
+              keep.
+            </p>
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+              <Link
+                href={routes.joiningForm(refParam)}
+                className="inline-flex flex-1 items-center justify-center rounded-full bg-flame px-6 py-4 font-mark text-[12px] uppercase tracking-[0.14em] text-white transition hover:bg-flame-600"
+              >
+                Open the joining form
+              </Link>
+              <Link
+                href={routes.contact({ ref: refParam, topic: 'booking' })}
+                className="inline-flex flex-1 items-center justify-center rounded-full border border-ink/20 px-6 py-4 font-mark text-[12px] uppercase tracking-[0.14em] text-ink-700 transition hover:border-ink"
+              >
+                Ask about this booking
+              </Link>
+            </div>
+            <p className="mt-6 border-t border-sand-300 pt-6 text-sm leading-relaxed text-ink/70">
+              Looking for a different date instead?{' '}
+              <Link href={routes.departures()} className="text-flame-600 underline underline-offset-4">
+                Browse the departures
+              </Link>
+              .
+            </p>
+          </div>
+        </div>
+      </main>
+    );
+  }
 
   if (state.step === 7 && state.dep && state.trip && state.boat) {
     return (
@@ -251,10 +310,11 @@ export function ReserveFlow() {
                 <span className="grid h-16 w-16 place-items-center rounded-full bg-mist-100 text-ink-700">
                   <BigCheck className="h-8 w-8" aria-hidden="true" />
                 </span>
-                <p className="mt-6 font-mark text-eyebrow uppercase text-flame">Cabin reserved</p>
+                <p className="mt-6 font-mark text-eyebrow uppercase text-flame">{state.selections.length > 1 ? 'Cabins reserved' : 'Cabin reserved'}</p>
                 <h1 className="mt-4 font-display text-3xl font-light leading-tight tracking-tight text-ink-700 sm:text-4xl">Held for you — welcome to the familia</h1>
                 <p className="mt-4 text-base leading-relaxed text-ink/70">
-                  Your cabin is held for 72 hours. Nothing has been charged: the office confirms availability by hand first, then sends the deposit link.
+                  {state.selections.length > 1 ? 'Your cabins are' : 'Your cabin is'} held for 72 hours. Nothing has been charged: the office confirms availability by hand first, then
+                  sends the deposit link.
                 </p>
 
                 <dl className="mt-8 grid gap-5 rounded-2xl bg-sand p-5 sm:grid-cols-2 lg:p-6">
@@ -282,7 +342,7 @@ export function ReserveFlow() {
                     <dd className="mt-1 text-sm text-ink-700">
                       72 hours from now
                       <br />
-                      <span className="text-ink/55">Then the cabin returns to the pool</span>
+                      <span className="text-ink/55">Then {state.selections.length > 1 ? 'the cabins return' : 'the cabin returns'} to the pool</span>
                     </dd>
                   </div>
                   <div className="sm:col-span-2">
@@ -298,12 +358,16 @@ export function ReserveFlow() {
                   <h2 className="font-mark text-[11px] uppercase tracking-[0.18em] text-flame">What happens next</h2>
                   <ol className="mt-4 space-y-3.5">
                     <li className="flex gap-3 text-sm leading-relaxed text-ink/80">
-                      <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-mist" />A confirmation is on its way to <strong className="text-ink-700">{state.lead.email}</strong> with
-                      everything on this screen.
+                      <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-mist" />A confirmation is on its way to <strong className="text-ink-700">{state.contact.email}</strong>{' '}
+                      with everything on this screen.
                     </li>
                     <li className="flex gap-3 text-sm leading-relaxed text-ink/80">
                       <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-mist" />
-                      Within one working day: the deposit link, joining instructions and a short form for dietary and diving details.
+                      Within one working day: the deposit link and joining instructions.
+                    </li>
+                    <li className="flex gap-3 text-sm leading-relaxed text-ink/80">
+                      <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-mist" />
+                      Once the deposit is paid: the joining form, where you tell us who is coming — nationalities, diving, dietary needs. The link below is the same one we email you.
                     </li>
                     <li className="flex gap-3 text-sm leading-relaxed text-ink/80">
                       <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-mist" />
@@ -316,7 +380,21 @@ export function ReserveFlow() {
                   </ol>
                 </div>
 
-                <div className="mt-9 flex flex-col gap-3 sm:flex-row">
+                <div className="mt-8 rounded-2xl bg-sand p-5 lg:p-6">
+                  <h2 className="font-mark text-[11px] uppercase tracking-[0.18em] text-flame">The joining form</h2>
+                  <p className="mt-2 text-sm leading-relaxed text-ink/75">
+                    Who is actually coming, what they eat, and what they are certified to dive. It normally waits until the deposit is paid — but if you have the details to hand, you can
+                    fill it in now and forget about it.
+                  </p>
+                  <Link
+                    href={routes.joiningForm(reference)}
+                    className="mt-4 inline-flex items-center justify-center rounded-full bg-flame px-6 py-3.5 font-mark text-[12px] uppercase tracking-[0.14em] text-white transition hover:bg-flame-600"
+                  >
+                    Open the joining form
+                  </Link>
+                </div>
+
+                <div className="mt-6 flex flex-col gap-3 sm:flex-row">
                   <button
                     type="button"
                     onClick={() => window.print()}
@@ -363,7 +441,10 @@ export function ReserveFlow() {
             <div>
               <p className="font-mark text-[11px] uppercase tracking-[0.18em] text-flame">Reserve a cabin</p>
               <p className="mt-1 font-mark text-[11px] uppercase tracking-[0.14em] text-mist-700">
-                Step {state.step} of 6 · {STEPS[state.step - 1].label}
+                {/* Clamped: step 7 reaches here when the confirmation's early
+                    return is skipped for want of a departure, and STEPS has
+                    no seventh entry. */}
+                Step {Math.min(state.step, STEPS.length)} of {STEPS.length} · {STEPS[Math.min(state.step, STEPS.length) - 1].label}
               </p>
             </div>
             <Link href={routes.departures()} className="group inline-flex items-center gap-2 font-mark text-[11px] uppercase tracking-[0.16em] text-ink/70 hover:text-flame-600">
@@ -595,62 +676,89 @@ export function ReserveFlow() {
               </section>
             ) : null}
 
-            {state.step === 3 && state.boat ? (
+            {state.step === 3 && state.boat && state.dep ? (
               <section>
-                <h1 className="font-display text-3xl font-light leading-tight tracking-tight text-ink-700 sm:text-4xl">Choose your cabin</h1>
-                <p className="mt-3 text-base leading-relaxed text-ink/70">Prices are per person for this departure, everything on board included. Choosing holds the cabin for 72 hours — no card details yet.</p>
+                <h1 className="font-display text-3xl font-light leading-tight tracking-tight text-ink-700 sm:text-4xl">Choose your cabins</h1>
+                <p className="mt-3 text-base leading-relaxed text-ink/70">
+                  Prices are per person for this departure, everything on board included. Take more than one if the party needs the room — you say who sleeps where on the next step.
+                  Choosing holds them for 72 hours, no card details yet.
+                </p>
 
                 <div className="mt-7 space-y-3">
-                  {state.cabins.map((c) => (
-                    <button
-                      key={c.code}
-                      type="button"
-                      onClick={() => dispatch({ type: 'CHOOSE_CABIN', code: c.code })}
-                      disabled={c.left <= 0}
-                      aria-pressed={state.cabin?.code === c.code}
-                      className={cn(
-                        'flex w-full gap-4 rounded-2xl border-2 bg-white p-4 text-left transition disabled:cursor-not-allowed disabled:opacity-60',
-                        state.cabin?.code === c.code ? 'border-flame shadow-card' : 'border-sand-300 hover:border-mist'
-                      )}
-                    >
-                      <span className="relative h-24 w-24 shrink-0 overflow-hidden rounded-xl bg-ink sm:h-28 sm:w-36">
-                        <PhotoPlate ph={c.ph} src={null} alt={c.name} sizes="9rem" />
-                      </span>
-                      <span className="min-w-0 flex-1">
-                        <span className="flex flex-wrap items-start justify-between gap-x-4 gap-y-1">
-                          <span>
-                            <span className="block font-display text-lg text-ink-700">{c.name}</span>
-                            <span className="mt-0.5 block text-xs text-mist-700">
-                              {c.deck} · {c.beds} · sleeps {c.maxOccupancy}
+                  {state.cabins.map((c) => {
+                    const taken = gradeCountOf(state.selections, c.code);
+                    const room = headroomFor(state, c.code);
+                    const soldOut = c.left <= 0;
+                    return (
+                      <div
+                        key={c.code}
+                        className={cn(
+                          'flex gap-4 rounded-2xl border-2 bg-white p-4 transition',
+                          soldOut ? 'border-sand-300 opacity-60' : taken > 0 ? 'border-flame shadow-card' : 'border-sand-300'
+                        )}
+                      >
+                        <span className="relative h-24 w-24 shrink-0 overflow-hidden rounded-xl bg-ink sm:h-28 sm:w-36">
+                          <PhotoPlate ph={c.ph} src={null} alt={c.name} sizes="9rem" />
+                        </span>
+                        <div className="min-w-0 flex-1">
+                          <div className="flex flex-wrap items-start justify-between gap-x-4 gap-y-1">
+                            <div>
+                              <p className="font-display text-lg text-ink-700">{c.name}</p>
+                              <p className="mt-0.5 text-xs text-mist-700">
+                                {c.deck} · {c.beds} · sleeps {c.maxOccupancy}
+                              </p>
+                            </div>
+                            <div className="shrink-0 text-right">
+                              <span className="tnum block font-display text-lg text-deep-700">{money(c.price)}</span>
+                              <span className="block text-[11px] text-ink/50">per person</span>
+                            </div>
+                          </div>
+                          <p className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-xs text-ink/65">
+                            {(c.features ?? []).map((f) => (
+                              <span key={f}>{f}</span>
+                            ))}
+                          </p>
+                          <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
+                            <span className={cn('font-mark text-[10px] uppercase tracking-[0.14em]', soldOut ? 'text-ink/40' : c.left === 1 ? 'text-flame-600' : 'text-mist-700')}>
+                              {soldOut ? 'Fully booked on this date' : c.left === 1 ? 'Last one' : `${c.left} left`}
                             </span>
-                          </span>
-                          <span className="shrink-0 text-right">
-                            <span className="tnum block font-display text-lg text-deep-700">{money(c.price)}</span>
-                            <span className="block text-[11px] text-ink/50">per person</span>
-                          </span>
-                        </span>
-                        <span className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-xs text-ink/65">
-                          {(c.features ?? []).map((f) => (
-                            <span key={f}>{f}</span>
-                          ))}
-                        </span>
-                        <span className={cn('mt-2 block font-mark text-[10px] uppercase tracking-[0.14em]', c.left <= 0 ? 'text-ink/40' : c.left === 1 ? 'text-flame-600' : 'text-mist-700')}>
-                          {c.left <= 0 ? 'Fully booked on this date' : c.left === 1 ? 'Last one' : `${c.left} left`}
-                        </span>
-                      </span>
-                      <span className={cn('mt-1 grid h-7 w-7 shrink-0 place-items-center self-start rounded-full border transition', state.cabin?.code === c.code ? 'border-flame bg-flame text-white' : 'border-sand-300 text-transparent')}>
-                        <Check className="h-4 w-4" aria-hidden="true" />
-                      </span>
-                    </button>
-                  ))}
+                            {soldOut ? null : (
+                              <Stepper
+                                value={taken}
+                                min={0}
+                                max={taken + room}
+                                onChange={(n) => {
+                                  if (n > taken) dispatch({ type: 'ADD_CABIN', code: c.code });
+                                  else if (n < taken) dispatch({ type: 'REMOVE_CABIN', code: c.code });
+                                }}
+                                label={`${c.name} cabins`}
+                              />
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
 
-                <p className="mt-5 rounded-2xl bg-white p-4 text-xs leading-relaxed text-ink/60">
-                  Travelling alone? The single berths carry no supplement and we will not pair you with a stranger unless you ask. Need two cabins side by side, or an interconnecting pair?{' '}
-                  <Link href={routes.contact()} className="text-flame-600 underline underline-offset-4">
-                    Tell the office
-                  </Link>{' '}
-                  and they will arrange it by hand.
+                <p className="mt-5 rounded-2xl bg-white p-4 text-xs leading-relaxed text-ink/60" aria-live="polite">
+                  {state.selections.length === 0 ? (
+                    <>Travelling alone? The single berths carry no supplement and we will not pair you with a stranger unless you ask.</>
+                  ) : (
+                    <>
+                      <strong className="text-ink-700">{cabinCountLabel}</strong> chosen
+                      {state.dep.cabinsLeft - state.selections.length > 0 ? (
+                        <> · {state.dep.cabinsLeft - state.selections.length} more still free on this date.</>
+                      ) : (
+                        <> · that is every cabin left on this date.</>
+                      )}{' '}
+                      Want them side by side or interconnecting?{' '}
+                      <Link href={routes.contact()} className="text-flame-600 underline underline-offset-4">
+                        Tell the office
+                      </Link>{' '}
+                      and they will arrange it by hand.
+                    </>
+                  )}
                 </p>
               </section>
             ) : null}
@@ -659,57 +767,74 @@ export function ReserveFlow() {
               <section>
                 <h1 className="font-display text-3xl font-light leading-tight tracking-tight text-ink-700 sm:text-4xl">Who is sailing?</h1>
                 <p className="mt-3 text-base leading-relaxed text-ink/70">
-                  Numbers first, names next. We ask ages because the kitchen, the dive plan and the cabin beds all depend on them — not the price bands alone.
+                  Numbers now, names later — the joining form takes those once the deposit is paid. We ask ages because the kitchen, the dive plan and the cabin beds all depend on them,
+                  not the price bands alone.
                 </p>
 
-                <div className="mt-7 rounded-2xl bg-white p-5 lg:p-6">
-                  <div className="space-y-4">
-                    {GUEST_BANDS.map((b) => (
-                      <div key={b.key} className="flex items-center justify-between gap-4 border-b border-sand-200 pb-4 last:border-0 last:pb-0">
-                        <div>
-                          <p className="text-sm text-ink-700">{b.label}</p>
-                          <p className="text-xs text-ink/55">{b.note}</p>
-                          {b.rate < 1 ? <p className="mt-0.5 font-mark text-[10px] uppercase tracking-[0.14em] text-mist-700">{Math.round(b.rate * 100)}% of the cabin fare</p> : null}
-                        </div>
-                        <Stepper
-                          value={state.guests[b.key]}
-                          min={b.min}
-                          max={state.guests[b.key] + Math.max(0, maxOccupancy - totalGuests)}
-                          onChange={(n) => dispatch({ type: 'BUMP_GUESTS', key: b.key, delta: n - state.guests[b.key] })}
-                          label={b.label.toLowerCase()}
-                        />
-                      </div>
-                    ))}
-                  </div>
+                <div className="mt-7 space-y-4">
+                  {selected.map((s) => {
+                    const inCabin = totalGuestsOf(s.guests);
+                    const cabinMax = maxOccupancyOf(state, s.cabin.code);
+                    const fits = inCabin >= 1 && inCabin <= cabinMax;
+                    return (
+                      <fieldset key={s.uid} className="rounded-2xl bg-white p-5 lg:p-6">
+                        <legend className="sf-legend flex items-center gap-3 pb-3 font-mark text-[11px] font-medium uppercase tracking-[0.18em] text-ink-700">
+                          <span className="h-3.5 w-[3px] shrink-0 rounded-full bg-flame" />
+                          <span>{cabinLabels[s.uid]}</span>
+                          <span className="shrink-0 rounded-full bg-sand px-2.5 py-1 font-mark text-[10px] uppercase tracking-[0.12em] text-mist-700">sleeps {cabinMax}</span>
+                          <span className="h-px flex-1 bg-sand-300" />
+                        </legend>
 
-                  <div className={cn('mt-5 rounded-xl p-4', occupancyOk(state) ? 'bg-sand' : 'bg-flame/5 ring-1 ring-inset ring-flame/25')} aria-live="polite">
-                    <p className={cn('text-sm leading-relaxed', occupancyOk(state) ? 'text-ink/75' : 'text-flame-700')}>
-                      {occupancyOk(state) ? (
-                        <>
-                          <strong className="text-ink-700">{totalGuests}</strong> in the {state.cabin ? state.cabin.name : 'cabin'}, which sleeps {maxOccupancy}.
-                          {totalGuests < maxOccupancy ? <span className="text-ink/60"> Room for {maxOccupancy - totalGuests} more if someone else joins.</span> : null}
-                        </>
-                      ) : (
-                        <>
-                          <strong>{totalGuests}</strong> will not fit — the {state.cabin ? state.cabin.name : 'cabin'} sleeps {maxOccupancy}. Choose a larger grade, or ask us for a second cabin nearby.
-                        </>
-                      )}
-                    </p>
-                    {!occupancyOk(state) ? (
-                      <div className="mt-3 flex flex-wrap gap-2">
-                        <button type="button" onClick={() => goto(3)} className="inline-flex h-10 items-center rounded-full bg-flame px-4 font-mark text-[11px] uppercase tracking-[0.12em] text-white transition hover:bg-flame-600">
-                          Choose another cabin
-                        </button>
-                        <Link href={routes.contact()} className="inline-flex h-10 items-center rounded-full border border-ink/20 px-4 font-mark text-[11px] uppercase tracking-[0.12em] text-ink-700 transition hover:border-ink">
-                          Ask for two cabins
-                        </Link>
-                      </div>
+                        <div className="mt-4 space-y-4">
+                          {GUEST_BANDS.map((b) => (
+                            <div key={b.key} className="flex items-center justify-between gap-4 border-b border-sand-200 pb-4 last:border-0 last:pb-0">
+                              <div>
+                                <p className="text-sm text-ink-700">{b.label}</p>
+                                <p className="text-xs text-ink/55">{b.note}</p>
+                                {b.rate < 1 ? <p className="mt-0.5 font-mark text-[10px] uppercase tracking-[0.14em] text-mist-700">{Math.round(b.rate * 100)}% of the cabin fare</p> : null}
+                              </div>
+                              <Stepper
+                                value={s.guests[b.key]}
+                                min={b.min}
+                                max={s.guests[b.key] + Math.max(0, cabinMax - inCabin)}
+                                onChange={(n) => dispatch({ type: 'BUMP_GUESTS', uid: s.uid, key: b.key, delta: n - s.guests[b.key] })}
+                                label={`${b.label.toLowerCase()} in ${cabinLabels[s.uid]}`}
+                              />
+                            </div>
+                          ))}
+                        </div>
+
+                        <div className={cn('mt-5 rounded-xl p-4', fits ? 'bg-sand' : 'bg-flame/5 ring-1 ring-inset ring-flame/25')} aria-live="polite">
+                          <p className={cn('text-sm leading-relaxed', fits ? 'text-ink/75' : 'text-flame-700')}>
+                            {fits ? (
+                              <>
+                                <strong className="text-ink-700">{inCabin}</strong> in this cabin, which sleeps {cabinMax}.
+                                {inCabin < cabinMax ? <span className="text-ink/60"> Room for {cabinMax - inCabin} more.</span> : null}
+                              </>
+                            ) : (
+                              <>This cabin is empty — put at least one guest in it, or drop it back on the previous step.</>
+                            )}
+                          </p>
+                        </div>
+                      </fieldset>
+                    );
+                  })}
+
+                  <div className="rounded-2xl bg-white p-5 lg:p-6">
+                    <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+                      <p className="text-sm text-ink-700">
+                        <strong>{guestsLabel(totalGuests)}</strong> across {cabinCountLabel}
+                      </p>
+                      <button type="button" onClick={() => goto(3)} className="font-mark text-[11px] uppercase tracking-[0.14em] text-flame-600 underline underline-offset-4">
+                        Add or remove a cabin
+                      </button>
+                    </div>
+                    {partyGuestsOf(state).children > 0 ? (
+                      <p className="mt-3 text-xs leading-relaxed text-ink/60">
+                        Children are welcome from four upwards. Under four, please talk to us first — it depends on the route rather than the child.
+                      </p>
                     ) : null}
                   </div>
-
-                  {state.guests.children > 0 ? (
-                    <p className="mt-4 text-xs leading-relaxed text-ink/60">Children are welcome from four upwards. Under four, please talk to us first — it depends on the route rather than the child.</p>
-                  ) : null}
                 </div>
 
                 <div className="mt-4 rounded-2xl bg-white p-5 lg:p-6">
@@ -742,147 +867,81 @@ export function ReserveFlow() {
 
             {state.step === 5 ? (
               <section>
-                <h1 className="font-display text-3xl font-light leading-tight tracking-tight text-ink-700 sm:text-4xl">Guest details</h1>
-                <p className="mt-3 text-base leading-relaxed text-ink/70">Only the lead guest is needed now — the rest can follow on the joining form. Anything you tell us here reaches the crew before you board.</p>
+                <h1 className="font-display text-3xl font-light leading-tight tracking-tight text-ink-700 sm:text-4xl">How do we reach you?</h1>
+                <p className="mt-3 text-base leading-relaxed text-ink/70">
+                  Just the person organising this, for now. Who is actually coming — nationalities, diving tickets, what everyone eats — comes later on the joining form, once the deposit
+                  is paid and you have had a chance to ask them.
+                </p>
 
                 <div className="mt-7 space-y-4">
-                  {state.guestList.map((g, i) => (
-                    <fieldset key={i} className="rounded-2xl bg-white p-5 lg:p-6">
-                      <legend className="sf-legend flex items-center gap-3 pb-3 font-mark text-[11px] font-medium uppercase tracking-[0.18em] text-ink-700">
-                        <span className="h-3.5 w-[3px] shrink-0 rounded-full bg-flame" />
-                        <span>{i === 0 ? 'Lead guest' : `Guest ${i + 1}`}</span>
-                        <span className="shrink-0 rounded-full bg-sand px-2.5 py-1 font-mark text-[10px] uppercase tracking-[0.12em] text-mist-700">{g.band}</span>
-                        <span className="h-px flex-1 bg-sand-300" />
-                      </legend>
+                  <fieldset className="rounded-2xl bg-white p-5 lg:p-6">
+                    <legend className="sf-legend flex items-center gap-3 pb-3 font-mark text-[11px] font-medium uppercase tracking-[0.18em] text-ink-700">
+                      <span className="h-3.5 w-[3px] shrink-0 rounded-full bg-flame" />
+                      <span>Lead guest</span>
+                      <span className="h-px flex-1 bg-sand-300" />
+                    </legend>
 
-                      <div className="mt-4 grid gap-4 sm:grid-cols-2">
-                        <label className="block sm:col-span-2">
-                          <span className="text-sm text-ink/70">
-                            Full name, as in the passport {i === 0 ? <span className="text-flame">*</span> : null}
+                    <div className="mt-4 grid gap-4 sm:grid-cols-2">
+                      <label className="block sm:col-span-2">
+                        <span className="text-sm text-ink/70">
+                          Full name, as in the passport <span className="text-flame">*</span>
+                        </span>
+                        <Input
+                          type="text"
+                          autoComplete="name"
+                          value={state.contact.name}
+                          onChange={(e) => dispatch({ type: 'SET_CONTACT_FIELD', field: 'name', value: e.target.value })}
+                          aria-invalid={state.errors.name ? true : undefined}
+                          className="mt-1.5 h-12 rounded-xl border-sand-300 bg-sand text-ink-700"
+                        />
+                        {state.errors.name ? (
+                          <span role="alert" className="mt-1.5 block text-sm text-flame-600">
+                            {state.errors.name}
                           </span>
-                          <Input
-                            type="text"
-                            autoComplete={i === 0 ? 'name' : 'off'}
-                            value={g.name}
-                            onChange={(e) => dispatch({ type: 'SET_GUEST_FIELD', index: i, field: 'name', value: e.target.value })}
-                            aria-invalid={i === 0 && state.errors.name0 ? true : undefined}
-                            className="mt-1.5 h-12 rounded-xl border-sand-300 bg-sand text-ink-700"
-                          />
-                          {i === 0 && state.errors.name0 ? (
-                            <span role="alert" className="mt-1.5 block text-sm text-flame-600">
-                              {state.errors.name0}
-                            </span>
-                          ) : null}
-                        </label>
+                        ) : null}
+                      </label>
 
-                        {i === 0 ? (
-                          <label className="block">
-                            <span className="text-sm text-ink/70">
-                              Email <span className="text-flame">*</span>
-                            </span>
-                            <Input
-                              type="email"
-                              autoComplete="email"
-                              inputMode="email"
-                              value={state.lead.email}
-                              onChange={(e) => dispatch({ type: 'SET_LEAD_FIELD', field: 'email', value: e.target.value })}
-                              aria-invalid={state.errors.email ? true : undefined}
-                              className="mt-1.5 h-12 rounded-xl border-sand-300 bg-sand text-ink-700"
-                            />
-                            {state.errors.email ? (
-                              <span role="alert" className="mt-1.5 block text-sm text-flame-600">
-                                {state.errors.email}
-                              </span>
-                            ) : null}
-                          </label>
+                      <label className="block">
+                        <span className="text-sm text-ink/70">
+                          Email <span className="text-flame">*</span>
+                        </span>
+                        <Input
+                          type="email"
+                          autoComplete="email"
+                          inputMode="email"
+                          value={state.contact.email}
+                          onChange={(e) => dispatch({ type: 'SET_CONTACT_FIELD', field: 'email', value: e.target.value })}
+                          aria-invalid={state.errors.email ? true : undefined}
+                          className="mt-1.5 h-12 rounded-xl border-sand-300 bg-sand text-ink-700"
+                        />
+                        {state.errors.email ? (
+                          <span role="alert" className="mt-1.5 block text-sm text-flame-600">
+                            {state.errors.email}
+                          </span>
                         ) : null}
-                        {i === 0 ? (
-                          <label className="block">
-                            <span className="text-sm text-ink/70">
-                              Phone or WhatsApp <span className="text-flame">*</span>
-                            </span>
-                            <Input
-                              type="tel"
-                              autoComplete="tel"
-                              inputMode="tel"
-                              placeholder="+61 400 000 000"
-                              value={state.lead.phone}
-                              onChange={(e) => dispatch({ type: 'SET_LEAD_FIELD', field: 'phone', value: e.target.value })}
-                              aria-invalid={state.errors.phone ? true : undefined}
-                              className="mt-1.5 h-12 rounded-xl border-sand-300 bg-sand text-ink-700 placeholder:text-ink/35"
-                            />
-                            {state.errors.phone ? (
-                              <span role="alert" className="mt-1.5 block text-sm text-flame-600">
-                                {state.errors.phone}
-                              </span>
-                            ) : null}
-                          </label>
+                      </label>
+                      <label className="block">
+                        <span className="text-sm text-ink/70">
+                          Phone or WhatsApp <span className="text-flame">*</span>
+                        </span>
+                        <Input
+                          type="tel"
+                          autoComplete="tel"
+                          inputMode="tel"
+                          placeholder="+61 400 000 000"
+                          value={state.contact.phone}
+                          onChange={(e) => dispatch({ type: 'SET_CONTACT_FIELD', field: 'phone', value: e.target.value })}
+                          aria-invalid={state.errors.phone ? true : undefined}
+                          className="mt-1.5 h-12 rounded-xl border-sand-300 bg-sand text-ink-700 placeholder:text-ink/35"
+                        />
+                        {state.errors.phone ? (
+                          <span role="alert" className="mt-1.5 block text-sm text-flame-600">
+                            {state.errors.phone}
+                          </span>
                         ) : null}
-
-                        <label className="block">
-                          <span className="text-sm text-ink/70">Nationality</span>
-                          <Input
-                            type="text"
-                            autoComplete="country-name"
-                            value={g.nationality}
-                            onChange={(e) => dispatch({ type: 'SET_GUEST_FIELD', index: i, field: 'nationality', value: e.target.value })}
-                            className="mt-1.5 h-12 rounded-xl border-sand-300 bg-sand text-ink-700"
-                          />
-                        </label>
-                        <label className="block">
-                          <span className="text-sm text-ink/70">Diving</span>
-                          <select
-                            value={g.diving}
-                            onChange={(e) => dispatch({ type: 'SET_GUEST_FIELD', index: i, field: 'diving', value: e.target.value })}
-                            className="mt-1.5 h-12 w-full rounded-xl border-sand-300 bg-sand text-ink-700 focus:border-mist focus:ring-2 focus:ring-mist/40"
-                          >
-                            <option value="none">Not diving — snorkelling only</option>
-                            <option value="learning">Would like to learn on board</option>
-                            <option value="open-water">Open Water</option>
-                            <option value="advanced">Advanced</option>
-                            <option value="rescue">Rescue or above</option>
-                            <option value="pro">Instructor / divemaster</option>
-                          </select>
-                        </label>
-                        {g.diving !== 'none' && g.diving !== 'learning' ? (
-                          <>
-                            <label className="block">
-                              <span className="text-sm text-ink/70">Certification number</span>
-                              <Input
-                                type="text"
-                                placeholder="Optional — can follow later"
-                                value={g.certNumber}
-                                onChange={(e) => dispatch({ type: 'SET_GUEST_FIELD', index: i, field: 'certNumber', value: e.target.value })}
-                                className="mt-1.5 h-12 rounded-xl border-sand-300 bg-sand text-ink-700 placeholder:text-ink/35"
-                              />
-                            </label>
-                            <label className="block">
-                              <span className="text-sm text-ink/70">Logged dives, roughly</span>
-                              <Input
-                                type="number"
-                                min={0}
-                                max={9999}
-                                value={g.dives}
-                                onChange={(e) => dispatch({ type: 'SET_GUEST_FIELD', index: i, field: 'dives', value: Number(e.target.value) || 0 })}
-                                className="counter-input mt-1.5 h-12 rounded-xl border-sand-300 bg-sand text-ink-700"
-                              />
-                            </label>
-                          </>
-                        ) : null}
-                        <label className="block sm:col-span-2">
-                          <span className="text-sm text-ink/70">Dietary needs, allergies, anything medical</span>
-                          <Textarea
-                            rows={2}
-                            maxLength={300}
-                            placeholder="Coeliac, vegan, nut allergy, halal, a knee that objects to ladders — all useful, and all easy if we know early."
-                            value={g.dietary}
-                            onChange={(e) => dispatch({ type: 'SET_GUEST_FIELD', index: i, field: 'dietary', value: e.target.value })}
-                            className="mt-1.5 rounded-xl border-sand-300 bg-sand text-ink-700 placeholder:text-ink/35"
-                          />
-                        </label>
-                      </div>
-                    </fieldset>
-                  ))}
+                      </label>
+                    </div>
+                  </fieldset>
 
                   <fieldset className="rounded-2xl bg-white p-5 lg:p-6">
                     <legend className="sf-legend flex items-center gap-3 pb-3 font-mark text-[11px] font-medium uppercase tracking-[0.18em] text-ink-700">
@@ -895,9 +954,9 @@ export function ReserveFlow() {
                       <Textarea
                         rows={3}
                         maxLength={500}
-                        placeholder="Celebrating something? Arriving a day early? Want us to hold this without a payment link for 72 hours? Say so here."
-                        value={state.lead.notes}
-                        onChange={(e) => dispatch({ type: 'SET_LEAD_FIELD', field: 'notes', value: e.target.value })}
+                        placeholder="Celebrating something? Arriving a day early? Cabins that need to be next to each other? Say so here."
+                        value={state.contact.notes}
+                        onChange={(e) => dispatch({ type: 'SET_CONTACT_FIELD', field: 'notes', value: e.target.value })}
                         className="rounded-xl border-sand-300 bg-sand text-ink-700 placeholder:text-ink/35"
                       />
                     </label>
@@ -906,10 +965,13 @@ export function ReserveFlow() {
               </section>
             ) : null}
 
-            {state.step === 6 && state.dep && state.trip && state.boat && state.cabin ? (
+            {state.step === 6 && state.dep && state.trip && state.boat && selected.length > 0 ? (
               <section>
                 <h1 className="font-display text-3xl font-light leading-tight tracking-tight text-ink-700 sm:text-4xl">Review and reserve</h1>
-                <p className="mt-3 text-base leading-relaxed text-ink/70">Nothing is charged on this screen. Reserving holds your cabin for 72 hours while the office confirms it by hand and sends a payment link.</p>
+                <p className="mt-3 text-base leading-relaxed text-ink/70">
+                  Nothing is charged on this screen. Reserving holds {state.selections.length > 1 ? 'your cabins' : 'your cabin'} for 72 hours while the office confirms
+                  {state.selections.length > 1 ? ' them' : ' it'} by hand and sends a payment link.
+                </p>
 
                 <div className="mt-7 rounded-2xl bg-white p-5 lg:p-6">
                   <div className="flex items-start justify-between gap-4">
@@ -944,25 +1006,37 @@ export function ReserveFlow() {
 
                 <div className="mt-4 rounded-2xl bg-white p-5 lg:p-6">
                   <div className="flex items-start justify-between gap-4">
-                    <h2 className="font-mark text-[11px] uppercase tracking-[0.16em] text-ink-700">Guests</h2>
-                    <button type="button" onClick={() => goto(5)} className="font-mark text-[11px] uppercase tracking-[0.14em] text-flame-600 underline underline-offset-4">
+                    <h2 className="font-mark text-[11px] uppercase tracking-[0.16em] text-ink-700">{state.selections.length > 1 ? 'Cabins and guests' : 'Cabin and guests'}</h2>
+                    <button type="button" onClick={() => goto(4)} className="font-mark text-[11px] uppercase tracking-[0.14em] text-flame-600 underline underline-offset-4">
                       Change
                     </button>
                   </div>
                   <ul className="mt-4 space-y-2.5">
-                    {state.guestList.map((g, i) => (
-                      <li key={i} className="flex flex-wrap items-baseline justify-between gap-x-4 border-b border-sand-200 pb-2.5 text-sm last:border-0 last:pb-0">
-                        <span className="text-ink-700">{g.name || (i === 0 ? 'Lead guest — name missing' : `Guest ${i + 1} — name to follow`)}</span>
+                    {selected.map((s) => (
+                      <li key={s.uid} className="flex flex-wrap items-baseline justify-between gap-x-4 border-b border-sand-200 pb-2.5 text-sm last:border-0 last:pb-0">
+                        <span className="text-ink-700">
+                          {cabinLabels[s.uid]}
+                          <span className="block text-xs text-mist-700">
+                            {s.cabin.deck} · {s.cabin.beds}
+                          </span>
+                        </span>
                         <span className="text-xs text-mist-700">
-                          {g.band}
-                          {g.diving !== 'none' ? <> · {DIVING_LABELS[g.diving]}</> : null}
+                          {GUEST_BANDS.filter((b) => s.guests[b.key] > 0)
+                            .map((b) => `${s.guests[b.key]} ${s.guests[b.key] === 1 ? b.one.toLowerCase() : b.label.toLowerCase()}`)
+                            .join(' · ')}
                         </span>
                       </li>
                     ))}
                   </ul>
-                  <p className="mt-3 text-xs text-ink/55">
-                    {state.lead.email}
-                    {state.lead.phone ? <> · {state.lead.phone}</> : null}
+                  <p className="mt-3 border-t border-sand-200 pt-3 text-xs text-ink/55">
+                    {state.contact.name} · {state.contact.email}
+                    {state.contact.phone ? <> · {state.contact.phone}</> : null}
+                    <button type="button" onClick={() => goto(5)} className="ml-2 font-mark text-[10px] uppercase tracking-[0.14em] text-flame-600 underline underline-offset-4">
+                      Edit
+                    </button>
+                  </p>
+                  <p className="mt-3 rounded-xl bg-sand p-3 text-xs leading-relaxed text-ink/65">
+                    We will ask who is actually coming — names, nationalities, diving and dietary needs — on the joining form, after the deposit.
                   </p>
                 </div>
 
@@ -970,7 +1044,7 @@ export function ReserveFlow() {
                   <div className="flex items-start justify-between gap-4">
                     <h2 className="font-mark text-[11px] uppercase tracking-[0.16em] text-ink-700">Full breakdown</h2>
                     <button type="button" onClick={() => goto(3)} className="font-mark text-[11px] uppercase tracking-[0.14em] text-flame-600 underline underline-offset-4">
-                      Change cabin
+                      {state.selections.length > 1 ? 'Change cabins' : 'Change cabin'}
                     </button>
                   </div>
 
@@ -978,10 +1052,13 @@ export function ReserveFlow() {
                     <caption className="sr-only">Price breakdown for this reservation</caption>
                     <tbody>
                       {priceLines.map((line) => (
-                        <tr key={line.label} className="border-b border-sand-200">
+                        <tr key={line.key} className="border-b border-sand-200">
                           <th scope="row" className="py-2.5 text-left font-normal text-ink/70">
                             {line.label}
-                            <span className="block text-xs text-ink/50">{line.detail}</span>
+                            <span className="block text-xs text-ink/50">
+                              {line.group ? `${line.group} · ` : ''}
+                              {line.detail}
+                            </span>
                           </th>
                           <td className="tnum py-2.5 text-right text-ink-700">{money(line.amount)}</td>
                         </tr>
@@ -1128,7 +1205,7 @@ export function ReserveFlow() {
                   <div role="alert" className="mt-4 rounded-2xl border border-flame/25 bg-flame/5 p-5">
                     <h2 className="font-display text-lg text-ink-700">The reservation did not go through</h2>
                     <p className="mt-1.5 text-sm leading-relaxed text-ink/75">
-                      Nothing was charged and nothing is lost — every answer is still on this screen. Your cabin is not held yet, so if the date is nearly full, message the office and quote{' '}
+                      Nothing was charged and nothing is lost — every answer is still on this screen. Nothing is held yet, so if the date is nearly full, message the office and quote{' '}
                       <strong className="text-ink-700">{state.dep.id}</strong>.
                     </p>
                     <div className="mt-4 flex flex-wrap gap-3">
@@ -1153,7 +1230,7 @@ export function ReserveFlow() {
                     trip={state.trip}
                     water={state.water}
                     boat={state.boat}
-                    cabin={state.cabin}
+                    selected={selected}
                     dateRange={dateRange(state.dep.start, state.dep.nights)}
                     nights={nights(state.dep.nights)}
                     totalGuests={totalGuests}
@@ -1191,7 +1268,7 @@ export function ReserveFlow() {
               trip={state.trip}
               water={state.water}
               boat={state.boat}
-              cabin={state.cabin}
+              selected={selected}
               dateRange={dateRange(state.dep.start, state.dep.nights)}
               nights={nights(state.dep.nights)}
               totalGuests={totalGuests}
@@ -1228,9 +1305,12 @@ export function ReserveFlow() {
                 <ChevronDown className="h-3.5 w-3.5 shrink-0 text-mist-700 lg:hidden" aria-hidden="true" />
               </span>
               <span className="block text-sm text-ink-700">
-                {state.cabin ? (
+                {selected.length ? (
                   <>
-                    <span className="tnum font-display text-base">{money(total)}</span> <span className="text-xs text-ink/55">total · {guestsLabel(totalGuests)}</span>
+                    <span className="tnum font-display text-base">{money(total)}</span>{' '}
+                    <span className="text-xs text-ink/55">
+                      total · {guestsLabel(totalGuests)} · {cabinCountLabel}
+                    </span>
                   </>
                 ) : (
                   <span className="text-xs text-ink/55">No cabin chosen yet</span>
@@ -1259,7 +1339,7 @@ export function ReserveFlow() {
               disabled={busy}
               className="inline-flex h-12 shrink-0 items-center gap-2 rounded-full bg-flame px-5 font-mark text-[12px] uppercase tracking-[0.14em] text-white transition hover:bg-flame-600 disabled:opacity-60 sm:px-6"
             >
-              {busy ? 'Reserving…' : 'Reserve my cabin'}
+              {busy ? 'Reserving…' : state.selections.length > 1 ? 'Reserve my cabins' : 'Reserve my cabin'}
             </button>
           )
         }
