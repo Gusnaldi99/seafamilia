@@ -9,7 +9,9 @@
     "lint": "eslint",
     "test": "vitest run",
     "test:watch": "vitest",
-    "photos:process": "node scripts/process-boat-photos.mjs"
+    "photos:process": "node scripts/process-boat-photos.mjs",
+    "photos:process:content": "node scripts/process-content-photos.mjs",
+    "photos:process:story": "node scripts/process-story-photos.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.7.1",

@@ -78,9 +78,10 @@ export default function OurStoryPage() {
               <br className="hidden sm:block" /> and a very long list
             </h1>
             <p className="mt-5 max-w-xl text-base leading-relaxed text-white/85 sm:text-lg">
-              Sea Familia is a family company in the boring, literal sense: the founders are
-              married, the cruise director is a cousin, and the shipwrights who built the boats
-              built for our grandfather.
+              We are Sea Familia — a company, a group, whose mission is to be your family in your
+              home away from home. Through a liveaboard trip or more, dive or no dive, aboard our
+              flagship vessels KLM Sea Familia I &amp; KLM Sea Familia II, whose dive operations
+              are run by our one and only Sea Familia Dive Academy.
             </p>
           </div>
         </div>
@@ -89,62 +90,29 @@ export default function OurStoryPage() {
       <section id="story" className="mx-auto max-w-8xl px-5 py-16 sm:px-6 lg:px-8 lg:py-24">
         <div className="grid gap-12 lg:grid-cols-[1fr_1.5fr] lg:gap-20">
           <div className="lg:sticky lg:top-28 lg:self-start">
-            <p className="font-mark text-eyebrow uppercase text-flame">How it started</p>
-            <h2 className="mt-4 font-display text-3xl font-light leading-tight tracking-tight text-ink-700 sm:text-4xl">Bira to Labuan Bajo, 2018</h2>
+            <p className="font-mark text-eyebrow uppercase text-flame">History</p>
+            <h2 className="mt-4 font-display text-3xl font-light leading-tight tracking-tight text-ink-700 sm:text-4xl">Brief History and Current Developments</h2>
             <div className="mt-8 hidden lg:block">
               <div className="arch-soft relative aspect-[3/4] overflow-hidden bg-ink">
-                <PhotoSlot ph="boat" src={LITERAL_PHOTOS.ourStoryFounding} alt="Sea Familia on the beach at Bira before launch" sizes={PHOTO_SIZES.portrait} />
+                <PhotoSlot ph="boat" src={LITERAL_PHOTOS.ourStoryFounding} alt="Labuan Bajo harbour at dusk" sizes={PHOTO_SIZES.portrait} />
               </div>
               <p className="mt-3 text-xs leading-relaxed text-ink/55">
-                Sea Familia on the beach at Bira, two months before launch. The keel is ironwood and still is.
+                Labuan Bajo, home port to KLM Sea Familia I &amp; II.
               </p>
             </div>
           </div>
 
           <div className="prose prose-familia max-w-prose prose-headings:font-display prose-headings:font-light prose-p:leading-relaxed">
             <p className="dropcap">
-              Bimo grew up in a boatyard that was, strictly speaking, a beach. In Bira the phinisi
-              are built where the sand meets the treeline: no dry dock, no crane, just a hull
-              growing under a tarpaulin while somebody&rsquo;s uncle argues about the angle of a
-              rib. His grandfather cut timber for those boats for forty years, and Bimo assumed he
-              would end up doing something more sensible.
+              Sea Familia&rsquo;s story is built on the kinship and togetherness our founder felt on
+              his first liveaboard dive trip in 2018. That experience deepened his love of the
+              ocean and led him to build the original Sea Familia, KLM Sea Familia I, in 2019.
             </p>
             <p>
-              He did, briefly — six years in a hotel group in Makassar, learning how tourism is
-              normally organised. What he mostly learned was that the boats being chartered out of
-              Labuan Bajo were beautiful and the arrangements around them were not. Crews were
-              hired by the week. Nobody asked the cook what he could actually make. Guests were
-              counted in units called &ldquo;pax&rdquo;.
-            </p>
-            <h2>The unreasonable part</h2>
-            <p>
-              In 2017 he and Ratih borrowed more than either of them wants written down, and asked
-              the yard for a thirty-two metre gaff-rigged ketch with eight cabins. The bank thought
-              this was a poor idea. The yard, who had known the family for three generations,
-              quietly extended the payment schedule and got on with it.
-            </p>
-            <blockquote>
-              <p>
-                We could not compete on price and we knew it. So we competed on the only thing
-                nobody else was bothering with, which was how it felt to be on board.
-              </p>
-            </blockquote>
-            <p>
-              Sea Familia launched out of Labuan Bajo in 2018 with a crew of fourteen for sixteen
-              guests — a ratio that made no commercial sense and which we have never changed. Nine
-              of those fourteen are still with us.
-            </p>
-            <h2>What actually grew</h2>
-            <p>
-              The second boat came in 2021 — deliberately small, because half our guests turned out
-              to want the opposite of scale. Sea Familia 2 goes further than the first boat ever
-              could, into Sumbawa and Alor as well as Komodo, and carries the dive gear the first
-              boat never has.
-            </p>
-            <p>
-              Eight years in, the company is two boats and twenty-five people. It is not large, it
-              does not intend to be, and roughly a third of our guests each season were recommended
-              by someone who sailed with us before.
+              Starting from that simple experience, Sea Familia began its journey legally under PT.
+              Famindo Wisata Bajo, and has since grown into a bigger group — with the Sea Familia
+              Dive Academy, KLM Sea Familia II, and KLM Sea Familia III, which is still being built.
+              When the time comes, we&rsquo;ll introduce you to Sea Familia III.
             </p>
           </div>
         </div>
@@ -227,10 +195,10 @@ export default function OurStoryPage() {
           <div className="max-w-xl">
             <p className="font-mark text-eyebrow uppercase text-flame">Meet the familia</p>
             <h2 className="mt-4 font-display text-3xl font-light leading-tight tracking-tight text-ink-700 sm:text-4xl lg:text-5xl">
-              Twenty-five people, six of them here
+              Twenty-five people, two of them here
             </h2>
             <p className="mt-4 text-base leading-relaxed text-ink/70">
-              You will meet the rest on board, which is rather the point. These six are the ones
+              You will meet the rest on board, which is rather the point. These two are the ones
               you are most likely to correspond with first.
             </p>
           </div>

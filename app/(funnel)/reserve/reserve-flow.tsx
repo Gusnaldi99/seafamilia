@@ -69,7 +69,7 @@ const STEPS = [
   { key: 'review', label: 'Review' },
 ];
 
-export function ReserveFlow() {
+export function ReserveFlow({ tripPhotos, cabinPhotos }: { tripPhotos: Record<string, string | null>; cabinPhotos: Record<string, string | null> }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const forced = forcedStateFrom(searchParams.get('state'));
@@ -608,7 +608,7 @@ export function ReserveFlow() {
 
                 <div className="mt-7 overflow-hidden rounded-2xl bg-white">
                   <div className="relative aspect-[16/7]">
-                    <PhotoPlate ph={state.trip.ph} src={null} alt={state.trip.title} sizes="60rem" />
+                    <PhotoPlate ph={state.trip.ph} src={tripPhotos[state.trip.slug] ?? null} alt={state.trip.title} sizes="60rem" />
                     <div className="scrim-soft absolute inset-0" />
                     <div className="absolute inset-x-5 bottom-4">
                       <p className="font-mark text-[10px] uppercase tracking-[0.18em] text-white/80">{state.water.short}</p>
@@ -698,7 +698,7 @@ export function ReserveFlow() {
                         )}
                       >
                         <span className="relative h-24 w-24 shrink-0 overflow-hidden rounded-xl bg-ink sm:h-28 sm:w-36">
-                          <PhotoPlate ph={c.ph} src={null} alt={c.name} sizes="9rem" />
+                          <PhotoPlate ph={c.ph} src={cabinPhotos[`${state.boat!.slug}-${c.code}`] ?? null} alt={c.name} sizes="9rem" />
                         </span>
                         <div className="min-w-0 flex-1">
                           <div className="flex flex-wrap items-start justify-between gap-x-4 gap-y-1">
@@ -1230,6 +1230,7 @@ export function ReserveFlow() {
                     trip={state.trip}
                     water={state.water}
                     boat={state.boat}
+                    photoSrc={tripPhotos[state.trip.slug] ?? null}
                     selected={selected}
                     dateRange={dateRange(state.dep.start, state.dep.nights)}
                     nights={nights(state.dep.nights)}
@@ -1268,6 +1269,7 @@ export function ReserveFlow() {
               trip={state.trip}
               water={state.water}
               boat={state.boat}
+              photoSrc={tripPhotos[state.trip.slug] ?? null}
               selected={selected}
               dateRange={dateRange(state.dep.start, state.dep.nights)}
               nights={nights(state.dep.nights)}

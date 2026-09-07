@@ -41,7 +41,7 @@ describe('content counts (transcription tripwire)', () => {
     expect(trips).toHaveLength(2);
     expect(departures).toHaveLength(6);
     expect(articles).toHaveLength(8);
-    expect(team).toHaveLength(6);
+    expect(team).toHaveLength(2);
     expect(faq).toHaveLength(12);
     expect(boats.flatMap((b) => b.cabinTypes)).toHaveLength(6);
   });

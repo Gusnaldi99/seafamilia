@@ -14,6 +14,7 @@ export function VoyageSummary({
   trip,
   water,
   boat,
+  photoSrc,
   selected,
   dateRange,
   nights,
@@ -31,6 +32,7 @@ export function VoyageSummary({
   trip: Trip;
   water: Water;
   boat: Boat;
+  photoSrc: string | null;
   selected: SelectedCabin[];
   dateRange: string;
   nights: string;
@@ -58,7 +60,7 @@ export function VoyageSummary({
     <div>
       {!bare ? (
         <div className="relative h-28">
-          <PhotoPlate ph={trip.ph} src={null} alt="" sizes="22rem" />
+          <PhotoPlate ph={trip.ph} src={photoSrc} alt="" sizes="22rem" />
           <div className="scrim-soft absolute inset-0" />
           <div className="absolute inset-x-5 bottom-3">
             <p className="font-mark text-[10px] uppercase tracking-[0.16em] text-white/80">{water.short}</p>

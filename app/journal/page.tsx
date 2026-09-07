@@ -16,7 +16,7 @@ export const metadata: Metadata = {
     'Written on the boat, mostly — by the crew, the cook, the captain and the marine biologist who joins four crossings a season.',
 };
 
-const WRITER_NAMES = ['Ayu Prasetya', 'Captain Yos Tanuwijaya', 'Rudi Hartawan', 'Dr. Lila Moerdani'];
+const WRITER_NAMES = ['Sean Justin', 'Osbert'];
 const writers = team.filter((p) => WRITER_NAMES.includes(p.name));
 
 const featuredCards = Object.fromEntries(
@@ -60,9 +60,8 @@ export default function JournalPage() {
                 Who writes this
               </h2>
               <p className="mt-4 text-base leading-relaxed text-ink/70">
-                Four regular contributors, none of whom were hired to write. Ayu reads currents, Yos
-                crosses the Banda Sea, Rudi feeds twelve people off a market stall, and Lila counts
-                coral.
+                Two regular contributors, neither of whom was hired to write. Sean Justin and Osbert
+                write from on board, between everything else it takes to run the company.
               </p>
               <Link
                 href={`${routes.ourStory()}#familia`}

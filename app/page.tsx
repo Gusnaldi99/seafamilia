@@ -4,6 +4,7 @@ import { BoatCard } from '@/components/cards/boat-card';
 import { DepartureCard } from '@/components/cards/departure-card';
 import { TripCard } from '@/components/cards/trip-card';
 import { WaterCard } from '@/components/cards/water-card';
+import { HeroVideo } from '@/components/media/hero-video';
 import { PhotoSlot } from '@/components/media/photo-slot';
 import { Money, Nights } from '@/components/providers/locale-provider';
 import { ChevronRight, Compass, HullMast, PathWavesMast } from '@/components/icons';
@@ -28,15 +29,10 @@ export default function Home() {
 
   return (
     <>
-      {/* ================= HERO =================
-          The original's <video> pointed at a stock mixkit URL and a
-          never-committed assets/media/hero.webm — neither is real footage,
-          so this uses the same .ph gradient plate every other media slot
-          falls back to rather than porting a broken/external video
-          reference. A HeroVideo component is one drop-in swap away once
-          real footage exists. */}
+      {/* ================= HERO ================= */}
       <section className="relative isolate flex min-h-[88vh] items-end overflow-hidden bg-ink lg:min-h-[94vh]">
         <div className="ph ph-reef absolute inset-0" aria-hidden="true" />
+        <HeroVideo />
         <div className="scrim absolute inset-0" aria-hidden="true" />
 
         <div className="relative mx-auto w-full max-w-8xl px-5 pb-14 pt-28 sm:px-6 lg:px-8 lg:pb-20">
