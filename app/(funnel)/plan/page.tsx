@@ -4,7 +4,9 @@ import { TripCard } from '@/components/cards/trip-card';
 import { DepartureCard } from '@/components/cards/departure-card';
 import { GuidedDiscovery } from './guided-discovery';
 import { filterDepartures } from '@/lib/queries';
-import { trips } from '@/lib/data';
+import { resolvePhotoMap } from '@/lib/photo';
+import { photoPath } from '@/lib/photo-paths';
+import { trips, waters } from '@/lib/data';
 
 export const metadata: Metadata = {
   title: 'Plan Your Trip',
@@ -17,9 +19,11 @@ const departureCards = Object.fromEntries(availableDepartures.map((d) => [d.id, 
 const departureTrips = Object.fromEntries(availableDepartures.map((d) => [d.id, d.trip]));
 
 export default function PlanPage() {
+  const waterPhotos = resolvePhotoMap(waters, (w) => w.slug, (w) => photoPath.water(w.slug));
+
   return (
     <Suspense fallback={<div className="min-h-[60vh]" />}>
-      <GuidedDiscovery tripCards={tripCards} departureCards={departureCards} departureTrips={departureTrips} />
+      <GuidedDiscovery tripCards={tripCards} departureCards={departureCards} departureTrips={departureTrips} waterPhotos={waterPhotos} />
     </Suspense>
   );
 }

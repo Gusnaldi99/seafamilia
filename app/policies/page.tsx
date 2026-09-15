@@ -232,7 +232,7 @@ export default function PoliciesPage() {
                 </p>
                 <h3>Evacuation</h3>
                 <p>
-                  DAN-affiliated on both boats. The nearest chambers are Bali, Makassar and Manado,
+                  DAN-affiliated on both boats. The nearest chambers are labuan bajo
                   and on the more remote stretches of Sea Familia 2&rsquo;s route we are honest with
                   you about the numbers: a serious incident can be several hours from a chamber.
                   That is a real risk and we would rather you weighed it than discovered it.

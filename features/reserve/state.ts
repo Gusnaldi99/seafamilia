@@ -16,7 +16,7 @@
 import { departureById, tripBySlug, boatBySlug, waterBySlug, deriveCabinInventory, type DerivedCabin } from '@/lib/queries';
 import { addDays } from '@/lib/format';
 import { EMAIL_RE } from '@/lib/validation';
-import { GUEST_BANDS, VOUCHERS, totalGuestsOf, sumGuests, type GuestCounts, type SelectedCabin } from './pricing';
+import { GUEST_BANDS, VOUCHERS, availableExtras, totalGuestsOf, sumGuests, type GuestCounts, type SelectedCabin } from './pricing';
 import type { Departure, Trip, Boat, Water } from '@/lib/data/types';
 
 export type DivingLevel = 'none' | 'learning' | 'open-water' | 'advanced' | 'rescue' | 'pro';
@@ -171,7 +171,11 @@ function selectDeparture(state: ReserveState, depId: string, cabinCode?: string)
   const wanted = cabinCode ? cabins.find((c) => c.code === cabinCode && c.left > 0) : undefined;
   const selections: CabinSelection[] =
     wanted && dep.cabinsLeft > 0 ? [{ uid: state.uidSeq, code: wanted.code, guests: defaultGuestsFor(wanted) }] : [];
-  return { ...state, dep, trip, boat, water, endDate, cabins, selections, uidSeq: state.uidSeq + selections.length };
+  // A different departure may not support diving — drop any gear/guide extra
+  // that no longer applies rather than let it linger as a hidden charge.
+  const offered = availableExtras(trip, boat);
+  const chosenExtras = state.chosenExtras.filter((k) => offered.some((x) => x.key === k));
+  return { ...state, dep, trip, boat, water, endDate, cabins, selections, chosenExtras, uidSeq: state.uidSeq + selections.length };
 }
 
 export type ReserveAction =
@@ -229,6 +233,7 @@ export function reserveReducer(state: ReserveState, action: ReserveAction): Rese
     }
     case 'TOGGLE_EXTRA': {
       const has = state.chosenExtras.includes(action.key);
+      if (!has && !availableExtras(state.trip, state.boat).some((x) => x.key === action.key)) return state;
       return { ...state, chosenExtras: has ? state.chosenExtras.filter((k) => k !== action.key) : [...state.chosenExtras, action.key] };
     }
     case 'SET_CONTACT_FIELD':

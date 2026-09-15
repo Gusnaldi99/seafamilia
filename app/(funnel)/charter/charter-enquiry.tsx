@@ -50,7 +50,7 @@ function computeDefaults(searchParams: URLSearchParams): CharterFormValues {
   return values;
 }
 
-export function CharterEnquiry() {
+export function CharterEnquiry({ boatPhotos, heroPhoto }: { boatPhotos: Record<string, string | null>; heroPhoto: string | null }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const forced = forcedStateFrom(searchParams.get('state'));
@@ -255,7 +255,7 @@ export function CharterEnquiry() {
       {step === 1 ? (
         <section>
           <div className="relative isolate flex min-h-[70vh] items-end overflow-hidden bg-ink">
-            <PhotoPlate ph="sunset" src={null} alt="" sizes="100vw" />
+            <PhotoPlate ph="sunset" src={heroPhoto} alt="" sizes="100vw" />
             <div className="scrim absolute inset-0" aria-hidden="true" />
             <div className="relative mx-auto w-full max-w-8xl px-5 pb-12 pt-28 sm:px-6 lg:px-8 lg:pb-16">
               <nav aria-label="Breadcrumb" className="font-mark text-[11px] uppercase tracking-[0.16em] text-white/60">
@@ -542,7 +542,7 @@ export function CharterEnquiry() {
                             className={cn('flex items-center gap-3 rounded-xl border-2 p-3 text-left transition', selected ? 'border-flame' : 'border-sand-300 hover:border-mist')}
                           >
                             <span className="relative h-14 w-20 shrink-0 overflow-hidden rounded-lg bg-ink">
-                              <PhotoPlate ph={b.ph} src={null} alt={b.name} sizes="5rem" />
+                              <PhotoPlate ph={b.ph} src={boatPhotos[b.slug] ?? null} alt={b.name} sizes="5rem" />
                             </span>
                             <span className="min-w-0">
                               <span className="block font-display text-base leading-tight text-ink-700">{b.name}</span>

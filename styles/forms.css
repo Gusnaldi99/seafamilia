@@ -50,3 +50,34 @@ select option {
     background-color: Canvas;
   }
 }
+
+/* Every plain <select> in the product wants the same custom chevron rather
+   than each browser's own affordance (Safari in particular draws a heavy
+   double-arrow spinner when this is left unset). NativeSelect already draws
+   its own ChevronDownIcon, so it's excluded here to avoid a second, doubled
+   icon. Values ported from the legacy site's Tailwind-forms reset, which
+   this migration dropped. */
+select:not([multiple]):not([data-slot='native-select']) {
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+  background-position: right 0.25rem center;
+  background-repeat: no-repeat;
+  background-size: 1.5em 1.5em;
+  padding-right: 2.5rem;
+}
+
+/* <input type="date"> ships with no reset either, so Safari paints its own
+   oversized date-picker chrome instead of the field's own border/background.
+   appearance:none hands rendering back to the input's own Tailwind classes;
+   the field stays fully functional — tapping still opens the native picker. */
+input[type='date'] {
+  appearance: none;
+  -webkit-appearance: none;
+}
+input[type='date']::-webkit-datetime-edit-fields-wrapper {
+  padding: 0;
+}
+input[type='date']::-webkit-date-and-time-value {
+  text-align: inherit;
+}

@@ -51,7 +51,7 @@ import {
   validateStep,
   canContinue as canContinueOf,
 } from '@/features/reserve/state';
-import { EXTRAS, GUEST_BANDS, cabinLabelsFor, cabinsSubtotal, priceLinesFor, subtotalOf, totalGuestsOf } from '@/features/reserve/pricing';
+import { availableExtras, GUEST_BANDS, cabinLabelsFor, cabinsSubtotal, priceLinesFor, subtotalOf, totalGuestsOf } from '@/features/reserve/pricing';
 import { useLocale } from '@/components/providers/locale-provider';
 import { filterDepartures, departureMonthOptions, tripBySlug, boatBySlug } from '@/lib/queries';
 import { forcedStateFrom, emptied } from '@/lib/qa';
@@ -841,7 +841,7 @@ export function ReserveFlow({ tripPhotos, cabinPhotos }: { tripPhotos: Record<st
                   <h2 className="font-mark text-[11px] uppercase tracking-[0.16em] text-ink-700">Anything to add?</h2>
                   <p className="mt-1 text-xs text-ink/55">All optional, all addable later. Nothing here is a trap.</p>
                   <div className="mt-4 space-y-3">
-                    {EXTRAS.map((x) => (
+                    {availableExtras(state.trip, state.boat).map((x) => (
                       <label key={x.key} className="flex items-start gap-3 border-b border-sand-200 pb-3 last:border-0 last:pb-0">
                         <input
                           type="checkbox"

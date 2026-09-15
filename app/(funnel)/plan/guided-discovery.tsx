@@ -78,10 +78,12 @@ export function GuidedDiscovery({
   tripCards,
   departureCards,
   departureTrips,
+  waterPhotos,
 }: {
   tripCards: Record<string, React.ReactNode>;
   departureCards: Record<string, React.ReactNode>;
   departureTrips: Record<string, string>;
+  waterPhotos: Record<string, string | null>;
 }) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -338,7 +340,7 @@ export function GuidedDiscovery({
                     )}
                   >
                     <span className="relative block h-28 w-full">
-                      <PhotoPlate ph={w.ph} src={null} alt={w.name} sizes={PHOTO_SIZES.waterCard} />
+                      <PhotoPlate ph={w.ph} src={waterPhotos[w.slug] ?? null} alt={w.name} sizes={PHOTO_SIZES.waterCard} />
                       <span className="scrim-soft absolute inset-0 block" />
                       <span className="absolute bottom-2.5 left-4 font-mark text-[10px] uppercase tracking-[0.16em] text-white/80">{w.season}</span>
                       {selected ? (

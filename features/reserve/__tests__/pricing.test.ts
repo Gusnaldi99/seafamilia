@@ -14,6 +14,8 @@ import {
   subtotalOf,
   sumGuests,
   totalGuestsOf,
+  divingAvailable,
+  availableExtras,
   GUEST_BANDS,
   EXTRAS,
   type SelectedCabin,
@@ -29,7 +31,7 @@ import {
   type CabinSelection,
 } from '../state';
 import type { DerivedCabin } from '@/lib/queries';
-import type { Departure } from '@/lib/data/types';
+import type { Departure, Trip, Boat } from '@/lib/data/types';
 
 const CABIN: DerivedCabin = {
   code: 'DBL',
@@ -46,6 +48,12 @@ const CABIN: DerivedCabin = {
 
 /** A second, cheaper grade so the per-cabin fan-out is observable. */
 const BUNK: DerivedCabin = { ...CABIN, code: 'BNK', name: 'Bunk Cabin', price: 600, maxOccupancy: 2, left: 2 };
+
+/** Minimal fixtures — divingAvailable/availableExtras only read these two fields. */
+const DIVING_BOAT = { offersDiving: true } as Boat;
+const NON_DIVING_BOAT = { offersDiving: false } as Boat;
+const DIVING_TRIP = { experiences: ['family', 'diving'] } as Trip;
+const LEISURE_TRIP = { experiences: ['family', 'wellness'] } as Trip;
 
 const DEP: Departure = {
   id: 'TEST-0001',
@@ -108,6 +116,28 @@ describe('cabinLabelsFor', () => {
 
   it('numbers repeats of the same grade so the two parties can be told apart', () => {
     expect(cabinLabelsFor([sel(1, CABIN, 2), sel(2, CABIN, 1)])).toEqual({ 1: 'Double Cabin 1', 2: 'Double Cabin 2' });
+  });
+});
+
+describe('divingAvailable / availableExtras', () => {
+  it('excludes gear/guide when the boat does not offer diving, even on a diving-tagged trip', () => {
+    expect(divingAvailable(DIVING_TRIP, NON_DIVING_BOAT)).toBe(false);
+    expect(availableExtras(DIVING_TRIP, NON_DIVING_BOAT).map((x) => x.key)).toEqual(['massage', 'hotel']);
+  });
+
+  it('excludes gear/guide when the trip is not diving-tagged, even on a diving-capable boat', () => {
+    expect(divingAvailable(LEISURE_TRIP, DIVING_BOAT)).toBe(false);
+    expect(availableExtras(LEISURE_TRIP, DIVING_BOAT).map((x) => x.key)).toEqual(['massage', 'hotel']);
+  });
+
+  it('includes gear/guide only when both the boat and the trip support diving', () => {
+    expect(divingAvailable(DIVING_TRIP, DIVING_BOAT)).toBe(true);
+    expect(availableExtras(DIVING_TRIP, DIVING_BOAT).map((x) => x.key)).toEqual(['gear', 'guide', 'massage', 'hotel']);
+  });
+
+  it('treats a missing trip or boat as diving-unavailable', () => {
+    expect(divingAvailable(null, DIVING_BOAT)).toBe(false);
+    expect(divingAvailable(DIVING_TRIP, null)).toBe(false);
   });
 });
 
@@ -244,6 +274,39 @@ describe('reserveReducer BUMP_GUESTS', () => {
   });
 });
 
+describe('reserveReducer SELECT_DEPARTURE (dive extras)', () => {
+  // SFD-2609-SF2/SFD-2610-SF2 sail on sea-familia-2 (offersDiving, diving-tagged trip);
+  // SFD-2609-SF1 sails on sea-familia, which offers neither.
+  it('drops gear/guide on switching to a departure that does not support diving', () => {
+    const diving = reserveReducer(INITIAL_STATE, { type: 'SELECT_DEPARTURE', depId: 'SFD-2609-SF2' });
+    const withExtras = { ...diving, chosenExtras: ['gear', 'guide', 'hotel'] };
+    const next = reserveReducer(withExtras, { type: 'SELECT_DEPARTURE', depId: 'SFD-2609-SF1' });
+    expect(next.chosenExtras).toEqual(['hotel']);
+  });
+
+  it('keeps gear/guide when switching between two diving-capable departures', () => {
+    const diving = reserveReducer(INITIAL_STATE, { type: 'SELECT_DEPARTURE', depId: 'SFD-2609-SF2' });
+    const withExtras = { ...diving, chosenExtras: ['gear'] };
+    const next = reserveReducer(withExtras, { type: 'SELECT_DEPARTURE', depId: 'SFD-2610-SF2' });
+    expect(next.chosenExtras).toEqual(['gear']);
+  });
+});
+
+describe('reserveReducer TOGGLE_EXTRA (dive extras)', () => {
+  it('refuses to add a dive extra on a departure that does not support diving', () => {
+    const state = reserveReducer(INITIAL_STATE, { type: 'SELECT_DEPARTURE', depId: 'SFD-2609-SF1' });
+    expect(reserveReducer(state, { type: 'TOGGLE_EXTRA', key: 'gear' })).toBe(state);
+  });
+
+  it('adds and removes a dive extra freely on a diving-capable departure', () => {
+    const state = reserveReducer(INITIAL_STATE, { type: 'SELECT_DEPARTURE', depId: 'SFD-2609-SF2' });
+    const added = reserveReducer(state, { type: 'TOGGLE_EXTRA', key: 'guide' });
+    expect(added.chosenExtras).toEqual(['guide']);
+    const removed = reserveReducer(added, { type: 'TOGGLE_EXTRA', key: 'guide' });
+    expect(removed.chosenExtras).toEqual([]);
+  });
+});
+
 describe('reserveReducer APPLY_VOUCHER', () => {
   it('applies a known code at its published rate', () => {
     const state = { ...INITIAL_STATE, voucher: { code: 'familia10', applied: '', rate: 0, error: '' } };
@@ -290,6 +353,8 @@ describe('computeInitialState', () => {
   });
 
   it('restores a v2 draft, cabins and all', () => {
+    // SFD-2610-SF1 sails on sea-familia, which does not offer diving — 'hotel'
+    // (not diving-gated) keeps this test about restore, not extras gating.
     window.sessionStorage.setItem(
       'sf.reserve',
       JSON.stringify({
@@ -297,14 +362,32 @@ describe('computeInitialState', () => {
         depId: 'SFD-2610-SF1',
         selections: [{ code: 'MN', guests: { adults: 2, teens: 0, children: 0 } }, { code: 'MN', guests: { adults: 1, teens: 1, children: 0 } }],
         contact: { name: 'Ada', email: 'ada@example.com', phone: '+61400000000', notes: '' },
-        chosenExtras: ['gear'],
+        chosenExtras: ['hotel'],
       })
     );
     const state = computeInitialState(new URLSearchParams());
     expect(state.dep?.id).toBe('SFD-2610-SF1');
     expect(state.selections).toHaveLength(2);
     expect(state.contact.name).toBe('Ada');
-    expect(state.chosenExtras).toEqual(['gear']);
+    expect(state.chosenExtras).toEqual(['hotel']);
+    window.sessionStorage.clear();
+  });
+
+  it('drops a restored gear/guide choice that no longer applies to its departure', () => {
+    // Same departure, but the draft still carries dive extras from before —
+    // sea-familia does not offer diving, so they must not silently persist.
+    window.sessionStorage.setItem(
+      'sf.reserve',
+      JSON.stringify({
+        v: PERSIST_VERSION,
+        depId: 'SFD-2610-SF1',
+        selections: [{ code: 'MN', guests: { adults: 2, teens: 0, children: 0 } }],
+        contact: { name: '', email: '', phone: '', notes: '' },
+        chosenExtras: ['gear', 'guide', 'hotel'],
+      })
+    );
+    const state = computeInitialState(new URLSearchParams());
+    expect(state.chosenExtras).toEqual(['hotel']);
     window.sessionStorage.clear();
   });
 

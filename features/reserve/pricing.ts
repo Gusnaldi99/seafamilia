@@ -12,6 +12,7 @@
  * by the whole party across every cabin.
  */
 import type { DerivedCabin } from '@/lib/queries';
+import type { Trip, Boat } from '@/lib/data/types';
 
 export interface GuestCounts {
   adults: number;
@@ -48,6 +49,18 @@ export const EXTRAS: ExtraOption[] = [
   { key: 'massage', label: 'Massage package, four sessions', note: 'With the crew therapists', price: 240, perPerson: true },
   { key: 'hotel', label: 'Night before, in the gateway port', note: 'Hotel and transfer, twin share', price: 160, perPerson: true },
 ];
+
+/** Dive-only extras need a boat that supports diving *and* a trip actually themed around it. */
+const DIVE_EXTRA_KEYS = new Set(['gear', 'guide']);
+
+export function divingAvailable(trip: Trip | null, boat: Boat | null): boolean {
+  return !!boat?.offersDiving && !!trip?.experiences.includes('diving');
+}
+
+/** The extras actually offerable for the selected trip/boat — hides `gear`/`guide` off diving trips. */
+export function availableExtras(trip: Trip | null, boat: Boat | null): ExtraOption[] {
+  return divingAvailable(trip, boat) ? EXTRAS : EXTRAS.filter((x) => !DIVE_EXTRA_KEYS.has(x.key));
+}
 
 export const VOUCHERS: Record<string, number> = { FAMILIA10: 0.1, RETURNING: 0.05, AGENT15: 0.15 };
 

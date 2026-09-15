@@ -37,7 +37,7 @@ export const trips: Trip[] = [
     nights: 2,
     from: 850, // TODO: placeholder pricing, confirm with client
     ph: 'reef',
-    experiences: ['family', 'wellness'],
+    experiences: ['family', 'wellness', 'diving'],
     party: ['families', 'couples', 'friends', 'solo'],
     editorPick: true,
     gateway: 'Labuan Bajo',
