@@ -9,6 +9,7 @@ import { CardSkeleton } from '@/components/states/card-skeleton';
 import { EmptyState } from '@/components/states/empty-state';
 import { ErrorState } from '@/components/states/error-state';
 import { useListingLoad } from '@/hooks/use-listing-load';
+import { useRevealSection } from '@/components/reveal-sections';
 import { departureMonthOptions, filterDepartures, type DepartureFilters } from '@/lib/queries';
 import { formatMonthLabel } from '@/lib/format';
 import { forcedStateFrom, emptied } from '@/lib/qa';
@@ -43,6 +44,8 @@ export function DepartureSearch({ departureCards }: { departureCards: Record<str
   const forced = forcedStateFrom(searchParams.get('state'));
   const { state, reload } = useListingLoad(forced, 560);
   const months = React.useMemo(() => departureMonthOptions(), []);
+  const searchRevealRef = useRevealSection<HTMLElement>();
+  const resultsRevealRef = useRevealSection<HTMLElement>();
 
   const [f, setF] = React.useState<Filters>(() => ({
     water: searchParams.get('water') ?? '',
@@ -115,7 +118,7 @@ export function DepartureSearch({ departureCards }: { departureCards: Record<str
 
   return (
     <>
-      <section className="border-b border-sand-300 bg-white lg:sticky lg:top-20 lg:z-20">
+      <section ref={searchRevealRef} data-reveal-owner="" className="border-b border-sand-300 bg-white lg:sticky lg:top-20 lg:z-20">
         <div className="mx-auto max-w-8xl px-5 py-5 sm:px-6 lg:px-8">
           <form onSubmit={(e) => e.preventDefault()} className="grid gap-3 lg:grid-cols-12 lg:items-end">
             <label className="block lg:col-span-3">
@@ -245,7 +248,7 @@ export function DepartureSearch({ departureCards }: { departureCards: Record<str
         </div>
       </section>
 
-      <section className="mx-auto max-w-8xl px-5 py-10 sm:px-6 lg:px-8 lg:py-14">
+      <section ref={resultsRevealRef} data-reveal-owner="" className="mx-auto max-w-8xl px-5 py-10 sm:px-6 lg:px-8 lg:py-14">
         {state === 'loading' ? (
           <div className="space-y-3">
             <CardSkeleton kind="departure" count={5} />

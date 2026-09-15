@@ -9,6 +9,7 @@ import { CardSkeleton } from '@/components/states/card-skeleton';
 import { EmptyState } from '@/components/states/empty-state';
 import { ErrorState } from '@/components/states/error-state';
 import { useListingLoad } from '@/hooks/use-listing-load';
+import { useRevealSection } from '@/components/reveal-sections';
 import { filterTrips, type TripFilters } from '@/lib/queries';
 import { forcedStateFrom, emptied } from '@/lib/qa';
 import { routes } from '@/lib/routes';
@@ -22,6 +23,7 @@ export function TripGrid({ tripCards }: { tripCards: Record<string, React.ReactN
   const searchParams = useSearchParams();
   const forced = forcedStateFrom(searchParams.get('state'));
   const { state, reload } = useListingLoad(forced);
+  const revealRef = useRevealSection<HTMLElement>();
 
   const [f, setF] = React.useState<Filters>(() => ({
     water: searchParams.get('water') ?? '',
@@ -55,7 +57,7 @@ export function TripGrid({ tripCards }: { tripCards: Record<string, React.ReactN
   }
 
   return (
-    <section id="itineraries" className="mx-auto max-w-8xl px-5 py-14 sm:px-6 lg:px-8 lg:py-20">
+    <section ref={revealRef} data-reveal-owner="" id="itineraries" className="mx-auto max-w-8xl px-5 py-14 sm:px-6 lg:px-8 lg:py-20">
       <div className="flex flex-wrap items-end justify-between gap-6">
         <div className="max-w-xl">
           <p className="font-mark text-eyebrow uppercase text-flame">Itineraries</p>

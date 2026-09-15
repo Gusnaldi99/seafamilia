@@ -12,6 +12,7 @@ import { CardSkeleton } from '@/components/states/card-skeleton';
 import { EmptyState } from '@/components/states/empty-state';
 import { ErrorState } from '@/components/states/error-state';
 import { useListingLoad } from '@/hooks/use-listing-load';
+import { useRevealSection } from '@/components/reveal-sections';
 import { forcedStateFrom, emptied } from '@/lib/qa';
 import { experiences, waters } from '@/lib/data';
 
@@ -19,6 +20,7 @@ export function WaterIndex({ waterCards }: { waterCards: Record<string, React.Re
   const searchParams = useSearchParams();
   const forced = forcedStateFrom(searchParams.get('state'));
   const { state, reload } = useListingLoad(forced);
+  const revealRef = useRevealSection<HTMLElement>();
 
   const [experience, setExperience] = React.useState(() => searchParams.get('experience') ?? '');
 
@@ -28,7 +30,7 @@ export function WaterIndex({ waterCards }: { waterCards: Record<string, React.Re
   }, [experience, forced]);
 
   return (
-    <section className="mx-auto max-w-8xl px-5 py-12 sm:px-6 lg:px-8 lg:py-16">
+    <section ref={revealRef} data-reveal-owner="" className="mx-auto max-w-8xl px-5 py-12 sm:px-6 lg:px-8 lg:py-16">
       <h2 className="sr-only">The three waters</h2>
       <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
         <div className="no-scrollbar -mx-5 flex gap-2 overflow-x-auto px-5 lg:mx-0 lg:flex-wrap lg:px-0" role="group" aria-label="Filter waters by experience">

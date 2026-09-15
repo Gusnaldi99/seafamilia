@@ -12,6 +12,7 @@ import { CardSkeleton } from '@/components/states/card-skeleton';
 import { EmptyState } from '@/components/states/empty-state';
 import { ErrorState } from '@/components/states/error-state';
 import { useListingLoad } from '@/hooks/use-listing-load';
+import { useRevealSection } from '@/components/reveal-sections';
 import { filterTrips, type TripFilters } from '@/lib/queries';
 import { forcedStateFrom, emptied } from '@/lib/qa';
 import { routes } from '@/lib/routes';
@@ -25,6 +26,7 @@ export function MatchingTrips({ tripCards }: { tripCards: Record<string, React.R
   const searchParams = useSearchParams();
   const forced = forcedStateFrom(searchParams.get('state'));
   const { state, reload } = useListingLoad(forced);
+  const revealRef = useRevealSection<HTMLElement>();
 
   const [f, setF] = React.useState<Filters>(() => ({
     experience: searchParams.get('experience') ?? '',
@@ -58,7 +60,7 @@ export function MatchingTrips({ tripCards }: { tripCards: Record<string, React.R
   }
 
   return (
-    <section id="matching" className="border-t border-sand-300 bg-sand">
+    <section ref={revealRef} data-reveal-owner="" id="matching" className="border-t border-sand-300 bg-sand">
       <div className="mx-auto max-w-8xl px-5 py-14 sm:px-6 lg:px-8 lg:py-20">
         <div className="mt-8 rounded-3xl border border-sand-300 bg-white p-5 lg:p-7">
           <fieldset>

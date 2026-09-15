@@ -64,7 +64,7 @@ select:not([multiple]):not([data-slot='native-select']) {
   background-position: right 0.25rem center;
   background-repeat: no-repeat;
   background-size: 1.5em 1.5em;
-  padding-right: 2.5rem;
+  padding-left: 0.5rem;
 }
 
 /* <input type="date"> ships with no reset either, so Safari paints its own
