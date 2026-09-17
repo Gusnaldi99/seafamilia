@@ -33,6 +33,7 @@ const JOBS = [
   { src: 'assets/media/photos/20240322-KomodoD-28.jpg', dest: 'assets/media/photos/experiences/wellness.jpg' },
   { src: 'assets/media/photos/departures/OZS02724.JPG', dest: 'assets/media/photos/trips/three-days-aboard-sea-familia.jpg' },
   { src: 'assets/media/photos/departures/GOPR1385.JPG', dest: 'assets/media/photos/trips/three-days-aboard-sea-familia-2.jpg' },
+  { src: 'assets/media/photos/OZS07278.JPG', dest: 'assets/media/photos/trips/four-days-aboard-sea-familia.jpg' },
   { src: 'assets/media/photos/IMG_0915.JPEG', dest: 'assets/media/photos/charter.jpg' },
 ];
 

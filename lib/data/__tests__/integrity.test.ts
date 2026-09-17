@@ -9,7 +9,7 @@
  */
 import { describe, expect, it } from 'vitest';
 import { articles, boats, departures, experiences, faq, team, trips, waters } from '..';
-import type { PhVariant } from '../types';
+import type { PhVariant, Trip } from '../types';
 import { CURRENCIES, type CurrencyCode } from '../../i18n/currencies';
 import { DICTIONARIES, type Lang } from '../../i18n/dictionaries';
 import {
@@ -38,8 +38,8 @@ describe('content counts (transcription tripwire)', () => {
     expect(experiences).toHaveLength(6);
     expect(waters).toHaveLength(3);
     expect(boats).toHaveLength(2);
-    expect(trips).toHaveLength(2);
-    expect(departures).toHaveLength(6);
+    expect(trips).toHaveLength(3);
+    expect(departures).toHaveLength(9);
     expect(articles).toHaveLength(8);
     expect(team).toHaveLength(2);
     expect(faq).toHaveLength(12);
@@ -147,9 +147,13 @@ describe('routeFor / bodyFor never render blank', () => {
     }
   });
   it('synthesized routes are flagged provisional; hand-written ones are not', () => {
+    // All real trips are hand-written today, so the fallback (synthesized from
+    // Water.stops) is exercised here against a constructed Trip rather than a
+    // real slug — keeps this test independent of which trips have a route.
     const withRoute = tripBySlug('three-days-aboard-sea-familia')!;
     expect(routeFor(withRoute).some((d) => d.provisional)).toBe(false);
-    const withoutRoute = tripBySlug('three-days-aboard-sea-familia-2')!;
+
+    const withoutRoute: Trip = { ...withRoute, route: undefined };
     expect(routeFor(withoutRoute).every((d) => d.provisional)).toBe(true);
   });
   it('every article has a non-empty body (hand-written or synthesized from the dek)', () => {

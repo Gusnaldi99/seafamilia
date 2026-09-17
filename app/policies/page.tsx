@@ -283,7 +283,8 @@ export default function PoliciesPage() {
                 </div>
                 <div>
                   <dt className="text-ink/60">Registered office</dt>
-                  <dd className="text-ink-700">Labuan Bajo, Nusa Tenggara Timur, Indonesia</dd>
+                  <dd className="text-ink-700">TCC BATAVIA TOWER ONE LT 5 No 02,JL. KH MAS MANSYUR,KARET TENGSIN, TANAH ABANG, KOTA ADMINISTRASI JAKARTA PUSAT, INDONESIA
+</dd>
                 </div>
                 <div>
                   <dt className="text-ink/60">Governing law</dt>

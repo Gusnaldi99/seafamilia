@@ -102,7 +102,7 @@ export default function Home() {
               <PathWavesMast className="mt-5 h-8 w-8 text-ink-700" aria-hidden="true" />
               <h3 className="mt-5 font-display text-2xl text-ink-700">Browse and be inspired</h3>
               <p className="mt-2.5 flex-1 text-sm leading-relaxed text-ink/70">
-                No form, no funnel. Three waters, two itineraries, two boats — wander through in
+                No form, no funnel. Three waters, three itineraries, two boats — wander through in
                 any order and see what catches.
               </p>
               <span className="mt-5 inline-flex items-center gap-2 font-mark text-[11px] uppercase tracking-[0.18em] text-flame-600">
@@ -166,7 +166,7 @@ export default function Home() {
               href={routes.destinations()}
               className="group inline-flex items-center gap-2 font-mark text-[11px] uppercase tracking-[0.18em] text-ink-700 hover:text-flame-600"
             >
-              Both itineraries
+              All itineraries
               <ChevronRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" aria-hidden="true" />
             </Link>
           </div>
